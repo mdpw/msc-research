@@ -28,4 +28,4 @@ mobilebert_hotel_model/
 results/
 build/
 vosk-model-en-us-0.22-lgraph/
-models/
+whisper/
