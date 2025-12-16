@@ -1,0 +1,5 @@
+{
+  "max_length": 32,
+  "num_labels": 18,
+  "model_type": "mobilebert"
+}

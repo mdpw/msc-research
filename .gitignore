@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+
+# Virtual Environments
+hotel_env/
+backend_env/
+*.venv
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+data/
+
+mobilebert_tf/
+logs/
+mobilebert_hotel_model/
+results/
+build/
+vosk-model-en-us-0.22-lgraph/
+models/
