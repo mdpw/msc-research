@@ -1,0 +1,25 @@
+# Requirements for Wake Word Model Training
+# Python 3.8+ recommended
+
+# Core ML/DL
+tensorflow==2.14.0
+numpy==1.24.3
+
+# Audio processing
+librosa==0.10.1
+soundfile==0.12.1
+
+# ML utilities
+scikit-learn==1.3.2
+
+# Audio recording (optional - for data collection)
+sounddevice==0.4.6
+
+# Progress bars (optional but nice)
+tqdm==4.66.1
+
+# Visualization (optional - for debugging)
+matplotlib==3.8.2
+
+gTTS 
+pydub
