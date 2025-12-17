@@ -1,0 +1,24 @@
+                     precision    recall  f1-score   support
+
+    blanket_request      0.848     1.000     0.918        39
+   checkout_billing      0.935     0.935     0.935        31
+  concierge_general      0.943     0.892     0.917        37
+     concierge_taxi      0.970     0.889     0.928        36
+     do_not_disturb      1.000     0.943     0.971        35
+          emergency      0.903     0.875     0.889        32
+         food_order      0.920     0.902     0.911        51
+    laundry_service      0.971     0.892     0.930        37
+   lighting_control      0.895     1.000     0.944        34
+        maintenance      0.800     0.737     0.767        38
+       misc_request      0.833     0.862     0.847        29
+    noise_complaint      0.939     0.969     0.954        32
+     pillow_request      0.974     0.826     0.894        46
+      room_cleaning      0.925     1.000     0.961        62
+temperature_control      0.896     0.935     0.915        46
+ toiletries_request      0.865     0.900     0.882        50
+      towel_request      0.947     0.947     0.947        76
+       wake_up_call      1.000     1.000     1.000        35
+
+           accuracy                          0.920       746
+          macro avg      0.920     0.917     0.917       746
+       weighted avg      0.921     0.920     0.919       746

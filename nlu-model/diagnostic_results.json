@@ -1,0 +1,30 @@
+{
+  "test_results": [
+    {
+      "text": "may i request room cleaning service",
+      "expected": "room_cleaning",
+      "predicted": "room_cleaning",
+      "confidence": 0.9999555349349976,
+      "correct": true
+    },
+    {
+      "text": "i need a coffee",
+      "expected": "food_order",
+      "predicted": "food_order",
+      "confidence": 0.9952900409698486,
+      "correct": true
+    },
+    {
+      "text": "housekeeping please",
+      "expected": "room_cleaning",
+      "predicted": "room_cleaning",
+      "confidence": 0.9994663596153259,
+      "correct": true
+    }
+  ],
+  "summary": {
+    "correct": 3,
+    "total": 3,
+    "accuracy": 1.0
+  }
+}

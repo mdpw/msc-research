@@ -1,0 +1,48 @@
+{
+  "model_type": "mobilebert",
+  "model_file": "hotel_mobilebert.tflite",
+  "vocab_file": "vocab.json",
+  "label_map_file": "label_map.json",
+  "max_length": 32,
+  "num_labels": 18,
+  "vocab_size": 30522,
+  "pad_token_id": 0,
+  "cls_token_id": 101,
+  "sep_token_id": 102,
+  "unk_token_id": 100,
+  "model_size_mb": 25.12,
+  "training_accuracy": 0.9195710455764075,
+  "expected_inference_time_ms": "50-150 ms",
+  "optimizations": [
+    "DEFAULT",
+    "SELECT_TF_OPS"
+  ],
+  "input_signature": {
+    "input_ids": {
+      "shape": [
+        1,
+        32
+      ],
+      "dtype": "int32",
+      "description": "Tokenized input text"
+    },
+    "attention_mask": {
+      "shape": [
+        1,
+        32
+      ],
+      "dtype": "int32",
+      "description": "Attention mask (1 for real tokens, 0 for padding)"
+    }
+  },
+  "output_signature": {
+    "logits": {
+      "shape": [
+        1,
+        18
+      ],
+      "dtype": "float32",
+      "description": "Raw logits for each intent class"
+    }
+  }
+}

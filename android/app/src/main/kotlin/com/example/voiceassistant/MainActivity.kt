@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.example.voiceassistant.NLUService
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -33,8 +34,15 @@ data class RequestItem(
     val id: Int,
     val requestText: String,
     val intent: String,
+    val confidence: Float,  // Added confidence
     val status: String,
     val timestamp: String
+)
+
+// Intent result data class
+data class IntentResult(
+    val name: String,
+    val confidence: Float
 )
 
 class MainActivity : ComponentActivity() {
@@ -57,11 +65,19 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        Log.d(TAG, "Permission result: $isGranted")
+        Log.d(TAG, "🎤 Microphone permission result: $isGranted")
+        if (!isGranted) {
+            Toast.makeText(this, "Microphone permission required", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d(TAG, "=".repeat(60))
+        Log.d(TAG, "🚀 Starting Hotel Voice Assistant")
+        Log.d(TAG, "   Room: $ROOM_NUMBER")
+        Log.d(TAG, "=".repeat(60))
 
         // Request permission
         if (ContextCompat.checkSelfPermission(
@@ -73,10 +89,25 @@ class MainActivity : ComponentActivity() {
         }
 
         // Initialize services
-        voskService = VoskService(this)
-        audioRecorder = AudioRecorder(this)
-        nluService = NLUService(this)
-        apiService = ApiService()
+        try {
+            Log.d(TAG, "Initializing Vosk service...")
+            voskService = VoskService(this)
+
+            Log.d(TAG, "Initializing Audio recorder...")
+            audioRecorder = AudioRecorder(this)
+
+            Log.d(TAG, "Initializing NLU service...")
+            nluService = NLUService(this)
+            // NLU service will run automatic tests on initialization
+
+            Log.d(TAG, "Initializing API service...")
+            apiService = ApiService()
+
+            Log.d(TAG, "✅ All services initialized")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Service initialization failed", e)
+            Toast.makeText(this, "Failed to initialize services: ${e.message}", Toast.LENGTH_LONG).show()
+        }
 
         // Initialize TTS
         tts = TextToSpeech(this) { status ->
@@ -85,9 +116,13 @@ class MainActivity : ComponentActivity() {
                 ttsReady = result != TextToSpeech.LANG_MISSING_DATA &&
                         result != TextToSpeech.LANG_NOT_SUPPORTED
                 if (ttsReady) {
-                    Toast.makeText(this, "TTS Ready", Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "✅ TTS initialized")
+                    Toast.makeText(this, "✅ TTS Ready", Toast.LENGTH_SHORT).show()
+                    Log.d(TAG, "✅ TTS initialized successfully")
+                } else {
+                    Log.e(TAG, "❌ TTS language not supported")
                 }
+            } else {
+                Log.e(TAG, "❌ TTS initialization failed")
             }
         }
 
@@ -110,26 +145,33 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun connectWebSocket() {
-        webSocketService = WebSocketService(ROOM_NUMBER)
-        webSocketService.connect(
-            onMessage = { message ->
-                runOnUiThread {
-                    speakResponse(message)
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                }
-            },
-            onStatusChange = { requestId, status ->
-                runOnUiThread {
-                    // Update request status in history
-                    val index = _requestHistory.indexOfFirst { it.id == requestId }
-                    if (index != -1) {
-                        val oldRequest = _requestHistory[index]
-                        _requestHistory[index] = oldRequest.copy(status = status)
-                        Log.d(TAG, "📱 Request $requestId status updated to: $status")
+        try {
+            Log.d(TAG, "Connecting to WebSocket...")
+            webSocketService = WebSocketService(ROOM_NUMBER)
+            webSocketService.connect(
+                onMessage = { message ->
+                    runOnUiThread {
+                        speakResponse(message)
+                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                        Log.d(TAG, "📱 Received message: $message")
+                    }
+                },
+                onStatusChange = { requestId, status ->
+                    runOnUiThread {
+                        // Update request status in history
+                        val index = _requestHistory.indexOfFirst { it.id == requestId }
+                        if (index != -1) {
+                            val oldRequest = _requestHistory[index]
+                            _requestHistory[index] = oldRequest.copy(status = status)
+                            Log.d(TAG, "📱 Request $requestId status updated to: $status")
+                        }
                     }
                 }
-            }
-        )
+            )
+            Log.d(TAG, "✅ WebSocket connected")
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ WebSocket connection failed", e)
+        }
     }
 
     private fun speakResponse(message: String) {
@@ -137,23 +179,42 @@ class MainActivity : ComponentActivity() {
             tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
             Log.d(TAG, "🔊 Speaking: $message")
         } else {
+            Log.w(TAG, "⚠️ TTS not ready, cannot speak: $message")
             Toast.makeText(this, "TTS not ready", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        voskService.release()
-        nluService.release()
+
+        Log.d(TAG, "Cleaning up services...")
+
+        try {
+            voskService.release()
+            Log.d(TAG, "✅ Vosk service released")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error releasing Vosk", e)
+        }
+
+        try {
+            nluService.close()  // Changed from release() to close()
+            Log.d(TAG, "✅ NLU service released")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error releasing NLU", e)
+        }
 
         if (::tts.isInitialized) {
             tts.stop()
             tts.shutdown()
+            Log.d(TAG, "✅ TTS shutdown")
         }
 
         if (::webSocketService.isInitialized) {
             webSocketService.disconnect()
+            Log.d(TAG, "✅ WebSocket disconnected")
         }
+
+        Log.d(TAG, "👋 MainActivity destroyed")
     }
 }
 
@@ -172,24 +233,32 @@ fun VoiceAssistantScreen(
     var status by remember { mutableStateOf("Initializing...") }
     var isRecording by remember { mutableStateOf(false) }
     var isInitialized by remember { mutableStateOf(false) }
+    var lastTranscription by remember { mutableStateOf("") }
+    var lastIntent by remember { mutableStateOf("") }
+    var lastConfidence by remember { mutableStateOf(0f) }
 
     val context = LocalContext.current
     val TAG = "VoiceAssistantScreen"
 
-    // Initialize STT and NLU
+    // Initialize STT (NLU is already initialized in MainActivity)
     LaunchedEffect(Unit) {
         try {
+            Log.d(TAG, "Initializing speech recognition...")
             status = "Initializing speech recognition..."
             voskService.initialize()
 
-            status = "Initializing NLU..."
-            nluService.initialize()
-
-            status = "Ready! Press the button to speak"
+            status = "✅ Ready! Press the button to speak"
             isInitialized = true
+
+            Log.d(TAG, "✅ Screen initialized and ready")
+
+            // Optional: Run NLU debug tests
+            // Uncomment to see detailed logs for the test phrases
+            // nluService.runDebugTests()
+
         } catch (e: Exception) {
-            Log.e(TAG, "Initialization error: ${e.message}", e)
-            status = "Error: ${e.message}"
+            Log.e(TAG, "❌ Initialization error: ${e.message}", e)
+            status = "❌ Error: ${e.message}"
         }
     }
 
@@ -234,64 +303,93 @@ fun VoiceAssistantScreen(
                 onClick = {
                     try {
                         if (isRecording) {
-                            Log.d(TAG, "🛑 Stop recording")
+                            Log.d(TAG, "🛑 Stopping recording...")
                             isRecording = false
-                            status = "Processing..."
+                            status = "Processing audio..."
 
                             lifecycleScope.launch {
                                 try {
+                                    // Stop recording and get audio
                                     val audioData = audioRecorder.stopRecording()
-                                    Log.d(TAG, "Got ${audioData.size} audio samples")
+                                    Log.d(TAG, "📊 Got ${audioData.size} audio samples")
 
                                     if (audioData.isEmpty()) {
-                                        status = "No audio recorded. Try again."
+                                        status = "❌ No audio recorded. Try again."
+                                        Log.w(TAG, "⚠️ Empty audio data")
                                     } else {
-                                        status = "Transcribing..."
+                                        // Step 1: Transcribe with Vosk
+                                        status = "🎤 Transcribing audio..."
                                         val text = voskService.transcribeAudio(audioData)
+                                        lastTranscription = text
+
+                                        Log.d(TAG, "📝 Transcription: '$text'")
 
                                         if (text.isNotEmpty()) {
-                                            status = "Understanding request..."
-                                            val intent = nluService.classifyIntent(text)
+                                            // Step 2: Classify intent with NLU
+                                            status = "🧠 Understanding request..."
 
-                                            status = "Sending to backend..."
-                                            apiService.submitRequest(
-                                                roomNumber = roomNumber,
-                                                requestText = text,
-                                                intent = intent.name,
-                                                onSuccess = { response ->
-                                                    lifecycleScope.launch {
-                                                        // Add to history
-                                                        val newRequest = RequestItem(
-                                                            id = response.requestId,
-                                                            requestText = text,
-                                                            intent = intent.name,
-                                                            status = "pending",
-                                                            timestamp = getCurrentTime()
-                                                        )
-                                                        onAddRequest(newRequest)
+                                            // Get intent with confidence
+                                            val (intent, confidence) = nluService.classifyIntent(text)
+                                            lastIntent = intent
+                                            lastConfidence = confidence
 
-                                                        status = "✅ Request sent!"
-                                                        onSpeakResponse(response.message)
+                                            Log.d(TAG, "🎯 Intent: $intent (${(confidence * 100).toInt()}% confidence)")
+
+                                            // Check confidence threshold
+                                            if (confidence < 0.5f) {
+                                                Log.w(TAG, "⚠️ Low confidence: ${(confidence * 100).toInt()}%")
+                                                status = "⚠️ Not sure I understood. Intent: $intent (${(confidence * 100).toInt()}%)"
+                                                onSpeakResponse("I'm not sure I understood. Did you say $intent?")
+                                            } else {
+                                                // Step 3: Submit to backend
+                                                status = "📤 Sending to backend..."
+                                                apiService.submitRequest(
+                                                    roomNumber = roomNumber,
+                                                    requestText = text,
+                                                    intent = intent,
+                                                    onSuccess = { response ->
+                                                        lifecycleScope.launch {
+                                                            // Add to history
+                                                            val newRequest = RequestItem(
+                                                                id = response.requestId,
+                                                                requestText = text,
+                                                                intent = intent,
+                                                                confidence = confidence,
+                                                                status = "pending",
+                                                                timestamp = getCurrentTime()
+                                                            )
+                                                            onAddRequest(newRequest)
+
+                                                            status = "✅ Request sent: $intent"
+                                                            onSpeakResponse(response.message)
+
+                                                            Log.d(TAG, "✅ Request submitted successfully")
+                                                            Log.d(TAG, "   Request ID: ${response.requestId}")
+                                                            Log.d(TAG, "   Message: ${response.message}")
+                                                        }
+                                                    },
+                                                    onError = { error ->
+                                                        lifecycleScope.launch {
+                                                            status = "❌ Backend error: $error"
+                                                            Log.e(TAG, "❌ API error: $error")
+                                                        }
                                                     }
-                                                },
-                                                onError = { error ->
-                                                    lifecycleScope.launch {
-                                                        status = "❌ Error: $error"
-                                                    }
-                                                }
-                                            )
+                                                )
+                                            }
 
                                         } else {
-                                            status = "Could not understand. Try again."
+                                            status = "❌ Could not understand speech. Try again."
+                                            Log.w(TAG, "⚠️ Empty transcription from Vosk")
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    Log.e(TAG, "Error: ${e.message}", e)
-                                    status = "Error: ${e.message}"
+                                    Log.e(TAG, "❌ Processing error", e)
+                                    status = "❌ Error: ${e.message}"
                                 }
                             }
                         } else {
-                            Log.d(TAG, "▶️ Start recording")
+                            // Start recording
+                            Log.d(TAG, "▶️ Starting recording...")
                             if (ContextCompat.checkSelfPermission(
                                     context,
                                     Manifest.permission.RECORD_AUDIO
@@ -300,13 +398,19 @@ fun VoiceAssistantScreen(
                                 audioRecorder.startRecording()
                                 isRecording = true
                                 status = "🎤 Listening... Speak now!"
+                                lastTranscription = ""
+                                lastIntent = ""
+                                lastConfidence = 0f
+                                Log.d(TAG, "✅ Recording started")
                             } else {
-                                status = "Microphone permission required"
+                                status = "❌ Microphone permission required"
+                                Log.e(TAG, "❌ Missing microphone permission")
+                                Toast.makeText(context, "Please grant microphone permission", Toast.LENGTH_LONG).show()
                             }
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error: ${e.message}", e)
-                        status = "Error: ${e.message}"
+                        Log.e(TAG, "❌ Button click error", e)
+                        status = "❌ Error: ${e.message}"
                         isRecording = false
                     }
                 },
@@ -337,24 +441,72 @@ fun VoiceAssistantScreen(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 )
             ) {
-                Text(
-                    text = status,
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = status,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    // Show last transcription and intent if available
+                    if (lastTranscription.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Transcription:",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = "\"$lastTranscription\"",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        if (lastIntent.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (lastConfidence > 0.75f)
+                                    Color(0xFF155724)
+                                else if (lastConfidence > 0.5f)
+                                    Color(0xFF856404)
+                                else
+                                    Color(0xFF721c24)
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Request History
-            Text(
-                text = "Recent Requests",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            // Request History Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent Requests",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (requestHistory.isNotEmpty()) {
+                    Text(
+                        text = "${requestHistory.size} total",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Request History List
             if (requestHistory.isEmpty()) {
                 Card(
                     modifier = Modifier
@@ -368,10 +520,25 @@ fun VoiceAssistantScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "No requests yet",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "📝",
+                                fontSize = 48.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No requests yet",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Start by pressing the microphone button",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
                     }
                 }
             } else {
@@ -436,6 +603,21 @@ fun RequestCard(request: RequestItem) {
                     text = request.timestamp,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Show confidence
+            if (request.confidence > 0) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Confidence: ${(request.confidence * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (request.confidence > 0.75f)
+                        Color(0xFF155724)
+                    else if (request.confidence > 0.5f)
+                        Color(0xFF856404)
+                    else
+                        Color(0xFF721c24)
                 )
             }
         }

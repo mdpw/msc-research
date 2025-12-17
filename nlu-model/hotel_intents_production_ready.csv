@@ -1,0 +1,4973 @@
+text,intent
+could you arrange transportation,concierge_taxi
+couldyou arrange transportation,concierge_taxi
+cud you arrange transportation,concierge_taxi
+could you arange transportation,concierge_taxi
+can't enter room,emergency
+cant enter room,emergency
+can you quiet them down,noise_complaint
+canyou quiet them down,noise_complaint
+can u quiet them down,noise_complaint
+skip service,do_not_disturb
+skip servic,do_not_disturb
+skip servis,do_not_disturb
+skipservice,do_not_disturb
+feel unsafe,emergency
+hangers few send,misc_request
+i would like to adjust the lighting,lighting_control
+i wud like to adjust the lighting,lighting_control
+iwould like to adjust the lighting,lighting_control
+i would like adjust lighting,lighting_control
+quiet karanna please,noise_complaint
+quietkaranna please,noise_complaint
+quiet kaanna please,noise_complaint
+quiet karanna pls,noise_complaint
+bring me pillows,pillow_request
+bring pillows,pillow_request
+bring me pilos,pillow_request
+turn off lights,lighting_control
+turn off lighs,lighting_control
+turn lights,lighting_control
+turnoff lights,lighting_control
+hot chocolate,food_order
+hotchocolate,food_order
+can i get ice,misc_request
+laundry service want,laundry_service
+laundryservice want,laundry_service
+laundry servis want,laundry_service
+broken,maintenance
+clean my room,room_cleaning
+cleanmy room,room_cleaning
+food thiyanna,food_order
+foodthiyanna,food_order
+door lock jammed,maintenance
+taxi karanna,concierge_taxi
+taxikaranna,concierge_taxi
+wake me at half past 6,wake_up_call
+wake me half past 6,wake_up_call
+wakeme at half past 6,wake_up_call
+send up some towels,towel_request
+sendup some towels,towel_request
+may i request room cleaning service,room_cleaning
+mayi request room cleaning service,room_cleaning
+may i request room cleaning servis,room_cleaning
+may i request room cleaning servic,room_cleaning
+ac on,temperature_control
+very hot no need ac please,temperature_control
+very hot no need ac pleas,temperature_control
+veryhot no need ac please,temperature_control
+very hot no need ac pleez,temperature_control
+i want conditioner,toiletries_request
+turn on the lamb,lighting_control
+turn the lamb,lighting_control
+sick feeling help,emergency
+sickfeeling help,emergency
+too much noise,noise_complaint
+housekeeping please,room_cleaning
+housekeeping pls,room_cleaning
+housekeeping pleez,room_cleaning
+housekeepingplease,room_cleaning
+turn off the lamb,lighting_control
+turn off lamb,lighting_control
+quiet please,noise_complaint
+quiet pleas,noise_complaint
+quiet pleez,noise_complaint
+chest pain help,emergency
+chestpain help,emergency
+cest pain help,emergency
+fever very high,emergency
+feververy high,emergency
+feer very high,emergency
+food want,food_order
+foodwant,food_order
+can i get body wash,toiletries_request
+cani get body wash,toiletries_request
+pool location please,concierge_general
+pool location pleas,concierge_general
+poollocation please,concierge_general
+i want a wake up call,wake_up_call
+i want wake up call,wake_up_call
+iwant a wake up call,wake_up_call
+restaurant recommendations,concierge_general
+pool rules,concierge_general
+poolrules,concierge_general
+don't clean my room,do_not_disturb
+don'tclean my room,do_not_disturb
+couple of pillows,pillow_request
+coupleof pillows,pillow_request
+couple of pilos,pillow_request
+may i file a noise complaint,noise_complaint
+mayi file a noise complaint,noise_complaint
+may i file noise complaint,noise_complaint
+vegetarian meal,food_order
+vegetarianmeal,food_order
+iron only,laundry_service
+wake up call want 8 am,wake_up_call
+wakeup call want 8 am,wake_up_call
+phone charger,misc_request
+turn off the lamp,lighting_control
+turn off lamp,lighting_control
+turnoff the lamp,lighting_control
+the tap is leaking please,maintenance
+thetap is leaking please,maintenance
+the tap is leaking pleez,maintenance
+tap is leaking please,maintenance
+i want my room cleaned,room_cleaning
+iwant my room cleaned,room_cleaning
+don't disturb me,do_not_disturb
+do't disturb me,do_not_disturb
+don'tdisturb me,do_not_disturb
+book taxi to air port please,concierge_taxi
+booktaxi to air port please,concierge_taxi
+book taxi air port please,concierge_taxi
+i would like to request additional pillows,pillow_request
+i would like to rquest addtional pillows,pillow_request
+i would like to request additional pilos,pillow_request
+room service menu,food_order
+roomservice menu,food_order
+room servic menu,food_order
+plumbing problem please,maintenance
+plumbing problem pleas,maintenance
+plumbingproblem please,maintenance
+extend for two days,checkout_billing
+extend two days,checkout_billing
+exted for two days,checkout_billing
+etend for two days,checkout_billing
+i need firm pillows,pillow_request
+ineed firm pillows,pillow_request
+i need firm pilos,pillow_request
+can i get ice please,misc_request
+can i get ice pls,misc_request
+cani get ice please,misc_request
+can i get ice pease,misc_request
+can i get some tolls,towel_request
+can i get some tlls,towel_request
+check out please,checkout_billing
+check out pleas,checkout_billing
+chck out please,checkout_billing
+check out pls,checkout_billing
+power adapter,misc_request
+poweradapter,misc_request
+no housekeeping this morning please,do_not_disturb
+no housekeeping this morning plase,do_not_disturb
+no housekeeping this morning pleas,do_not_disturb
+no housekeeping this morning pease,do_not_disturb
+comforter needed,blanket_request
+can i get an extra blanket,blanket_request
+can i get an extra blankit,blanket_request
+cani get an extra blanket,blanket_request
+may i request late checkout,checkout_billing
+may i requst late checkout,checkout_billing
+clean room tomorrow morning,room_cleaning
+clean room tmorrow morning,room_cleaning
+cleanroom tomorrow morning,room_cleaning
+wake me up at 7,wake_up_call
+wake me up 7,wake_up_call
+could you prepare my final bill,checkout_billing
+cud you prepare my final bill,checkout_billing
+could u prepare my final bill,checkout_billing
+culd you prepare my final bill,checkout_billing
+extra towels,towel_request
+extra towls,towel_request
+extratowels,towel_request
+i need shampoo,toiletries_request
+i need shmpoo,toiletries_request
+i want shampoo,toiletries_request
+i lost my key,emergency
+ilost my key,emergency
+send up pillows,pillow_request
+send up pilows,pillow_request
+send up pilos,pillow_request
+can't sleep,noise_complaint
+i need the receipt,checkout_billing
+i need receipt,checkout_billing
+ineed the receipt,checkout_billing
+i want breakfast,food_order
+iwant breakfast,food_order
+i want brekfast,food_order
+i need laundry service,laundry_service
+i need laundry servic,laundry_service
+need laundry service,laundry_service
+i want laundry service,laundry_service
+clean room and make bed,room_cleaning
+cleanroom and make bed,room_cleaning
+clen room and make bed,room_cleaning
+lost key,emergency
+privacy,do_not_disturb
+could you please turn on the lights,lighting_control
+could you plese turn on the lights,lighting_control
+coud you please turn on the lights,lighting_control
+could you please turnon the lights,lighting_control
+call me a cab,concierge_taxi
+call me cab,concierge_taxi
+i need house keeping,room_cleaning
+i need houe keeping,room_cleaning
+need house keeping,room_cleaning
+ineed house keeping,room_cleaning
+shampoo,toiletries_request
+i need help,emergency
+i want help,emergency
+need help,emergency
+tree pillows,pillow_request
+treepillows,pillow_request
+blanket quickly,blanket_request
+blankit quickly,blanket_request
+get me a car,concierge_taxi
+getme a car,concierge_taxi
+get me car,concierge_taxi
+privacy for whole day,do_not_disturb
+privacyfor whole day,do_not_disturb
+where is galle fort,concierge_general
+where is gale fort,concierge_general
+the shower is broken,maintenance
+theshower is broken,maintenance
+the shower is brken,maintenance
+three soft pillows,pillow_request
+threesoft pillows,pillow_request
+ac on karanna,temperature_control
+acon karanna,temperature_control
+warm up the room,temperature_control
+warm up room,temperature_control
+blanket want,blanket_request
+blanketwant,blanket_request
+blankit want,blanket_request
+shopping malls location,concierge_general
+shoppingmalls location,concierge_general
+shopping mals location,concierge_general
+air conditioner making noise,maintenance
+air conditioner makng noise,maintenance
+airconditioner making noise,maintenance
+can you clean the room,room_cleaning
+canyou clean the room,room_cleaning
+can you clean room,room_cleaning
+need pillows,pillow_request
+needpillows,pillow_request
+bring me a blanket,blanket_request
+bringme a blanket,blanket_request
+bring me a blankit,blanket_request
+brng me a blankt,blanket_request
+toilet paper and tissues,toiletries_request
+tolet paper and tissues,toiletries_request
+next room loud ah,noise_complaint
+nextroom loud ah,noise_complaint
+can i order breakfast,food_order
+cani order breakfast,food_order
+can i ordr breakfst,food_order
+i'm checking out,checkout_billing
+i'm cheking out,checkout_billing
+clean the room fast fast,room_cleaning
+cleanthe room fast fast,room_cleaning
+clean room fast fast,room_cleaning
+clan the room fast fast,room_cleaning
+prepare my bill,checkout_billing
+tomorrow morning 6 am call,wake_up_call
+tomorrowmorning 6 am call,wake_up_call
+tomorrw morning 6 am call,wake_up_call
+could you bring extra bedding,blanket_request
+cud you bring extra bedding,blanket_request
+couldyou bring extra bedding,blanket_request
+could you bing extra bedding,blanket_request
+fix this,maintenance
+fixthis,maintenance
+call me at 6:15,wake_up_call
+callme at 6:15,wake_up_call
+laundry pickup thiyanna,laundry_service
+laundry pikup thiyanna,laundry_service
+landry pickup thiyanna,laundry_service
+i need soap,toiletries_request
+ineed soap,toiletries_request
+i want soap,toiletries_request
+extra blanket,blanket_request
+extra blankit,blanket_request
+no hot water,maintenance
+no hot watr,maintenance
+two more pillows,pillow_request
+twomore pillows,pillow_request
+breathing problem,emergency
+cleaning want now,room_cleaning
+cleaningwant now,room_cleaning
+clening want now,room_cleaning
+i want laundry servic,laundry_service
+i want landry servce,laundry_service
+do not disturb,do_not_disturb
+do not distub,do_not_disturb
+donot disturb,do_not_disturb
+i need transport,concierge_taxi
+need transport,concierge_taxi
+ineed transport,concierge_taxi
+i want transport,concierge_taxi
+towels want,towel_request
+towelswant,towel_request
+towls want,towel_request
+when does the pool close,concierge_general
+when does pool close,concierge_general
+whendoes the pool close,concierge_general
+i'm leaving,checkout_billing
+i'mleaving,checkout_billing
+no housekeeping this morning,do_not_disturb
+no houskeeping this morning,do_not_disturb
+fire alarm,emergency
+firealarm,emergency
+food,food_order
+bring me a burger and fries,food_order
+get me a burger and fries,food_order
+bing me a burger and fries,food_order
+dry cleaning needed,laundry_service
+injury need help,emergency
+inury need help,emergency
+cab,concierge_taxi
+i need toilet paper,toiletries_request
+i want toilet paper,toiletries_request
+i need toiet paper,toiletries_request
+checkout karanna ona please,checkout_billing
+checkout karanna ona pleez,checkout_billing
+checkout karanna ona pls,checkout_billing
+restaurants nearby,concierge_general
+restaurantsnearby,concierge_general
+light not working,maintenance
+lightnot working,maintenance
+lght not working,maintenance
+light problem ah,maintenance
+lightproblem ah,maintenance
+blanket,blanket_request
+blankit,blanket_request
+tv is broken,maintenance
+towels thiyanna,towel_request
+towls thiyanna,towel_request
+cold drinks,food_order
+wake up call,wake_up_call
+iron and ironing board,misc_request
+make it cooler,temperature_control
+its too noisy,noise_complaint
+itstoo noisy,noise_complaint
+charger,misc_request
+do not disturb karanna,do_not_disturb
+donot disturb karanna,do_not_disturb
+can i get shampoo,toiletries_request
+cani get shampoo,toiletries_request
+can send breakfast,food_order
+cansend breakfast,food_order
+three or four towels,towel_request
+three or four toels,towel_request
+threeor four towels,towel_request
+some extra towels,towel_request
+someextra towels,towel_request
+soap please,toiletries_request
+soapplease,toiletries_request
+soap pleez,toiletries_request
+taxi now,concierge_taxi
+taxinow,concierge_taxi
+wool blanket,blanket_request
+wool blankit,blanket_request
+woolblanket,blanket_request
+gas leak,emergency
+key lose kara,emergency
+keylose kara,emergency
+dim the lights,lighting_control
+dimthe lights,lighting_control
+i would like directions to local attractions,concierge_general
+i would lik directions to local attractions,concierge_general
+i wold like directions to local attrations,concierge_general
+i would like directions local attractions,concierge_general
+light nut working,maintenance
+light nut workig,maintenance
+lightnut working,maintenance
+dinner ekak ona please,food_order
+dinner ekak ona plese,food_order
+dinner ekak ona pls,food_order
+i want to towels,towel_request
+i want to towls,towel_request
+i want to towes,towel_request
+people are being loud,noise_complaint
+peopleare being loud,noise_complaint
+soft pillows want ah,pillow_request
+soft pilows want ah,pillow_request
+softpillows want ah,pillow_request
+bill ekak ona,checkout_billing
+billekak ona,checkout_billing
+wash and iron please,laundry_service
+wash and iron pls,laundry_service
+wash and iron pleas,laundry_service
+i need privacy,do_not_disturb
+need privacy,do_not_disturb
+i want privacy,do_not_disturb
+i can't sleep noise,noise_complaint
+ican't sleep noise,noise_complaint
+turn off ceiling light please,lighting_control
+turn off ceiling light pls,lighting_control
+turn off ceiling light pleas,lighting_control
+hangers ona,misc_request
+pillows want,pillow_request
+pillowswant,pillow_request
+privacy thiyanna,do_not_disturb
+bring toilet paper,toiletries_request
+bringtoilet paper,toiletries_request
+mineral water,food_order
+mineralwater,food_order
+warm duvet,blanket_request
+warmduvet,blanket_request
+rome service please,food_order
+rome servic please,food_order
+rome service pls,food_order
+rome service pleez,food_order
+housekeeping now,room_cleaning
+housekeepingnow,room_cleaning
+loud at midnight,noise_complaint
+taxi to airport,concierge_taxi
+taxito airport,concierge_taxi
+leaving,checkout_billing
+morning call thiyanna,wake_up_call
+morningcall thiyanna,wake_up_call
+morning call thiynna,wake_up_call
+it's too hot,temperature_control
+moisturizer needed,toiletries_request
+moisturizerneeded,toiletries_request
+full laundry bag,laundry_service
+fulllaundry bag,laundry_service
+doctor want fast,emergency
+doctorwant fast,emergency
+temperature adjust karanna,temperature_control
+temperatureadjust karanna,temperature_control
+temp adjust karanna,temperature_control
+temprature adjust karanna,temperature_control
+could i order a sandwich,food_order
+couldi order a sandwich,food_order
+could i order sandwich,food_order
+wake me at seven,wake_up_call
+wakeme at seven,wake_up_call
+wake me seven,wake_up_call
+emergency,emergency
+emergancy,emergency
+its too noisy please,noise_complaint
+its too noisy pleas,noise_complaint
+its too noisy pease,noise_complaint
+few towels needed,towel_request
+few towls needed,towel_request
+few towes needed,towel_request
+press shirt,laundry_service
+tv not working send someone please,maintenance
+tvnot working send someone please,maintenance
+tv not working send someone pleez,maintenance
+tv not woring send somone plase,maintenance
+i'm hangry,food_order
+hand wash needed,laundry_service
+handwash needed,laundry_service
+main light on,lighting_control
+mainlight on,lighting_control
+6 am call,wake_up_call
+6am call,wake_up_call
+more pillows,pillow_request
+morepillows,pillow_request
+i'd like coffee,food_order
+i'dlike coffee,food_order
+return by evening,laundry_service
+returnby evening,laundry_service
+tourist places koheda,concierge_general
+turist paces koheda,concierge_general
+touristplaces koheda,concierge_general
+too noisy,noise_complaint
+what are the attractions,concierge_general
+whatare the attractions,concierge_general
+morning call please,wake_up_call
+morning call pleas,wake_up_call
+morning call pleez,wake_up_call
+morning call plase,wake_up_call
+heavy blanket please,blanket_request
+heay blankt please,blanket_request
+heavyblanket please,blanket_request
+heavy blanket pleas,blanket_request
+i need more towels,towel_request
+i need more towls,towel_request
+i want more towels,towel_request
+ineed more towels,towel_request
+shower ekka problem,maintenance
+shwer ekka poblem,maintenance
+showerekka problem,maintenance
+soft pillows,pillow_request
+softpillows,pillow_request
+full room cleaning please,room_cleaning
+fullroom cleaning please,room_cleaning
+full room cleaning pleez,room_cleaning
+full room cleaning plase,room_cleaning
+local market where,concierge_general
+lcal market where,concierge_general
+localmarket where,concierge_general
+pickup laundry,laundry_service
+pickuplaundry,laundry_service
+fix karanna ona,maintenance
+noisy guests,noise_complaint
+noisyguests,noise_complaint
+bring me dinner,food_order
+bring dinner,food_order
+brng me diner,food_order
+get me dinner,food_order
+repair needed,maintenance
+alarm 8,wake_up_call
+wake me at 7 am,wake_up_call
+wakeme at 7 am,wake_up_call
+wake me 7 am,wake_up_call
+emergency maintenance,maintenance
+emergency maintanance,maintenance
+emergancy maintenance,maintenance
+hand sanitizer,toiletries_request
+air conditioned taxi,concierge_taxi
+airconditioned taxi,concierge_taxi
+heating too high lower it,temperature_control
+heatingtoo high lower it,temperature_control
+heaing too high loer it,temperature_control
+pickup laundry please,laundry_service
+pickup landry please,laundry_service
+pickup laundry pleas,laundry_service
+pickup laundry pleez,laundry_service
+razors please,toiletries_request
+razors pleez,toiletries_request
+razors pleas,toiletries_request
+ironing board please,misc_request
+ironing board pleas,misc_request
+ironing board pleez,misc_request
+i need another blanket,blanket_request
+need another blanket,blanket_request
+ineed another blanket,blanket_request
+i need another blankit,blanket_request
+i need an iron,misc_request
+need an iron,misc_request
+ineed an iron,misc_request
+hot,temperature_control
+can i get more pillows,pillow_request
+cani get more pillows,pillow_request
+can i get more pilos,pillow_request
+could you send up the menu,food_order
+cud you send up the menu,food_order
+couldyou send up the menu,food_order
+could you send up menu,food_order
+face wash please,toiletries_request
+face wash plese,toiletries_request
+facewash please,toiletries_request
+i'm hungry,food_order
+noise,noise_complaint
+orange juice,food_order
+orangejuice,food_order
+iron clothes,laundry_service
+it's too warm,temperature_control
+i want food,food_order
+iwant food,food_order
+i need soap and shampoo,toiletries_request
+need soap and shampoo,toiletries_request
+i want soap and shampoo,toiletries_request
+i need soap and shamoo,toiletries_request
+brighten the room,lighting_control
+noise complaint,noise_complaint
+i would like to request an additional blanket,blanket_request
+iwould like to request an additional blanket,blanket_request
+i would like to request an additional blankit,blanket_request
+i woud like to requet an additional blanket,blanket_request
+magazines,misc_request
+7:45 wake up call,wake_up_call
+fridge not cooling,maintenance
+fridge not coolig,maintenance
+fidge not cooling,maintenance
+what time is breakfast,concierge_general
+whattime is breakfast,concierge_general
+cab to colombo,concierge_taxi
+cabto colombo,concierge_taxi
+i want another pillow,pillow_request
+iwant another pillow,pillow_request
+i want anothr pllow,pillow_request
+i want another pilo,pillow_request
+wet wipes,toiletries_request
+dim lights,lighting_control
+noise next door,noise_complaint
+nose next door,noise_complaint
+noisenext door,noise_complaint
+clean the rome please,room_cleaning
+clean the rome pls,room_cleaning
+clean the rome pleas,room_cleaning
+clan the rome please,room_cleaning
+towel ekak ona,towel_request
+towl ekak ona,towel_request
+twel ekak ona,towel_request
+footsteps above,noise_complaint
+party noise above,noise_complaint
+could you please call my room at 7 am,wake_up_call
+could you pleas call my room at 7 am,wake_up_call
+could you pleez call my room at 7 am,wake_up_call
+please send help immediately,emergency
+pls send help immediately,emergency
+pleasesend help immediately,emergency
+same day service,laundry_service
+sameday service,laundry_service
+same day servic,laundry_service
+wash and iron,laundry_service
+washand iron,laundry_service
+please make room clean,room_cleaning
+please make room cean,room_cleaning
+pleez make room clean,room_cleaning
+pleasemake room clean,room_cleaning
+brighter,lighting_control
+could i get ice,misc_request
+couldi get ice,misc_request
+coud i get ice,misc_request
+culd i get ice,misc_request
+i'd like to eat,food_order
+i'dlike to eat,food_order
+two three towels send,towel_request
+twothree towels send,towel_request
+morning 7 call me,wake_up_call
+moring 7 call me,wake_up_call
+express checkout,checkout_billing
+cold feeling need warm,temperature_control
+i need a doctor,emergency
+need a doctor,emergency
+ineed a doctor,emergency
+snorkeling tour,concierge_general
+broken ac,maintenance
+darker,lighting_control
+no cleaning please,do_not_disturb
+nocleaning please,do_not_disturb
+no cleaning pleez,do_not_disturb
+no cleaning pls,do_not_disturb
+don't disturb ah,do_not_disturb
+don'tdisturb ah,do_not_disturb
+lights off,lighting_control
+no service today please,do_not_disturb
+no service today pls,do_not_disturb
+no servic today please,do_not_disturb
+lower temperature please,temperature_control
+lower temperature pleas,temperature_control
+lower temperature pleez,temperature_control
+lower temperature pls,temperature_control
+morning call at 6,wake_up_call
+morningcall at 6,wake_up_call
+night light please,lighting_control
+nigt light pleae,lighting_control
+night light pleez,lighting_control
+night light pls,lighting_control
+for towels please,towel_request
+fortowels please,towel_request
+for towls please,towel_request
+for towels plase,towel_request
+large car needed,concierge_taxi
+lare car needed,concierge_taxi
+more hangers please,misc_request
+morehangers please,misc_request
+more hangers pls,misc_request
+leave alone,do_not_disturb
+i would like to check out,checkout_billing
+i wud like to check out,checkout_billing
+i would lik to check out,checkout_billing
+i would like check out,checkout_billing
+adjust temperature,temperature_control
+adjusttemperature,temperature_control
+adjust temprature,temperature_control
+adjust temp,temperature_control
+i need tourist information,concierge_general
+i want tourist information,concierge_general
+i need touist iformation,concierge_general
+good seafood restaurants,concierge_general
+goodseafood restaurants,concierge_general
+good sefood restaurants,concierge_general
+dress press karanna ona,laundry_service
+dres press karanna ona,laundry_service
+dress prss karanna ona,laundry_service
+i won't get my room cleaned,room_cleaning
+iwon't get my room cleaned,room_cleaning
+beach directions,concierge_general
+beachdirections,concierge_general
+press my clothes,laundry_service
+pressmy clothes,laundry_service
+3 am noise complaint,noise_complaint
+3 am noise comlaint,noise_complaint
+3am noise complaint,noise_complaint
+don't come in no,do_not_disturb
+don'tcome in no,do_not_disturb
+i need shampoo please,toiletries_request
+i want shampoo please,toiletries_request
+i need shampo please,toiletries_request
+reading light on,lighting_control
+readinglight on,lighting_control
+reaing light on,lighting_control
+i need two tells,towel_request
+i want two tells,towel_request
+ineed two tells,towel_request
+toothbrush and toothpaste please,toiletries_request
+toothbrush and toothpaste pleez,toiletries_request
+toothbrush and toothpaste pls,toiletries_request
+toothbrush and toothpaste pleas,toiletries_request
+full brightness please,lighting_control
+full brightness pls,lighting_control
+full brightness pleas,lighting_control
+lost room key,emergency
+lamp on,lighting_control
+i need food,food_order
+need food,food_order
+ineed food,food_order
+clean my room later,room_cleaning
+to more pillows,pillow_request
+tomore pillows,pillow_request
+return by evening please,laundry_service
+return by evening pleae,laundry_service
+returnby evening please,laundry_service
+return by evening pleez,laundry_service
+breakfast in bed,food_order
+breakfastin bed,food_order
+brakfast in bed,food_order
+more blankets please,blanket_request
+more blnkets please,blanket_request
+more blankits please,blanket_request
+more blankets pleas,blanket_request
+tomorrow 8 am alarm,wake_up_call
+towels please,towel_request
+towels pls,towel_request
+towelsplease,towel_request
+could you please bring extra towels,towel_request
+could you pleez bring extra towels,towel_request
+could you please brig extra towels,towel_request
+could you please bring extra towls,towel_request
+can i get toilet paper,toiletries_request
+can i get tilet paper,toiletries_request
+can i get toilet papr,toiletries_request
+cani get toilet paper,toiletries_request
+i need extra pillows,pillow_request
+i need extra pilos,pillow_request
+ineed extra pillows,pillow_request
+i need extra pillos,pillow_request
+bring me an iron,misc_request
+bring me iron,misc_request
+get me an iron,misc_request
+bringme an iron,misc_request
+wake me up at sex,wake_up_call
+wakeme up at sex,wake_up_call
+turn on ac and make it cold,temperature_control
+turnon ac and make it cold,temperature_control
+i would like to request laundry service,laundry_service
+i would like to request laundry servis,laundry_service
+i would lik to request laundry service,laundry_service
+i wud like to request laundry service,laundry_service
+bathroom light on,lighting_control
+bathroomlight on,lighting_control
+i want my room clean,room_cleaning
+i want my room clen,room_cleaning
+lights on,lighting_control
+must clean room today itself,room_cleaning
+must clean room today itelf,room_cleaning
+must clean room tday itelf,room_cleaning
+i need a blanket,blanket_request
+i need blanket,blanket_request
+i need a banket,blanket_request
+need a blanket,blanket_request
+toothbrush send no,toiletries_request
+toothbrushsend no,toiletries_request
+toothbush send no,toiletries_request
+can call taxi,concierge_taxi
+uber,concierge_taxi
+where is gym no,concierge_general
+i want a razor,toiletries_request
+iwant a razor,toiletries_request
+i want razor,toiletries_request
+arrange a taxi,concierge_taxi
+arrangea taxi,concierge_taxi
+range a taxi,concierge_taxi
+broken tv,maintenance
+need repair,maintenance
+needrepair,maintenance
+i need fresh towels,towel_request
+i need fresh towls,towel_request
+i need fresh twels,towel_request
+i need ice,misc_request
+need ice,misc_request
+ineed ice,misc_request
+room service,food_order
+roomservice,food_order
+room servic,food_order
+i need one pillow,pillow_request
+ineed one pillow,pillow_request
+i need one pllow,pillow_request
+can someone clean my room,room_cleaning
+can someone cean my room,room_cleaning
+shouting neighbors,noise_complaint
+taxi want,concierge_taxi
+taxiwant,concierge_taxi
+i'm cold need a blanket,blanket_request
+i'm cold need a blanet,blanket_request
+i'mcold need a blanket,blanket_request
+i'm cold need a blankit,blanket_request
+can you clean the rome,room_cleaning
+can you clean rome,room_cleaning
+can you cean the rome,room_cleaning
+can u clean the rome,room_cleaning
+i would like to report a noise disturbance,noise_complaint
+i would like report noise disturbance,noise_complaint
+i would lik to report a noise disturbance,noise_complaint
+i wud like to report a noise disturbance,noise_complaint
+thick blanket,blanket_request
+thickblanket,blanket_request
+can i checkout late,checkout_billing
+cani checkout late,checkout_billing
+can i ceckout late,checkout_billing
+hungry no can you send food,food_order
+hungry no canu send food,food_order
+hungy no can you send food,food_order
+may i request urgent repair service,maintenance
+may i request urgent repair servic,maintenance
+mayi request urgent repair service,maintenance
+may i requet urgent repair service,maintenance
+temperature,temperature_control
+temp,temperature_control
+business center location,concierge_general
+turn on the lights,lighting_control
+turnon the lights,lighting_control
+loud music,noise_complaint
+two three pillows,pillow_request
+two three pilos,pillow_request
+two three pllows,pillow_request
+extra pillows,pillow_request
+extra pilos,pillow_request
+i'm starving,food_order
+bathroom items want,toiletries_request
+bathroomitems want,toiletries_request
+need blanket,blanket_request
+needblanket,blanket_request
+need blankit,blanket_request
+may i have additional hangers,misc_request
+mayi have additional hangers,misc_request
+i want to get my room cleaned,room_cleaning
+i want get my room cleaned,room_cleaning
+delicate wash,laundry_service
+fast billing,checkout_billing
+fastbilling,checkout_billing
+may i request brighter lighting,lighting_control
+mayi request brighter lighting,lighting_control
+sent housekeeping,room_cleaning
+conference room booking,concierge_general
+conferenceroom booking,concierge_general
+confeence room boking,concierge_general
+bathroom light flickering,maintenance
+bathroomlight flickering,maintenance
+bathrom lght flicering,maintenance
+bathrom light flckering,maintenance
+pick up laundry please,laundry_service
+pick up laundry pleas,laundry_service
+pick up laundry pls,laundry_service
+newspaper,misc_request
+toilet paper,toiletries_request
+toiletpaper,toiletries_request
+dry clean suit,laundry_service
+dryclean suit,laundry_service
+charger and adapter,misc_request
+carger and adapter,misc_request
+chargerand adapter,misc_request
+need soap,toiletries_request
+needsoap,toiletries_request
+toilet flush naha,maintenance
+tolet fluh naha,maintenance
+i need a hairdryer,misc_request
+ineed a hairdryer,misc_request
+i need hairdryer,misc_request
+could you arrange laundry pickup,laundry_service
+could you arrange laundry pckup,laundry_service
+could you range laundry pickup,laundry_service
+fresh towels want no please,towel_request
+fresh towls want no please,towel_request
+freshtowels want no please,towel_request
+please clean my room,room_cleaning
+please clan my room,room_cleaning
+pleas clean my room,room_cleaning
+pleaseclean my room,room_cleaning
+coffee,food_order
+loud neighbors,noise_complaint
+loudneighbors,noise_complaint
+pick up laundry at 10 am,laundry_service
+pickup laundry at 10 am,laundry_service
+pick up lundry at 10 am,laundry_service
+key card not working,emergency
+this is an emergency situation,emergency
+this is emergency situation,emergency
+thisis an emergency situation,emergency
+this is an emergency situaion,emergency
+i need ac,temperature_control
+i want ac,temperature_control
+ineed ac,temperature_control
+i can't sleep noise please,noise_complaint
+i can't sleep noise pleez,noise_complaint
+i can't seep nose plese,noise_complaint
+ican't sleep noise please,noise_complaint
+i would like to book a taxi,concierge_taxi
+i would lik to book a taxi,concierge_taxi
+iwould like to book a taxi,concierge_taxi
+set alarm for 8 am,wake_up_call
+set alarm 8 am,wake_up_call
+set aarm for 8 am,wake_up_call
+setalarm for 8 am,wake_up_call
+broken window urgent,maintenance
+brokenwindow urgent,maintenance
+brokn window urgent,maintenance
+i need two brush,toiletries_request
+ineed two brush,toiletries_request
+need two brush,toiletries_request
+i need two brsh,toiletries_request
+i would like privacy please,do_not_disturb
+i would like privacy pleez,do_not_disturb
+iwould like privacy please,do_not_disturb
+i need a taxi,concierge_taxi
+i want a taxi,concierge_taxi
+need a taxi,concierge_taxi
+ineed a taxi,concierge_taxi
+tv volume too high,noise_complaint
+tvvolume too high,noise_complaint
+do not disturb please,do_not_disturb
+do not disturb pleas,do_not_disturb
+do not disturb pls,do_not_disturb
+do not disturb pease,do_not_disturb
+leave me alone,do_not_disturb
+leaveme alone,do_not_disturb
+another day please,checkout_billing
+another day pls,checkout_billing
+anotherday please,checkout_billing
+another day pleae,checkout_billing
+no electricity in room,maintenance
+no electricity room,maintenance
+noelectricity in room,maintenance
+toilet paper finish no,toiletries_request
+toilet paer finish no,toiletries_request
+i want soup,toiletries_request
+i would like to request an iron,misc_request
+i wud like to request an iron,misc_request
+iwould like to request an iron,misc_request
+i would like request iron,misc_request
+i need a toothbrush,toiletries_request
+need a toothbrush,toiletries_request
+ineed a toothbrush,toiletries_request
+turn on ac,temperature_control
+turn ac,temperature_control
+full laundry bag please,laundry_service
+full laundry bag pls,laundry_service
+fulllaundry bag please,laundry_service
+full laundry bag plase,laundry_service
+morning call,wake_up_call
+ice,misc_request
+breakfast send no,food_order
+breakfastsend no,food_order
+not working,maintenance
+notworking,maintenance
+i want ice,misc_request
+several towels please,towel_request
+several towels pleas,towel_request
+several towes please,towel_request
+several towels pleez,towel_request
+extra firm pillows,pillow_request
+extra firm pilos,pillow_request
+extrafirm pillows,pillow_request
+extra firm pllows,pillow_request
+four towels please,towel_request
+four towels pease,towel_request
+four towels pls,towel_request
+fourtowels please,towel_request
+more towels,towel_request
+more towls,towel_request
+wake me 7,wake_up_call
+wakeme 7,wake_up_call
+room clean karanna,room_cleaning
+roomclean karanna,room_cleaning
+don't come in no please,do_not_disturb
+don't come in no pleez,do_not_disturb
+don't come in no pls,do_not_disturb
+don'tcome in no please,do_not_disturb
+set ac to 18,temperature_control
+setac to 18,temperature_control
+set ac 18,temperature_control
+i need another pillow,pillow_request
+need another pillow,pillow_request
+i need another pilow,pillow_request
+ineed another pillow,pillow_request
+i want the receipt,checkout_billing
+i want the recipt,checkout_billing
+iwant the receipt,checkout_billing
+i want receipt,checkout_billing
+may i request no housekeeping service today,do_not_disturb
+may i request no houekeeping service today,do_not_disturb
+may i request no housekeeping servic today,do_not_disturb
+warmer,temperature_control
+bring me pizza,food_order
+bring pizza,food_order
+bringme pizza,food_order
+pickme please,concierge_taxi
+pickmeplease,concierge_taxi
+pickme pleas,concierge_taxi
+toothbrush,toiletries_request
+can i get toothpaste please,toiletries_request
+can i get toothpaste pls,toiletries_request
+cani get toothpaste please,toiletries_request
+can i get toohpaste please,toiletries_request
+taxi please,concierge_taxi
+taxi pls,concierge_taxi
+taxiplease,concierge_taxi
+late night party,noise_complaint
+room needs cleaning,room_cleaning
+room neds cleaning,room_cleaning
+i need a hair dryer,misc_request
+ineed a hair dryer,misc_request
+i want a hair dryer,misc_request
+clean my room now,room_cleaning
+clen my room now,room_cleaning
+cleanmy room now,room_cleaning
+clan my room now,room_cleaning
+slippers,misc_request
+theft report,emergency
+please send soap ah,toiletries_request
+pleez send soap ah,toiletries_request
+pls send soap ah,toiletries_request
+pleasesend soap ah,toiletries_request
+may i have my clothes pressed,laundry_service
+mayi have my clothes pressed,laundry_service
+may i have my clothes presed,laundry_service
+turn down the heat please,temperature_control
+turn down the heat pleez,temperature_control
+turn down the heat pleas,temperature_control
+turn down heat please,temperature_control
+breakfast time,concierge_general
+breakfasttime,concierge_general
+bill please,checkout_billing
+bill pleez,checkout_billing
+bill pls,checkout_billing
+sewing kit,misc_request
+sewingkit,misc_request
+pillow ekak ona,pillow_request
+pillowekak ona,pillow_request
+receipt,checkout_billing
+no cleaning today,do_not_disturb
+noise at night,noise_complaint
+noiseat night,noise_complaint
+nise at nigt,noise_complaint
+stop noise,noise_complaint
+stopnoise,noise_complaint
+iwant tourist information,concierge_general
+i want tourst information,concierge_general
+book city tour,concierge_general
+bookcity tour,concierge_general
+laundry service want please,laundry_service
+laundryservice want please,laundry_service
+laundry service want pleez,laundry_service
+laundry service want pls,laundry_service
+four firm pillows,pillow_request
+four firm pilos,pillow_request
+fourfirm pillows,pillow_request
+housekeeping,room_cleaning
+doctor needed,emergency
+doctorneeded,emergency
+more pillows send no please,pillow_request
+more pillows send no pleas,pillow_request
+more pillows send no pls,pillow_request
+more pillows send no pleez,pillow_request
+room service please,food_order
+room servis please,food_order
+room service pls,food_order
+room service pleez,food_order
+checkout at 2 pm,checkout_billing
+checkout 2 pm,checkout_billing
+the ac is not working,maintenance
+ac is not working,maintenance
+taxi thiyanna,concierge_taxi
+taxithiyanna,concierge_taxi
+slamming doors,noise_complaint
+beach towels,towel_request
+beach towls,towel_request
+beachtowels,towel_request
+i want a warm blanket,blanket_request
+i want a warm blankit,blanket_request
+i want warm blanket,blanket_request
+security needed,emergency
+securityneeded,emergency
+privacy want,do_not_disturb
+could you mark this room do not disturb,do_not_disturb
+could you mark this room do not distrb,do_not_disturb
+cud you mark this room do not disturb,do_not_disturb
+ac fast fast on,temperature_control
+ac fast fast,temperature_control
+more pillows send no,pillow_request
+more pilows send no,pillow_request
+more pilos send no,pillow_request
+immediate taxi,concierge_taxi
+immediatetaxi,concierge_taxi
+light blanket please,blanket_request
+light blanket pleae,blanket_request
+light blanket pleas,blanket_request
+liht blanket please,blanket_request
+shampoo naha,toiletries_request
+several pillows,pillow_request
+severalpillows,pillow_request
+may i have more pillows,pillow_request
+may i have more pilos,pillow_request
+mayi have more pillows,pillow_request
+invoice,checkout_billing
+could i get my invoice,checkout_billing
+the tap is leaking,maintenance
+tap is leaking,maintenance
+thetap is leaking,maintenance
+early breakfast,food_order
+earlybreakfast,food_order
+wake me tomorrow at 7,wake_up_call
+wakeme tomorrow at 7,wake_up_call
+wake me tomorrow 7,wake_up_call
+wake me tmorrow at 7,wake_up_call
+bar hours,concierge_general
+someone clean my room,room_cleaning
+somene cean my room,room_cleaning
+someoneclean my room,room_cleaning
+fresh juice,food_order
+bring me soap,toiletries_request
+brng me soap,toiletries_request
+bring soap,toiletries_request
+ice want,misc_request
+icewant,misc_request
+extra tolls,towel_request
+extratolls,towel_request
+lamp off,lighting_control
+cotton blanket,blanket_request
+cotton blankit,blanket_request
+clean please,room_cleaning
+clean pleas,room_cleaning
+clean pls,room_cleaning
+electric blanket,blanket_request
+electricblanket,blanket_request
+the ac is not working please,maintenance
+the ac is not working pleas,maintenance
+the ac is not working pls,maintenance
+the ac is not working pleez,maintenance
+can i have towels,towel_request
+can i have towls,towel_request
+can i have towes,towel_request
+make bed,room_cleaning
+tv not working send someone,maintenance
+tv not working send somone,maintenance
+tv not wrking send someone,maintenance
+tvnot working send someone,maintenance
+skip cleaning today,do_not_disturb
+skipcleaning today,do_not_disturb
+pool hours please,concierge_general
+pool hours pease,concierge_general
+poolhours please,concierge_general
+may i request a cab to the airport,concierge_taxi
+may i request cab airport,concierge_taxi
+i want clothes washed,laundry_service
+iwant clothes washed,laundry_service
+turn up the ac,temperature_control
+turnup the ac,temperature_control
+clean bath towels,towel_request
+cean bath towels,towel_request
+cleanbath towels,towel_request
+clean room before dinner,room_cleaning
+cleanroom before dinner,room_cleaning
+checkout,checkout_billing
+call uber,concierge_taxi
+invoice thiyanna,checkout_billing
+bright ah lights dim karanna,lighting_control
+brightah lights dim karanna,lighting_control
+send up some food,food_order
+sendup some food,food_order
+leave me alone please,do_not_disturb
+leave me alone pls,do_not_disturb
+leaveme alone please,do_not_disturb
+leae me alone please,do_not_disturb
+quick checkout,checkout_billing
+quickcheckout,checkout_billing
+skip house keeping,do_not_disturb
+skip hose keeping,do_not_disturb
+skip house keeing,do_not_disturb
+skiphouse keeping,do_not_disturb
+directions thiyanna,concierge_general
+book a cab,concierge_taxi
+stain removal,laundry_service
+need taxi,concierge_taxi
+needtaxi,concierge_taxi
+tomorrow morning call,wake_up_call
+tomorrowmorning call,wake_up_call
+tomorrow moning call,wake_up_call
+smell smoke,emergency
+smellsmoke,emergency
+cab for tonight,concierge_taxi
+i'm cold,temperature_control
+i'mcold,temperature_control
+air conditioning please,temperature_control
+air conditioning pls,temperature_control
+air conditioning pleas,temperature_control
+one more blanket,blanket_request
+one more blankit,blanket_request
+onemore blanket,blanket_request
+ac too strong reduce it,temperature_control
+actoo strong reduce it,temperature_control
+ac too strong redce it,temperature_control
+ac too strong reuce it,temperature_control
+whale watching trip,concierge_general
+whle watching trip,concierge_general
+my room is messy please,room_cleaning
+myroom is messy please,room_cleaning
+my room is messy pls,room_cleaning
+several items,laundry_service
+severalitems,laundry_service
+extra bedding,blanket_request
+few clothes to wash,laundry_service
+few cloths to wash,laundry_service
+fewclothes to wash,laundry_service
+feather pillows,pillow_request
+featherpillows,pillow_request
+i would like to request bathroom amenities,toiletries_request
+i would like request bathroom amenities,toiletries_request
+iwould like to request bathroom amenities,toiletries_request
+it's too noisy,noise_complaint
+it's too nisy,noise_complaint
+i need hangers,misc_request
+need hangers,misc_request
+ineed hangers,misc_request
+i want hangers,misc_request
+three towels please,towel_request
+three towels pls,towel_request
+three towels pleas,towel_request
+three towls please,towel_request
+i need a warm blanket,blanket_request
+ineed a warm blanket,blanket_request
+i need a warm blankit,blanket_request
+may i have bathroom supplies,toiletries_request
+mayi have bathroom supplies,toiletries_request
+where is gym,concierge_general
+whee is gym,concierge_general
+whereis gym,concierge_general
+shower has no pressure,maintenance
+sower has no pressure,maintenance
+shwer has no prssure,maintenance
+showerhas no pressure,maintenance
+can you do my laundry,laundry_service
+can u do my laundry,laundry_service
+canyou do my laundry,laundry_service
+may i schedule a morning call,wake_up_call
+may i schdule a morning call,wake_up_call
+may i schedle a morning call,wake_up_call
+mayi schedule a morning call,wake_up_call
+firm pillows,pillow_request
+firm pilos,pillow_request
+airport pickup,concierge_taxi
+toiletries,toiletries_request
+ac broken no can you fix,maintenance
+ac broken no canu fix,maintenance
+ac broen no can you fix,maintenance
+chicken curry and rice,food_order
+chickencurry and rice,food_order
+chickn curry and rice,food_order
+i want to order food please,food_order
+i want to orer food please,food_order
+iwant to order food please,food_order
+i want to order food pleas,food_order
+bill want,checkout_billing
+make it darker,lighting_control
+makeit darker,lighting_control
+make it drker,lighting_control
+can on lights,lighting_control
+canon lights,lighting_control
+the room needs to be cleaned,room_cleaning
+the room nees to be cleaned,room_cleaning
+room needs be cleaned,room_cleaning
+room service send ah,food_order
+room servis send ah,food_order
+roomservice send ah,food_order
+noise complaint please,noise_complaint
+noise coplaint please,noise_complaint
+noise complaint pleez,noise_complaint
+noise complaint pleae,noise_complaint
+food order karanna,food_order
+foodorder karanna,food_order
+thin blanket,blanket_request
+thinblanket,blanket_request
+thin blankit,blanket_request
+additional blankets,blanket_request
+additionalblankets,blanket_request
+turn on the lamb please,lighting_control
+turn lamb please,lighting_control
+turn the lamb please,lighting_control
+turn on the lamb pls,lighting_control
+i feel sick,emergency
+ifeel sick,emergency
+i like housekeeping service,room_cleaning
+i like hosekeeping service,room_cleaning
+i like housekeeping servic,room_cleaning
+cold,blanket_request
+safari booking,concierge_general
+safaribooking,concierge_general
+it's cold,temperature_control
+it'scold,temperature_control
+brunch order,food_order
+brunchorder,food_order
+dry clean please,laundry_service
+dryclean please,laundry_service
+dry clen please,laundry_service
+late checkout please,checkout_billing
+late checkout pleez,checkout_billing
+late checkout pls,checkout_billing
+i need soup,toiletries_request
+ineed soup,toiletries_request
+need soup,toiletries_request
+water leak,maintenance
+towels need ah,towel_request
+towelsneed ah,towel_request
+usb cable,misc_request
+usbcable,misc_request
+i require immediate assistance,emergency
+i require imediate assistance,emergency
+its cold,temperature_control
+itscold,temperature_control
+loud music please,noise_complaint
+loudmusic please,noise_complaint
+loud music pleez,noise_complaint
+make lights dimmer,lighting_control
+makelights dimmer,lighting_control
+make lihts dmmer,lighting_control
+clothes wash karanna,laundry_service
+clotheswash karanna,laundry_service
+noise ekka sleep karanna baha,noise_complaint
+noise ekka slep karana baha,noise_complaint
+noiseekka sleep karanna baha,noise_complaint
+extend stay,checkout_billing
+extendstay,checkout_billing
+i want to check out,checkout_billing
+i want to chek out,checkout_billing
+i want check out,checkout_billing
+please tidy the room,room_cleaning
+pleasetidy the room,room_cleaning
+pleas tidy the room,room_cleaning
+tap dripping continuously,maintenance
+can clean my room,room_cleaning
+canclean my room,room_cleaning
+half brightness,lighting_control
+halfbrightness,lighting_control
+bathrobe,misc_request
+morning call at 5 sharp,wake_up_call
+morning call at 5 shap,wake_up_call
+morning call 5 sharp,wake_up_call
+gym opening hours,concierge_general
+gym openig hours,concierge_general
+gymopening hours,concierge_general
+uber call karanna,concierge_taxi
+uber call kranna,concierge_taxi
+wake me at 7 am please,wake_up_call
+wake me at 7 am pleas,wake_up_call
+wake me 7 am please,wake_up_call
+wake me at 7 am pls,wake_up_call
+i need soft pillows,pillow_request
+i need soft pillws,pillow_request
+need soft pillows,pillow_request
+ineed soft pillows,pillow_request
+could you please arrange for room cleaning,room_cleaning
+could you please range for room cleaning,room_cleaning
+could you please arange for room cleaning,room_cleaning
+couldyou please arrange for room cleaning,room_cleaning
+don't disturb,do_not_disturb
+don'tdisturb,do_not_disturb
+email my bill,checkout_billing
+emal my bill,checkout_billing
+set alarm for quarter to 8,wake_up_call
+setalarm for quarter to 8,wake_up_call
+emergency ah please,emergency
+emergencyah please,emergency
+emrgency ah please,emergency
+tomorrow delivery,laundry_service
+tomorrowdelivery,laundry_service
+bring me food,food_order
+bring food,food_order
+get me food,food_order
+playing cards,misc_request
+clean room after lunch,room_cleaning
+cleanroom after lunch,room_cleaning
+lunch,food_order
+cab ekak ona,concierge_taxi
+cabekak ona,concierge_taxi
+may i have a warm blanket,blanket_request
+may i have a warm blankit,blanket_request
+may i have warm blanket,blanket_request
+locked out,emergency
+lockedout,emergency
+iron quickly send,misc_request
+ironquickly send,misc_request
+neighbors loud music,noise_complaint
+neighbors loud muic,noise_complaint
+neighborsloud music,noise_complaint
+no disturbance please,do_not_disturb
+no disturbance pleas,do_not_disturb
+no dsturbance please,do_not_disturb
+nodisturbance please,do_not_disturb
+extra blanket ona,blanket_request
+extrablanket ona,blanket_request
+extra blankit ona,blanket_request
+extra blnket ona,blanket_request
+three wheeler call karanna,concierge_taxi
+tree wheeler call karanna,concierge_taxi
+i need bath towels,towel_request
+ineed bath towels,towel_request
+i need bath towls,towel_request
+bring me a razor,toiletries_request
+brng me a razor,toiletries_request
+bring me a rzor,toiletries_request
+late checkout,checkout_billing
+latecheckout,checkout_billing
+could i get lunch,food_order
+cold i get lunch,food_order
+i'm hot,temperature_control
+i'mhot,temperature_control
+can i get my invoice,checkout_billing
+laundry,laundry_service
+taxi urgently want,concierge_taxi
+taxiurgently want,concierge_taxi
+umbrella,misc_request
+coat hangers,misc_request
+heart problem emergency,emergency
+heart prblem emergency,emergency
+hart problem emrgency,emergency
+early morning noise,noise_complaint
+erly morning nise,noise_complaint
+make it 22 degrees,temperature_control
+make it 22 degres,temperature_control
+makeit 22 degrees,temperature_control
+lunch want quickly,food_order
+lunchwant quickly,food_order
+lunch want quicly,food_order
+construction noise,noise_complaint
+constructionnoise,noise_complaint
+can i get toothpaste,toiletries_request
+can i get toothaste,toiletries_request
+iwant soap and shampoo,toiletries_request
+hangers and hooks,misc_request
+hangersand hooks,misc_request
+call me at 6,wake_up_call
+call me 6,wake_up_call
+iron thiyanna,misc_request
+cold ah put heater please,temperature_control
+cold ah put heater pls,temperature_control
+cold ah put heaer please,temperature_control
+remote doesn't work,maintenance
+reote doesn't work,maintenance
+remotedoesn't work,maintenance
+bring ice please,misc_request
+bring ice pls,misc_request
+brng ice plese,misc_request
+bring ice pleas,misc_request
+too hot can you ac on,temperature_control
+too hot canu ac on,temperature_control
+too hot can you ac,temperature_control
+best places visit karanna,concierge_general
+best places vsit karanna,concierge_general
+best places visit karana,concierge_general
+maintenance,maintenance
+maintance,maintenance
+maintanance,maintenance
+send housekeeping,room_cleaning
+sendhousekeeping,room_cleaning
+wash clothes,laundry_service
+washclothes,laundry_service
+clean the room please,room_cleaning
+clean room please,room_cleaning
+clean the room pls,room_cleaning
+clen the room plese,room_cleaning
+loud music next door,noise_complaint
+loudmusic next door,noise_complaint
+set wake up call,wake_up_call
+setwake up call,wake_up_call
+pool close at what time,concierge_general
+pool close what time,concierge_general
+pool cose at what time,concierge_general
+increase ac power,temperature_control
+increaseac power,temperature_control
+wake me at 6 and 6:30,wake_up_call
+wakeme at 6 and 6:30,wake_up_call
+tidy up my room,room_cleaning
+i need a pillow,pillow_request
+i need a pilo,pillow_request
+i need pillow,pillow_request
+ineed a pillow,pillow_request
+room very dirty need clean,room_cleaning
+roomvery dirty need clean,room_cleaning
+dinner ekak ona,food_order
+dinnerekak ona,food_order
+maintenance want urgently,maintenance
+maintenancewant urgently,maintenance
+maintanance want urgently,maintenance
+blanket ekak send,blanket_request
+blanketekak send,blanket_request
+book taxi to airport,concierge_taxi
+booktaxi to airport,concierge_taxi
+book taxi airport,concierge_taxi
+morning call at 6 please,wake_up_call
+morning call 6 please,wake_up_call
+morningcall at 6 please,wake_up_call
+mornng call at 6 pleae,wake_up_call
+bring two towels,towel_request
+bringtwo towels,towel_request
+brng two towls,towel_request
+hallway noise,noise_complaint
+do not disturb until tomorrow,do_not_disturb
+do not distrb until tmorrow,do_not_disturb
+donot disturb until tomorrow,do_not_disturb
+laundry pickup now,laundry_service
+launry picup now,laundry_service
+laundry picup now,laundry_service
+ac off,temperature_control
+soft pillows please,pillow_request
+soft pilos please,pillow_request
+soft pillows pleas,pillow_request
+someone at door please,emergency
+someone at door pls,emergency
+someone door please,emergency
+someone at door pleez,emergency
+6 am wake up karanna,wake_up_call
+6am wake up karanna,wake_up_call
+book taxi for 8 am tomorrow please,concierge_taxi
+book taxi for 8 am tomorrow pls,concierge_taxi
+book taxi 8 am tomorrow please,concierge_taxi
+could you bring extra pillows,pillow_request
+could you bring extra pilos,pillow_request
+couldyou bring extra pillows,pillow_request
+could you bing extra pillows,pillow_request
+handful of towels,towel_request
+handful of towls,towel_request
+handfulof towels,towel_request
+room cleaning want,room_cleaning
+room claning want,room_cleaning
+roomcleaning want,room_cleaning
+suspicious person,emergency
+turn on the lamp,lighting_control
+turnon the lamp,lighting_control
+best places to visit in colombo,concierge_general
+best places visit colombo,concierge_general
+best placs to visit in colombo,concierge_general
+bestplaces to visit in colombo,concierge_general
+toothbrush please,toiletries_request
+toothbrush pleez,toiletries_request
+toothbrush pls,toiletries_request
+send someone to clean,room_cleaning
+send someone clean,room_cleaning
+sendsomeone to clean,room_cleaning
+i need an iron please,misc_request
+i need an iron pleez,misc_request
+i want an iron please,misc_request
+need an iron please,misc_request
+gluten-free options,food_order
+medical emergency,emergency
+medical emrgency,emergency
+medical emergancy,emergency
+could you address the noise from next door,noise_complaint
+could you address noise from next door,noise_complaint
+could u address the noise from next door,noise_complaint
+bright lights,lighting_control
+its two hot,temperature_control
+itstwo hot,temperature_control
+steam iron,misc_request
+steamiron,misc_request
+dinner,food_order
+taxi in 10 minutes,concierge_taxi
+taxi in 10 minuts,concierge_taxi
+taxiin 10 minutes,concierge_taxi
+very noisy no can you stop,noise_complaint
+very nosy no can you stop,noise_complaint
+verynoisy no can you stop,noise_complaint
+very noisy no can u stop,noise_complaint
+hypoallergenic pillows,pillow_request
+hypoallergenic pilos,pillow_request
+shirt pressing,laundry_service
+shirtpressing,laundry_service
+more blankets,blanket_request
+moreblankets,blanket_request
+wake me tomorrow at ate,wake_up_call
+wake me tomorow at ate,wake_up_call
+wake me tomorrow ate,wake_up_call
+wakeme tomorrow at ate,wake_up_call
+i can't get in my room,emergency
+ican't get in my room,emergency
+heat,temperature_control
+taxi to shopping mall,concierge_taxi
+taxito shopping mall,concierge_taxi
+taxi to shoping mall,concierge_taxi
+iwant ac,temperature_control
+hairdryer ekak,misc_request
+urgent,emergency
+spa timings,concierge_general
+key broken urgent,emergency
+key broken ugent,emergency
+keybroken urgent,emergency
+i would like to change the temperature,temperature_control
+i would like to change the temp,temperature_control
+i would lik to change the temperature,temperature_control
+i would like to change the temprature,temperature_control
+too much sound,noise_complaint
+too much sund,noise_complaint
+toomuch sound,noise_complaint
+hangers,misc_request
+hand towels please,towel_request
+hand towels pls,towel_request
+hand towls please,towel_request
+handtowels please,towel_request
+flood in room,emergency
+face towels needed,towel_request
+face towls needed,towel_request
+cotton swabs,toiletries_request
+caesar salad,food_order
+turn down the heat,temperature_control
+turndown the heat,temperature_control
+i would like to request a wake up call,wake_up_call
+i would like request wake up call,wake_up_call
+iwould like to request a wake up call,wake_up_call
+i wud like to request a wake up call,wake_up_call
+pool hours,concierge_general
+i would like to request additional towels,towel_request
+i would like to request addtional toels,towel_request
+i would like request additional towels,towel_request
+i need toothpaste,toiletries_request
+i want toothpaste,toiletries_request
+need toothpaste,toiletries_request
+iron please,misc_request
+ironplease,misc_request
+iron pleas,misc_request
+i want directions,concierge_general
+iwant directions,concierge_general
+i want directins,concierge_general
+temple tour,concierge_general
+bring two pillows,pillow_request
+bring two pilos,pillow_request
+bringtwo pillows,pillow_request
+transport,concierge_taxi
+extra pillows thiyanna,pillow_request
+etra pillows thiyanna,pillow_request
+extra pilos thiyanna,pillow_request
+airport taxi,concierge_taxi
+airporttaxi,concierge_taxi
+white towels please,towel_request
+white towls please,towel_request
+white towels pleez,towel_request
+whitetowels please,towel_request
+very hot here,temperature_control
+six towels please,towel_request
+sixtowels please,towel_request
+six towels pleas,towel_request
+six towls please,towel_request
+know cleaning please,do_not_disturb
+know ceaning please,do_not_disturb
+know cleaning pleas,do_not_disturb
+too hot,temperature_control
+next day wake up call,wake_up_call
+nextday wake up call,wake_up_call
+the neighbors are loud,noise_complaint
+the neihbors are loud,noise_complaint
+theneighbors are loud,noise_complaint
+tomorrow morning,wake_up_call
+restaurant menu,concierge_general
+restaurantmenu,concierge_general
+make it brighter,lighting_control
+makeit brighter,lighting_control
+need cleaning,room_cleaning
+needcleaning,room_cleaning
+i need a taxi please,concierge_taxi
+i need a taxi pleez,concierge_taxi
+need a taxi please,concierge_taxi
+taxi to beach,concierge_taxi
+taxi to beah,concierge_taxi
+taxi to bach,concierge_taxi
+cooler,temperature_control
+i want eggs and toast,food_order
+two blankets please,blanket_request
+two blankets pls,blanket_request
+two blankets pleas,blanket_request
+wake me at 5:30 am,wake_up_call
+wake me 5:30 am,wake_up_call
+all lights off,lighting_control
+all lighs off,lighting_control
+alllights off,lighting_control
+cab to restaurant,concierge_taxi
+coat hangers please,misc_request
+coat haners pease,misc_request
+coat hangers pls,misc_request
+coat hangers pleas,misc_request
+safe won't lock,maintenance
+i want to order food,food_order
+i want order food,food_order
+i want to oder food,food_order
+room open karanna help,emergency
+room open kaanna help,emergency
+room open karana help,emergency
+roomopen karanna help,emergency
+fresh hand towels,towel_request
+fresh hand towes,towel_request
+freshhand towels,towel_request
+fresh hand towls,towel_request
+i need a razor,toiletries_request
+i need razor,toiletries_request
+ineed a razor,toiletries_request
+clean my room in one hour,room_cleaning
+clean my room one hour,room_cleaning
+cleanmy room in one hour,room_cleaning
+extend checkout,checkout_billing
+very dark lights on,lighting_control
+very dark ligts on,lighting_control
+verydark lights on,lighting_control
+very dark lights,lighting_control
+call a taxi,concierge_taxi
+could you please send toiletries,toiletries_request
+culd you please send toiletris,toiletries_request
+could you pls send toiletries,toiletries_request
+could you pleez send toiletries,toiletries_request
+light off karanna please,lighting_control
+light off karanna pleas,lighting_control
+light off karanna pleez,lighting_control
+light off karanna pls,lighting_control
+i want one pillow,pillow_request
+i want one pilow,pillow_request
+i want one pilo,pillow_request
+iwant one pillow,pillow_request
+too cold,temperature_control
+toocold,temperature_control
+five towels please,towel_request
+fivetowels please,towel_request
+five towels pleas,towel_request
+i want privay,do_not_disturb
+complete toiletries set,toiletries_request
+completetoiletries set,toiletries_request
+lost passport,emergency
+desk lamp please,lighting_control
+desk lamp pleas,lighting_control
+desk lamp pleez,lighting_control
+desklamp please,lighting_control
+lights on karanna,lighting_control
+lightson karanna,lighting_control
+can send towels,towel_request
+can send towls,towel_request
+cansend towels,towel_request
+large towels please,towel_request
+large towels pleez,towel_request
+large towls please,towel_request
+largetowels please,towel_request
+two wake up calls 7 and 7:30,wake_up_call
+two wake up cals 7 and 7:30,wake_up_call
+shampoo thiyanna,toiletries_request
+currency exchange where,concierge_general
+currency exchange whee,concierge_general
+currencyexchange where,concierge_general
+can i order lunch,food_order
+i need a ride,concierge_taxi
+i want a ride,concierge_taxi
+i need ride,concierge_taxi
+ineed a ride,concierge_taxi
+room needs clean,room_cleaning
+roomneeds clean,room_cleaning
+room neds clan,room_cleaning
+room needs cean,room_cleaning
+board games,misc_request
+i need my bill,checkout_billing
+need my bill,checkout_billing
+ineed my bill,checkout_billing
+i want my bill,checkout_billing
+help want urgent,emergency
+helpwant urgent,emergency
+increase the heat,temperature_control
+increasethe heat,temperature_control
+tissue box,toiletries_request
+tissuebox,toiletries_request
+fresh towels,towel_request
+freshtowels,towel_request
+checking out now,checkout_billing
+cecking out now,checkout_billing
+bring me towels please,towel_request
+bring me towls please,towel_request
+bring me towels pls,towel_request
+bring towels please,towel_request
+i need a wake up call,wake_up_call
+ineed a wake up call,wake_up_call
+all bathroom amenities please,toiletries_request
+all bahroom amenities plase,toiletries_request
+all bathroom amenities pleas,toiletries_request
+someone at door,emergency
+fix the sink please,maintenance
+fix the sink pls,maintenance
+fixthe sink please,maintenance
+temperature 24 please,temperature_control
+temprature 24 please,temperature_control
+temperature 24 pleez,temperature_control
+6 am exactly please,wake_up_call
+6am exactly please,wake_up_call
+6 am exactly pleas,wake_up_call
+memory foam pillows,pillow_request
+mmory foam pillows,pillow_request
+memory foam pillws,pillow_request
+prepare my bill please,checkout_billing
+prepre my bill pease,checkout_billing
+prepare my bill pleas,checkout_billing
+prepare my bill pleez,checkout_billing
+where's the restaurant,concierge_general
+where's the retaurant,concierge_general
+very dim lighting,lighting_control
+book taxi to air port,concierge_taxi
+booktaxi to air port,concierge_taxi
+breakfast,food_order
+where can i eat,concierge_general
+whre can i eat,concierge_general
+wherecan i eat,concierge_general
+were can i eat,concierge_general
+turn on bedside lamp,lighting_control
+turn on bedsie lamp,lighting_control
+turn bedside lamp,lighting_control
+cold ah blanket thiyanna,blanket_request
+cold ah banket thiyanna,blanket_request
+coldah blanket thiyanna,blanket_request
+i'm cold please,temperature_control
+i'mcold please,temperature_control
+i'm cold pls,temperature_control
+i'm cold pleez,temperature_control
+7 o'clock wake me,wake_up_call
+breakfast time mokadda,concierge_general
+breakfasttime mokadda,concierge_general
+breakfast time mokada,concierge_general
+club sandwich please,food_order
+clubsandwich please,food_order
+club sandwich pleez,food_order
+club sandwich pls,food_order
+extend my stay,checkout_billing
+exend my stay,checkout_billing
+lights please,lighting_control
+lights pleez,lighting_control
+lights pls,lighting_control
+set temperature to 20 degrees,temperature_control
+settemperature to 20 degrees,temperature_control
+set temperature 20 degrees,temperature_control
+tuk tuk,concierge_taxi
+pillows,pillow_request
+i want to do not disturb,do_not_disturb
+i want do not disturb,do_not_disturb
+i want to do not distrb,do_not_disturb
+hot coffee,food_order
+allergic reaction,emergency
+allergicreaction,emergency
+kindly clean my room no,room_cleaning
+more bath towels,towel_request
+morebath towels,towel_request
+dental floss,toiletries_request
+dentalfloss,toiletries_request
+where is the gym,concierge_general
+whre is the gym,concierge_general
+digital invoice,checkout_billing
+digitalinvoice,checkout_billing
+extension cord,misc_request
+extensioncord,misc_request
+toilet won't flush properly,maintenance
+toiet won't flush properly,maintenance
+toiletwon't flush properly,maintenance
+adapter,misc_request
+i require housekeeping assistance,room_cleaning
+i reqire hosekeeping assstance,room_cleaning
+irequire housekeeping assistance,room_cleaning
+ice bucket,misc_request
+i need the maid,room_cleaning
+need the maid,room_cleaning
+i need maid,room_cleaning
+i want the maid,room_cleaning
+skip housekeeping please,do_not_disturb
+skip housekeeping pleez,do_not_disturb
+skiphousekeeping please,do_not_disturb
+call ambulance,emergency
+callambulance,emergency
+i would like to report a maintenance issue,maintenance
+i would like to report a maintance issue,maintenance
+i would lik to report a maintenance issue,maintenance
+i would like to report a maintenane isue,maintenance
+warm blanket want no please,blanket_request
+warm banket want no plese,blanket_request
+warm blanket want no pleez,blanket_request
+very hot no need ac,temperature_control
+veryhot no need ac,temperature_control
+warm blanket,blanket_request
+warm blankit,blanket_request
+clean towels please,towel_request
+cean towels please,towel_request
+clean towls please,towel_request
+cleantowels please,towel_request
+i want sum food,food_order
+ride to galle,concierge_taxi
+ride to glle,concierge_taxi
+i need housekeeping,room_cleaning
+ineed housekeeping,room_cleaning
+need housekeeping,room_cleaning
+cleaning,room_cleaning
+deep clean my room,room_cleaning
+deep cean my room,room_cleaning
+deepclean my room,room_cleaning
+children running,noise_complaint
+pool location,concierge_general
+tomorrow delivery please,laundry_service
+tomorrow delivery pls,laundry_service
+tomorrow delivry please,laundry_service
+low sugar dessert,food_order
+heating too high lower it please,temperature_control
+heating too high lower it pleas,temperature_control
+heating too high lower it pls,temperature_control
+cool to 19 degrees,temperature_control
+cool 19 degrees,temperature_control
+coolto 19 degrees,temperature_control
+locked out urgent,emergency
+may i request temperature adjustment,temperature_control
+may i request temp adjustment,temperature_control
+may i request temprature adjustent,temperature_control
+ice bucket send,misc_request
+ice bucet send,misc_request
+skip housekeeping,do_not_disturb
+skiphousekeeping,do_not_disturb
+could you bring ice and glasses,misc_request
+could u bring ice and glasses,misc_request
+cud you bring ice and glasses,misc_request
+i need my bill please,checkout_billing
+ineed my bill please,checkout_billing
+i need my bill pleez,checkout_billing
+need my bill please,checkout_billing
+blanket ekak send please,blanket_request
+blanketekak send please,blanket_request
+blanket ekak send pleas,blanket_request
+cold ah put heater,temperature_control
+coldah put heater,temperature_control
+make my bed please,room_cleaning
+make my bed pls,room_cleaning
+makemy bed please,room_cleaning
+cold,temperature_control
+i need body lotion,toiletries_request
+i need body loion,toiletries_request
+i want body lotion,toiletries_request
+need body lotion,toiletries_request
+late checkout by 2 hours,checkout_billing
+late chckout by 2 hours,checkout_billing
+late checkout by 2 hors,checkout_billing
+shampoo thiyanna please,toiletries_request
+shampoo thiyanna pleez,toiletries_request
+shampoo thiyanna pleas,toiletries_request
+taxi early morning,concierge_taxi
+taxiearly morning,concierge_taxi
+halal meal,food_order
+halalmeal,food_order
+i need shower jell,toiletries_request
+i want shower jell,toiletries_request
+ineed shower jell,toiletries_request
+urgent laundry,laundry_service
+urgentlaundry,laundry_service
+clean and organize my room,room_cleaning
+cleanand organize my room,room_cleaning
+lights thiyanna,lighting_control
+lightsthiyanna,lighting_control
+shampoo and conditioner,toiletries_request
+shampooand conditioner,toiletries_request
+blow dryer,misc_request
+please send towels no,towel_request
+pleasesend towels no,towel_request
+please send towls no,towel_request
+pleas send towels no,towel_request
+bill,checkout_billing
+could you please adjust the air conditioning,temperature_control
+couldyou please adjust the air conditioning,temperature_control
+could you pls adjust the air conditioning,temperature_control
+cud you please adjust the air conditioning,temperature_control
+toilet paper want,toiletries_request
+toiletpaper want,toiletries_request
+taxi,concierge_taxi
+may i have restaurant recommendations,concierge_general
+may i have restarant recommendations,concierge_general
+can i get some towels,towel_request
+can i get some towls,towel_request
+i want more pillows,pillow_request
+iwant more pillows,pillow_request
+i want more pilos,pillow_request
+i need shower gel,toiletries_request
+need shower gel,toiletries_request
+i want shower gel,toiletries_request
+towels quickly send,towel_request
+towls quickly send,towel_request
+toels quicky send,towel_request
+thorough cleaning needed,room_cleaning
+thoroughcleaning needed,room_cleaning
+please clean my room ah,room_cleaning
+pleez clean my room ah,room_cleaning
+pleas clean my room ah,room_cleaning
+don't enter my room please,do_not_disturb
+don'tenter my room please,do_not_disturb
+don't enter my room pleez,do_not_disturb
+warm blanket want no,blanket_request
+warm blankit want no,blanket_request
+help,emergency
+towels,towel_request
+sick,emergency
+may i place a food order,food_order
+mayi place a food order,food_order
+may i place food order,food_order
+vegan breakfast,food_order
+iwant help,emergency
+i need two towels please,towel_request
+i need two towls please,towel_request
+i need two towels pleez,towel_request
+i need two towels pls,towel_request
+buddhist temples nearby,concierge_general
+buddhisttemples nearby,concierge_general
+cab downtown,concierge_taxi
+cabdowntown,concierge_taxi
+soap ekak ona,toiletries_request
+soapekak ona,toiletries_request
+tree towels please,towel_request
+tree towls pease,towel_request
+tree towels pls,towel_request
+tree towels pleez,towel_request
+vegetarian food please,food_order
+vegetarian food pleae,food_order
+vegetarian food pls,food_order
+ac kharab,maintenance
+ackharab,maintenance
+airport taxi book,concierge_taxi
+airporttaxi book,concierge_taxi
+towels need ah please,towel_request
+towelsneed ah please,towel_request
+towels need ah pleas,towel_request
+towels need ah pleez,towel_request
+fix the sink,maintenance
+know hot water,maintenance
+knowhot water,maintenance
+cool to 19 degrees please,temperature_control
+cool to 19 degrees pleas,temperature_control
+cool to 19 degees please,temperature_control
+cool 19 degrees please,temperature_control
+small towels,towel_request
+small towls,towel_request
+bill ready karanna,checkout_billing
+bill ready karana,checkout_billing
+billready karanna,checkout_billing
+toilet issue,maintenance
+toiletissue,maintenance
+a couple of towels,towel_request
+a couple of towls,towel_request
+a cuple of towels,towel_request
+acouple of towels,towel_request
+parking available,concierge_general
+clean room in the evening,room_cleaning
+cleanroom in the evening,room_cleaning
+clean room evening,room_cleaning
+pasta with sauce,food_order
+pastawith sauce,food_order
+privacy thiyanna please,do_not_disturb
+privacy thiyanna plase,do_not_disturb
+privacythiyanna please,do_not_disturb
+privacy thiyanna pls,do_not_disturb
+clean,room_cleaning
+send a blanket,blanket_request
+senda blanket,blanket_request
+send a blankt,blanket_request
+iron,misc_request
+no cleaning,do_not_disturb
+nocleaning,do_not_disturb
+good restaurants thiyeda,concierge_general
+good resaurants thiyeda,concierge_general
+bottled water,food_order
+bottledwater,food_order
+one more night,checkout_billing
+onemore night,checkout_billing
+i need shampo,toiletries_request
+need shampo,toiletries_request
+i want shampo,toiletries_request
+iced tea please,food_order
+iced tea pleas,food_order
+icedtea please,food_order
+i need directions,concierge_general
+need directions,concierge_general
+i need drections,concierge_general
+set alarm for quarter to 8 please,wake_up_call
+set alarm quarter 8 please,wake_up_call
+set alarm for quarter to 8 pleae,wake_up_call
+express laundry,laundry_service
+expresslaundry,laundry_service
+i need more pillows,pillow_request
+ineed more pillows,pillow_request
+i need more pillos,pillow_request
+need more pillows,pillow_request
+make it cooler please,temperature_control
+make it cooler plase,temperature_control
+make it cooler pls,temperature_control
+ice and glasses,misc_request
+cold please,temperature_control
+cold pls,temperature_control
+coldplease,temperature_control
+directions,concierge_general
+no spicy food,food_order
+nospicy food,food_order
+no spcy food,food_order
+room dirty,room_cleaning
+could you send maintenance staff,maintenance
+could you send mainenance saff,maintenance
+could you send maintance staff,maintenance
+cud you send maintenance staff,maintenance
+water leaking everywhere,maintenance
+water leaking evrywhere,maintenance
+waer leaking everywhere,maintenance
+hand wash needed please,laundry_service
+hand wash needed pls,laundry_service
+hand wash needed pleas,laundry_service
+no service today,do_not_disturb
+noservice today,do_not_disturb
+no servis today,do_not_disturb
+wifi very slow,maintenance
+cappuccino,food_order
+can i get lunch,food_order
+cani get lunch,food_order
+just one shirt press,laundry_service
+just one shit press,laundry_service
+just one shirt prss,laundry_service
+justone shirt press,laundry_service
+i would like to order from room service,food_order
+i wold like to ordr from room service,food_order
+i would like to order from room servic,food_order
+i would like order from room service,food_order
+privacy want please,do_not_disturb
+privacywant please,do_not_disturb
+privacy want pleas,do_not_disturb
+privacy want pleez,do_not_disturb
+dinner at 7pm,food_order
+dinnr at 7pm,food_order
+something is broken,maintenance
+i need the maid please,room_cleaning
+ineed the maid please,room_cleaning
+need the maid please,room_cleaning
+tea,food_order
+i need another blanket please,blanket_request
+i need another blanket pleez,blanket_request
+need another blanket please,blanket_request
+i need one towel,towel_request
+i want one towel,towel_request
+need one towel,towel_request
+ineed one towel,towel_request
+plumbing problem,maintenance
+plumbingproblem,maintenance
+several blankets,blanket_request
+severalblankets,blanket_request
+local market where please,concierge_general
+local maret where please,concierge_general
+local market where pleas,concierge_general
+loal maret where please,concierge_general
+could you provide tourist information,concierge_general
+could u provide tourist information,concierge_general
+cold you provide tourist information,concierge_general
+may i have more towels,towel_request
+may i have more towls,towel_request
+mayi have more towels,towel_request
+express laundry please,laundry_service
+express laundry pleas,laundry_service
+expresslaundry please,laundry_service
+express laundry pleez,laundry_service
+bring shampoo please,toiletries_request
+bringshampoo please,toiletries_request
+bring shampoo pleez,toiletries_request
+brng shampoo please,toiletries_request
+things to do,concierge_general
+thingsto do,concierge_general
+sigiriya day trip,concierge_general
+soap ekak ona please,toiletries_request
+soap ekak ona pleas,toiletries_request
+soap ekak ona pls,toiletries_request
+leaking,maintenance
+grilled fish,food_order
+grilledfish,food_order
+iwant soap,toiletries_request
+i need too towers,towel_request
+need too towers,towel_request
+ineed too towers,towel_request
+checkout karanna ona,checkout_billing
+chckout karanna ona,checkout_billing
+espresso,food_order
+ride needed,concierge_taxi
+rideneeded,concierge_taxi
+make room cooler,temperature_control
+makeroom cooler,temperature_control
+i would like to request housekeeping service,room_cleaning
+iwould like to request housekeeping service,room_cleaning
+i wud like to request housekeeping service,room_cleaning
+i wold like to requet housekeeping service,room_cleaning
+tidy room,room_cleaning
+tidyroom,room_cleaning
+extra pillows thiyanna please,pillow_request
+extra pillows thiyanna pleas,pillow_request
+extrapillows thiyanna please,pillow_request
+extra pillows thiyanna pls,pillow_request
+don't enter my room,do_not_disturb
+don'tenter my room,do_not_disturb
+don't ener my room,do_not_disturb
+don't eter my room,do_not_disturb
+fresh towels want no,towel_request
+freshtowels want no,towel_request
+i need two towels,towel_request
+i want two towels,towel_request
+ineed two towels,towel_request
+need two towels,towel_request
+hairdryer please,misc_request
+hairdryerplease,misc_request
+hairdryer pleez,misc_request
+too paste please,toiletries_request
+toopaste please,toiletries_request
+too paste pleez,toiletries_request
+turn off ceiling light,lighting_control
+turnoff ceiling light,lighting_control
+stay one more night,checkout_billing
+stayone more night,checkout_billing
+bathroom stuff,toiletries_request
+menu,food_order
+extra pillows please,pillow_request
+extra pillows pleez,pillow_request
+extra pilos please,pillow_request
+neighbors loud music please,noise_complaint
+neighborsloud music please,noise_complaint
+neighbos loud music please,noise_complaint
+neighbors loud music pleas,noise_complaint
+bring me some towers,towel_request
+brng me some towers,towel_request
+bringme some towers,towel_request
+get me some towers,towel_request
+need towels,towel_request
+needtowels,towel_request
+shaving cream,toiletries_request
+shavingcream,toiletries_request
+urgent repair needed,maintenance
+may i have restaurant recommendations please,concierge_general
+may i have resturant recommendatins please,concierge_general
+mayi have restaurant recommendations please,concierge_general
+may i have restaurant recommendations pls,concierge_general
+all bathroom amenities,toiletries_request
+allbathroom amenities,toiletries_request
+all bathroom amenitis,toiletries_request
+iwant shower jell,toiletries_request
+i want showr jell,toiletries_request
+could i get some towels,towel_request
+could i get some towls,towel_request
+i need more towels please,towel_request
+i need more towels pleas,towel_request
+ineed more towels please,towel_request
+i need more towels pleez,towel_request
+adjust the temperature,temperature_control
+adjustthe temperature,temperature_control
+adjust the temperatue,temperature_control
+i need a doctor please,emergency
+i need doctor please,emergency
+ineed a doctor please,emergency
+i need a doctor pleez,emergency
+i'd like housekeeping service,room_cleaning
+i'd like housekeeping servie,room_cleaning
+i'd like housekeeping servis,room_cleaning
+hairdryer,misc_request
+late night snack,food_order
+late night snak,food_order
+latenight snack,food_order
+i need sum food,food_order
+ineed sum food,food_order
+need sum food,food_order
+maid,room_cleaning
+dry clean,laundry_service
+dryclean,laundry_service
+three wheeler,concierge_taxi
+i want extra pillows,pillow_request
+i want etra pillows,pillow_request
+i want extra pilos,pillow_request
+i need conditioner,toiletries_request
+i need condiioner,toiletries_request
+ineed conditioner,toiletries_request
+what time is breakfast please,concierge_general
+what time is breakfat please,concierge_general
+whattime is breakfast please,concierge_general
+what time is breakfast pls,concierge_general
+i'm starving please,food_order
+i'm starving pls,food_order
+i'm sarving please,food_order
+hand sanitizer please,toiletries_request
+hand sanitizer pleez,toiletries_request
+hand sanitizer pleas,toiletries_request
+one more night please,checkout_billing
+onemore night please,checkout_billing
+one more niht please,checkout_billing
+taxi to train station,concierge_taxi
+taxito train station,concierge_taxi
+taxi to tain station,concierge_taxi
+lights thiyanna please,lighting_control
+lights thiyanna pleas,lighting_control
+lights thiyanna pls,lighting_control
+my room is messy,room_cleaning
+tea please,food_order
+tea pleez,food_order
+tea pls,food_order
+lunch for two,food_order
+clean my room and change sheets,room_cleaning
+cleanmy room and change sheets,room_cleaning
+i want body loton,toiletries_request
+iwant body lotion,toiletries_request
+hungry,food_order
+leaking please,maintenance
+leakingplease,maintenance
+leaking pleas,maintenance
+leaking pls,maintenance
+press my clothes please,laundry_service
+pres my cloths please,laundry_service
+press my clothes pls,laundry_service
+tv remote not responding,maintenance
+tv remote not rsponding,maintenance
+tv remte not responding,maintenance
+i need directions please,concierge_general
+i need directions pls,concierge_general
+i need directions pleas,concierge_general
+need directions please,concierge_general
+could u arrange transportation,concierge_taxi
+could u arange transportation,concierge_taxi
+could u arrange transportaton,concierge_taxi
+could arrange transportation,concierge_taxi
+could arrange transport,concierge_taxi
+could arange transportation,concierge_taxi
+cud you arrange transport,concierge_taxi
+cud you arange transporttion,concierge_taxi
+canu quiet them down,noise_complaint
+can quiet them down,noise_complaint
+could you quiet them down,noise_complaint
+could u quiet them down,noise_complaint
+couldyou quiet them down,noise_complaint
+skipservic,do_not_disturb
+hangers few,misc_request
+i would like to adjust the,lighting_control
+i would like adjust,lighting_control
+i would lik to adjust the,lighting_control
+i wud like to adjust the,lighting_control
+i like to adjust the lighting,lighting_control
+i like adjust lighting,lighting_control
+i wud like adjust lighting,lighting_control
+iwud like to adjust the lighting,lighting_control
+i wud like to adjust the lihting,lighting_control
+quiet karanna,noise_complaint
+quiet karanna pleas,noise_complaint
+quietkaranna pleas,noise_complaint
+bring me,pillow_request
+get me,pillow_request
+bringme,pillow_request
+bringpillows,pillow_request
+get me pillows,pillow_request
+get me pilos,pillow_request
+getme pillows,pillow_request
+turn off,lighting_control
+turnoff,lighting_control
+switch off lights,lighting_control
+swtch off lights,lighting_control
+can i get,misc_request
+can get ice,misc_request
+canget ice,misc_request
+laundry servic want,laundry_service
+laundryservic want,laundry_service
+door lock,maintenance
+wake me at half past,wake_up_call
+wakeme at half past,wake_up_call
+send up some towls,towel_request
+sendup some towls,towel_request
+send up some,towel_request
+sendup some,towel_request
+may i request room cleaning,room_cleaning
+mayi request room cleaning,room_cleaning
+may request room cleaning service,room_cleaning
+may request room cleaning servic,room_cleaning
+may request room cleaning servis,room_cleaning
+very no need ac please,temperature_control
+very no need ac pleas,temperature_control
+very no need ac pleez,temperature_control
+veryno need ac please,temperature_control
+very hot no need ac pls,temperature_control
+veryhot no need ac pls,temperature_control
+veryhot no need ac pleas,temperature_control
+turn on the,lighting_control
+turn the,lighting_control
+switch on the lamb,lighting_control
+swtch on the lamb,lighting_control
+sick feeling,emergency
+housekeeping pleas,room_cleaning
+switch off the lamb,lighting_control
+switchoff the lamb,lighting_control
+turn off the,lighting_control
+turnoff the,lighting_control
+quiet pls,noise_complaint
+chest pain,emergency
+chestpain,emergency
+can get body wash,toiletries_request
+can i get body,toiletries_request
+pool location pls,concierge_general
+i a wake up call,wake_up_call
+ia wake up call,wake_up_call
+i want a wake up,wake_up_call
+i want wake up,wake_up_call
+iwant a wake up,wake_up_call
+don't my room,do_not_disturb
+don'tmy room,do_not_disturb
+don't clean my,do_not_disturb
+don'tclean my,do_not_disturb
+couple of,pillow_request
+coupleof,pillow_request
+may i file a noise,noise_complaint
+mayi file a noise,noise_complaint
+may i file noise,noise_complaint
+may file a noise complaint,noise_complaint
+may file a nise complaint,noise_complaint
+may file noise complaint,noise_complaint
+may file a noise cmplaint,noise_complaint
+wake call want 8 am,wake_up_call
+wakecall want 8 am,wake_up_call
+wake up call want 8,wake_up_call
+turn the lamp,lighting_control
+the tap is leaking pleas,maintenance
+the tap is leaking plas,maintenance
+thetap is leaking pleas,maintenance
+the is leaking please,maintenance
+theis leaking please,maintenance
+the is leaking pleas,maintenance
+the tap is leaking pls,maintenance
+the tap is leakng pls,maintenance
+thetap is leaking pls,maintenance
+i want my room,room_cleaning
+iwant my room,room_cleaning
+i my room cleaned,room_cleaning
+i my room claned,room_cleaning
+i my room cleaed,room_cleaning
+book to air port please,concierge_taxi
+bookto air port please,concierge_taxi
+book to air port pleez,concierge_taxi
+book to air port pls,concierge_taxi
+book taxi to air port pls,concierge_taxi
+book taxi air port pls,concierge_taxi
+i would like to request additional,pillow_request
+i would like request additional,pillow_request
+iwould like to request additional,pillow_request
+i would lik to request additional pillows,pillow_request
+i wuld lik to requst additional pillows,pillow_request
+i would lik to request additional pillws,pillow_request
+i would like to reuest additional pilos,pillow_request
+i wud like to request additional pilos,pillow_request
+i like to request additional pillows,pillow_request
+i like request additional pillows,pillow_request
+ilike to request additional pillows,pillow_request
+i like to request additional pilos,pillow_request
+room srvic menu,food_order
+plumbing problem pls,maintenance
+plmbing prblem pls,maintenance
+extendtwo days,checkout_billing
+i want firm pillows,pillow_request
+iwant firm pillows,pillow_request
+i firm pillows,pillow_request
+ifirm pillows,pillow_request
+need firm pillows,pillow_request
+needfirm pillows,pillow_request
+can i get ice pleas,misc_request
+can get ice please,misc_request
+can get ice pls,misc_request
+can get ice pleas,misc_request
+can get some tolls,towel_request
+canget some tolls,towel_request
+checkout pleas,checkout_billing
+check out,checkout_billing
+no houskeeping this morning pleas,do_not_disturb
+nohousekeeping this morning pleas,do_not_disturb
+no this morning please,do_not_disturb
+no this morning pls,do_not_disturb
+nothis morning please,do_not_disturb
+no housekeeping this morning pls,do_not_disturb
+can get an extra blanket,blanket_request
+can get an extra blankit,blanket_request
+canget an extra blanket,blanket_request
+can get extra blanket,blanket_request
+can i get an extra,blanket_request
+cani get an extra,blanket_request
+can i get an etra,blanket_request
+may request late checkout,checkout_billing
+may reqest late checkout,checkout_billing
+clean tomorrow morning,room_cleaning
+clean tomorrow mrning,room_cleaning
+wake up at 7,wake_up_call
+wakeup at 7,wake_up_call
+wake up 7,wake_up_call
+could prepare my final bill,checkout_billing
+couldprepare my final bill,checkout_billing
+could prepae my fnal bill,checkout_billing
+culd prepare my finl bill,checkout_billing
+cud you preare my final bill,checkout_billing
+could you prepare my final,checkout_billing
+could you prepare my fnal,checkout_billing
+cud you prepare my final,checkout_billing
+could u prepare my final,checkout_billing
+extratowls,towel_request
+i need,toiletries_request
+ineed,toiletries_request
+need,toiletries_request
+i want,toiletries_request
+i lost my,emergency
+send up,pillow_request
+i the receipt,checkout_billing
+i the rceipt,checkout_billing
+need the receipt,checkout_billing
+need the recept,checkout_billing
+need the reeipt,checkout_billing
+needthe receipt,checkout_billing
+i need the,checkout_billing
+i want the,checkout_billing
+need the,checkout_billing
+i need laundry,laundry_service
+need laundry,laundry_service
+i need lundry,laundry_service
+i need laundry seric,laundry_service
+need laundry servic,laundry_service
+clean room and make,room_cleaning
+could you pleas turn on the lights,lighting_control
+could u pleas turn on the lights,lighting_control
+could you pleas turn the lights,lighting_control
+could you pls turn on the lights,lighting_control
+coud you pls turn on the ligts,lighting_control
+could you pls turn lights,lighting_control
+could you pls turnon the lights,lighting_control
+could you please turn the lights,lighting_control
+could u please turn the lights,lighting_control
+could you pls turn the lights,lighting_control
+cud you please turn on the lights,lighting_control
+cud you plase turn on the lights,lighting_control
+cud you please turnon the lights,lighting_control
+cud you pleez turn on the lights,lighting_control
+call a cab,concierge_taxi
+calla cab,concierge_taxi
+i want house keeping,room_cleaning
+iwant house keeping,room_cleaning
+i need house,room_cleaning
+need house,room_cleaning
+ineed house,room_cleaning
+i want house,room_cleaning
+i house keeping,room_cleaning
+ihouse keeping,room_cleaning
+i need,emergency
+ineed,emergency
+need,emergency
+i want,emergency
+get a car,concierge_taxi
+get me a,concierge_taxi
+privacy whole day,do_not_disturb
+privacywhole day,do_not_disturb
+privacy whle day,do_not_disturb
+where is galle,concierge_general
+whereis galle,concierge_general
+the is broken,maintenance
+theis broken,maintenance
+three soft,pillow_request
+threesoft,pillow_request
+warm up the,temperature_control
+warmup the,temperature_control
+shopping malls,concierge_general
+air making noise,maintenance
+air makng noise,maintenance
+air conditioner making,maintenance
+airconditioner making,maintenance
+could you clean the room,room_cleaning
+could you clean room,room_cleaning
+could u clean the room,room_cleaning
+can u clean the room,room_cleaning
+can u cean the room,room_cleaning
+canu clean the room,room_cleaning
+can clean the room,room_cleaning
+canclean the room,room_cleaning
+can cean the room,room_cleaning
+get me a blanket,blanket_request
+get me blanket,blanket_request
+getme a blanket,blanket_request
+bring me a,blanket_request
+brig me a,blanket_request
+bringme a,blanket_request
+toilet and tissues,toiletries_request
+toiletand tissues,toiletries_request
+next loud ah,noise_complaint
+nextloud ah,noise_complaint
+can i order,food_order
+can order breakfast,food_order
+i'm checking,checkout_billing
+cleanroom fast fast,room_cleaning
+clean the room fast,room_cleaning
+cleanthe room fast,room_cleaning
+clan the room fast,room_cleaning
+clean room fast,room_cleaning
+tomorrow morning 6 am,wake_up_call
+tomorrowmorning 6 am,wake_up_call
+tomorow morning 6 am,wake_up_call
+cud you brng extra bedding,blanket_request
+cudyou bring extra bedding,blanket_request
+could bring extra bedding,blanket_request
+couldbring extra bedding,blanket_request
+could you bring extra,blanket_request
+cud you bring extra,blanket_request
+couldyou bring extra,blanket_request
+call at 6:15,wake_up_call
+laundry pickup,laundry_service
+laundrypickup,laundry_service
+two more pilos,pillow_request
+two more pils,pillow_request
+twomore pilos,pillow_request
+two more,pillow_request
+twomore,pillow_request
+cleaning want,room_cleaning
+cleaningwant,room_cleaning
+i want laundry,laundry_service
+i want laundy,laundry_service
+iwant laundry servic,laundry_service
+i want laundry servc,laundry_service
+i laundry service,laundry_service
+i laundry srvice,laundry_service
+i laundry servis,laundry_service
+do not,do_not_disturb
+donot,do_not_disturb
+iwant transport,concierge_taxi
+i want transort,concierge_taxi
+needtransport,concierge_taxi
+i need,concierge_taxi
+ineed,concierge_taxi
+need,concierge_taxi
+i want,concierge_taxi
+when the pool close,concierge_general
+whenthe pool close,concierge_general
+when pool close,concierge_general
+no this morning,do_not_disturb
+nothis morning,do_not_disturb
+getme a burger and fries,food_order
+get me a burer and fries,food_order
+bring me a burger and,food_order
+bring me burger and,food_order
+get me a burger and,food_order
+bringme a burger and,food_order
+bring a burger and fries,food_order
+brig a burger and fries,food_order
+bring burger and fries,food_order
+i toilet paper,toiletries_request
+itoilet paper,toiletries_request
+iwant toilet paper,toiletries_request
+i want toiet pper,toiletries_request
+i need toilet,toiletries_request
+ineed toilet,toiletries_request
+need toilet,toiletries_request
+checkout ona please,checkout_billing
+checkout ona pls,checkout_billing
+checkout ona pleas,checkout_billing
+checkout karanna ona pleas,checkout_billing
+checkout kaanna ona pleas,checkout_billing
+checkoutkaranna ona pleas,checkout_billing
+checkoutkaranna ona pls,checkout_billing
+checkot karanna ona pls,checkout_billing
+light not,maintenance
+lightnot,maintenance
+tv is,maintenance
+iron and ironing,misc_request
+ironand ironing,misc_request
+make it,temperature_control
+its too,noise_complaint
+can get shampoo,toiletries_request
+can get sampoo,toiletries_request
+canget shampoo,toiletries_request
+can send,food_order
+cansend,food_order
+three or four towls,towel_request
+threeor four towls,towel_request
+three or four,towel_request
+some extra,towel_request
+someextra,towel_request
+soap pleas,toiletries_request
+dim the,lighting_control
+dimthe,lighting_control
+i would lik directions to locl atractions,concierge_general
+iwould lik directions to local attractions,concierge_general
+i would like directions to local,concierge_general
+iwould like directions to local,concierge_general
+i wuld like directions to local,concierge_general
+i would lik directions to local,concierge_general
+i like directions to local attractions,concierge_general
+i like directions to local attracions,concierge_general
+ilike directions to local attractions,concierge_general
+dinner ona please,food_order
+dinner ona plese,food_order
+dinner ona pls,food_order
+dinnerekak ona pls,food_order
+dinner ekak ona pleas,food_order
+dinnerekak ona pleas,food_order
+i want to,towel_request
+i want towls,towel_request
+i want to twls,towel_request
+people being loud,noise_complaint
+people bing loud,noise_complaint
+peoplebeing loud,noise_complaint
+soft want ah,pillow_request
+soft pillows want,pillow_request
+softpillows want,pillow_request
+soft pilos want,pillow_request
+soft pilos want ah,pillow_request
+soft pils want ah,pillow_request
+wash and iron plas,laundry_service
+washand iron pleas,laundry_service
+wash iron please,laundry_service
+washiron please,laundry_service
+wash iron plese,laundry_service
+washand iron pls,laundry_service
+i need,do_not_disturb
+ineed,do_not_disturb
+need,do_not_disturb
+i want,do_not_disturb
+i can't sleep,noise_complaint
+i can't slep,noise_complaint
+ican't sleep,noise_complaint
+turn off ceilig lght pleas,lighting_control
+turn off ceiling lght pleas,lighting_control
+turnoff ceiling light pleas,lighting_control
+turnoff ceiling light pls,lighting_control
+turn ceiling light pls,lighting_control
+turn ceiling light please,lighting_control
+turn ceiling light pease,lighting_control
+turnceiling light please,lighting_control
+turn ceiling light pleez,lighting_control
+bring toilet,toiletries_request
+rome service,food_order
+rome servic,food_order
+rome servis,food_order
+romeservice,food_order
+rome servic pleez,food_order
+rome seric pease,food_order
+rome service pleas,food_order
+rome service ples,food_order
+rome servis pleas,food_order
+taxi to,concierge_taxi
+full laundry,laundry_service
+tempratureadjust karanna,temperature_control
+could i order a,food_order
+couldi order a,food_order
+cold i order a,food_order
+wake at seven,wake_up_call
+wakeat seven,wake_up_call
+wake me at,wake_up_call
+its noisy please,noise_complaint
+its noisy pls,noise_complaint
+its noisy pleas,noise_complaint
+itstoo noisy pleas,noise_complaint
+few tols neded,towel_request
+fewtowls needed,towel_request
+tv not working send someone pls,maintenance
+tv not woking send someone pls,maintenance
+tv working send someone please,maintenance
+tvworking send someone please,maintenance
+tv workng send someoe please,maintenance
+hand wash,laundry_service
+what are the,concierge_general
+what the attractions,concierge_general
+what the attrctions,concierge_general
+what the attractins,concierge_general
+morning call pls,wake_up_call
+mornng call pls,wake_up_call
+heavy blankit pleas,blanket_request
+heavy banket pleas,blanket_request
+heavy blanket pls,blanket_request
+heavy blankt pls,blanket_request
+heavy banket pls,blanket_request
+heavy blankit pls,blanket_request
+i want more towls,towel_request
+need more towls,towel_request
+i more towels,towel_request
+imore towels,towel_request
+shower ekka,maintenance
+showerekka,maintenance
+full room cleaning pls,room_cleaning
+fullroom cleaning pls,room_cleaning
+full cleaning please,room_cleaning
+full cleaning pleas,room_cleaning
+full cleaning pleez,room_cleaning
+full room cleaning pleas,room_cleaning
+full room ceaning pleas,room_cleaning
+get me diner,food_order
+bring me,food_order
+get me,food_order
+bringme,food_order
+wake me at 7,wake_up_call
+wakeme at 7,wake_up_call
+air conditioned,concierge_taxi
+heating high lower it,temperature_control
+heating high lwer it,temperature_control
+heating too high lower,temperature_control
+heatingtoo high lower,temperature_control
+hating too high lower,temperature_control
+pickup laundry pls,laundry_service
+pickuplaundry pls,laundry_service
+pickuplaundry pleas,laundry_service
+picup laundry pleas,laundry_service
+pickup landry peas,laundry_service
+razors pls,toiletries_request
+ironing board pls,misc_request
+ironing bard pls,misc_request
+ironing board,misc_request
+ironingboard,misc_request
+i want another blanket,blanket_request
+iwant another blanket,blanket_request
+i want another blaket,blanket_request
+i want another blankit,blanket_request
+i need another,blanket_request
+need another,blanket_request
+i want another,blanket_request
+i another blanket,blanket_request
+ianother blanket,blanket_request
+i another blankit,blanket_request
+i need an,misc_request
+ineed an,misc_request
+i want an,misc_request
+i an iron,misc_request
+i want an iron,misc_request
+iwant an iron,misc_request
+needan iron,misc_request
+cani get more pilos,pillow_request
+can get more pillows,pillow_request
+canget more pillows,pillow_request
+could u send up the menu,food_order
+culd u send up the menu,food_order
+could u send up menu,food_order
+coud u send up the menu,food_order
+could you send up the,food_order
+could you send up,food_order
+cud you send up the,food_order
+couldyou send up the,food_order
+cudyou send up the menu,food_order
+face wash pleas,toiletries_request
+face wash pls,toiletries_request
+facewash pls,toiletries_request
+it's too,temperature_control
+it'stoo,temperature_control
+i want,food_order
+need soap and shmpoo,toiletries_request
+needsoap and shampoo,toiletries_request
+i soap and shampoo,toiletries_request
+i wud like to request an additional blanket,blanket_request
+iwud like to request an additional blanket,blanket_request
+i wud like to request an additional blankit,blanket_request
+i wud like to request an additioal blanket,blanket_request
+i like to request an additional blanket,blanket_request
+ilike to request an additional blanket,blanket_request
+i like to request an additionl blanket,blanket_request
+i would like to request an additional,blanket_request
+i would like request additional,blanket_request
+i would lik to request an additional,blanket_request
+7:45 wake up,wake_up_call
+7:45wake up,wake_up_call
+7:45 up call,wake_up_call
+7:45up call,wake_up_call
+what is breakfast,concierge_general
+whatis breakfast,concierge_general
+what time is,concierge_general
+whattime is,concierge_general
+iwant another pilo,pillow_request
+i want another,pillow_request
+cleanthe rome pls,room_cleaning
+clen the rome pls,room_cleaning
+clean the rome,room_cleaning
+cleanthe rome,room_cleaning
+cean the rome,room_cleaning
+cleanthe rome pleas,room_cleaning
+clean the rome ples,room_cleaning
+towel ekak,towel_request
+towelekak,towel_request
+towl ekak,towel_request
+towlekak ona,towel_request
+could you pls call my room at 7 am,wake_up_call
+cud you pls call my room at 7 am,wake_up_call
+couldyou pls call my room at 7 am,wake_up_call
+cud you please call my room at 7 am,wake_up_call
+cudyou please call my room at 7 am,wake_up_call
+cud you pleas call my room at 7 am,wake_up_call
+could you pleas call my room 7 am,wake_up_call
+couldyou pleas call my room at 7 am,wake_up_call
+pleas send help immediately,emergency
+ples send help imediately,emergency
+pleas send help immeditely,emergency
+please send help,emergency
+pleasesend help,emergency
+pleas send help,emergency
+sameday servic,laundry_service
+wash and,laundry_service
+washand,laundry_service
+pls make room clean,room_cleaning
+plsmake room clean,room_cleaning
+please make room,room_cleaning
+pleez make room,room_cleaning
+pls make room,room_cleaning
+pleas make room,room_cleaning
+please room clean,room_cleaning
+pleez room clean,room_cleaning
+please room clen,room_cleaning
+could i get,misc_request
+i'd like to,food_order
+i'dlike to,food_order
+two towels send,towel_request
+two towls send,towel_request
+two twels send,towel_request
+twotowels send,towel_request
+two three towels,towel_request
+two tree towels,towel_request
+two three towls,towel_request
+morning 7 call,wake_up_call
+morning7 call,wake_up_call
+cold feeling need,temperature_control
+cold feeing need,temperature_control
+i a doctor,emergency
+i need a,emergency
+need a,emergency
+ineed a,emergency
+i want a doctor,emergency
+iwant a doctor,emergency
+i want doctor,emergency
+no cleaning pleas,do_not_disturb
+nocleaning pleas,do_not_disturb
+nocleaning pls,do_not_disturb
+no today please,do_not_disturb
+no today pleae,do_not_disturb
+no today pleez,do_not_disturb
+no today pls,do_not_disturb
+no servic today pleez,do_not_disturb
+no servic today pls,do_not_disturb
+no service today pleas,do_not_disturb
+no servie today pleas,do_not_disturb
+noservice today pleas,do_not_disturb
+no servis today pleas,do_not_disturb
+lower temperature,temperature_control
+lowertemperature,temperature_control
+lower temp,temperature_control
+lower temprature pls,temperature_control
+lower temp pls,temperature_control
+lowertemperature pleas,temperature_control
+lower temperatue plas,temperature_control
+lower temp pleas,temperature_control
+morning at 6,wake_up_call
+moning at 6,wake_up_call
+morningat 6,wake_up_call
+night light pleas,lighting_control
+nightlight pleas,lighting_control
+niht light pleas,lighting_control
+night light,lighting_control
+for towels pleas,towel_request
+fortowels pleas,towel_request
+for towls pleas,towel_request
+for towls pleez,towel_request
+for towels pls,towel_request
+for towls pls,towel_request
+fortowels pls,towel_request
+large car,concierge_taxi
+largecar,concierge_taxi
+morehangers pls,misc_request
+more hangers,misc_request
+morehangers,misc_request
+i would like to check,checkout_billing
+iwould like to check,checkout_billing
+i would like to ceck,checkout_billing
+i wud like check out,checkout_billing
+i wud like to chek out,checkout_billing
+i would lik check out,checkout_billing
+need tourist information,concierge_general
+need tourist iformation,concierge_general
+need tourist informtion,concierge_general
+i tourist information,concierge_general
+itourist information,concierge_general
+i need tourist,concierge_general
+i want tourist,concierge_general
+need tourist,concierge_general
+ineed tourist,concierge_general
+good seafood,concierge_general
+dress karanna ona,laundry_service
+dress karana ona,laundry_service
+i get my room cleaned,room_cleaning
+iget my room cleaned,room_cleaning
+i get my room ceaned,room_cleaning
+press my,laundry_service
+3 am noise,noise_complaint
+3 am noie,noise_complaint
+3 noise complaint,noise_complaint
+3 noie complaint,noise_complaint
+3noise complaint,noise_complaint
+don't in no,do_not_disturb
+do't in no,do_not_disturb
+don'tin no,do_not_disturb
+i need shampoo pleas,toiletries_request
+ineed shampoo pleas,toiletries_request
+need shampoo pleas,toiletries_request
+iwant shampoo please,toiletries_request
+i want shampoo pleas,toiletries_request
+i want shampoo pls,toiletries_request
+i need shampoo pls,toiletries_request
+need shampoo pls,toiletries_request
+ineed shampoo pls,toiletries_request
+i shampoo please,toiletries_request
+ishampoo please,toiletries_request
+i shampoo pleas,toiletries_request
+i sampoo pleae,toiletries_request
+i two tells,towel_request
+itwo tells,towel_request
+i need two,towel_request
+ineed two,towel_request
+i want two,towel_request
+need two tells,towel_request
+need two tlls,towel_request
+needtwo tells,towel_request
+need two tels,towel_request
+toothbrush and toothpaste,toiletries_request
+toothbrushand toothpaste,toiletries_request
+toothbrush and toothpase pls,toiletries_request
+toohbrush and tothpaste pleas,toiletries_request
+toothbrush toothpaste please,toiletries_request
+toothbrushtoothpaste please,toiletries_request
+toothbrush toothpaste pleas,toiletries_request
+fullbrightness pls,lighting_control
+full brghtness pls,lighting_control
+full brightness,lighting_control
+fullbrightness,lighting_control
+needfood,food_order
+i need,food_order
+ineed,food_order
+need,food_order
+clean room later,room_cleaning
+cleanroom later,room_cleaning
+to more pilos,pillow_request
+tomore pilos,pillow_request
+to more,pillow_request
+tomore,pillow_request
+return by evening pls,laundry_service
+rturn by evening pls,laundry_service
+returnby evening pls,laundry_service
+return by evening pleas,laundry_service
+return by evenng peas,laundry_service
+returnby evening pleas,laundry_service
+more blankets pls,blanket_request
+more blankits pls,blanket_request
+tomorrow 8 am,wake_up_call
+tomorrw 8 am,wake_up_call
+tomorrow8 am,wake_up_call
+towelspls,towel_request
+towels pleas,towel_request
+towls pleas,towel_request
+could you please bring extra,towel_request
+could you pleas bring extra,towel_request
+cold you plese bring extra,towel_request
+could you please bing exta,towel_request
+could u please bring extra towls,towel_request
+cud you please bring extra towls,towel_request
+couldyou please bring extra towls,towel_request
+could you pleas bring extra towels,towel_request
+could u pleas bring extra towels,towel_request
+cud you pleas bring extra towels,towel_request
+can get toilet paper,toiletries_request
+can get toilt paper,toiletries_request
+need extra pilos,pillow_request
+need extra pillows,pillow_request
+needextra pillows,pillow_request
+need exra pilows,pillow_request
+bring an iron,misc_request
+bringan iron,misc_request
+getme an iron,misc_request
+wake up at sex,wake_up_call
+wakeup at sex,wake_up_call
+turn ac and make it cold,temperature_control
+turnac and make it cold,temperature_control
+turn on ac and make it,temperature_control
+turn ac and make it,temperature_control
+i like to request laundry service,laundry_service
+ilike to request laundry service,laundry_service
+i like to request laundry servic,laundry_service
+i would like to request laundry servic,laundry_service
+i would like request laundry servic,laundry_service
+i wud like to request laundry servic,laundry_service
+i would lik to request laundry servic,laundry_service
+i would like to request laundry,laundry_service
+i would lik to request laundry,laundry_service
+i would like request laundry,laundry_service
+i wud like to request laundry,laundry_service
+bathroom light,lighting_control
+i my room clean,room_cleaning
+imy room clean,room_cleaning
+i my room cean,room_cleaning
+must room today itself,room_cleaning
+must room today itelf,room_cleaning
+must clean room today,room_cleaning
+mustclean room today,room_cleaning
+i need a,blanket_request
+need a,blanket_request
+ineed a,blanket_request
+i want a blanket,blanket_request
+i want a blankt,blanket_request
+i want blanket,blanket_request
+needa blanket,blanket_request
+need a blanet,blanket_request
+where gym no,concierge_general
+i a razor,toiletries_request
+i a rzor,toiletries_request
+ia razor,toiletries_request
+i want a,toiletries_request
+arrange a,concierge_taxi
+range a,concierge_taxi
+arange a,concierge_taxi
+arange a taxi,concierge_taxi
+arangea taxi,concierge_taxi
+arnge a taxi,concierge_taxi
+i need fresh,towel_request
+i need freh,towel_request
+i want fresh,towel_request
+need fresh towels,towel_request
+needfresh towels,towel_request
+i need fresh twls,towel_request
+need fresh towls,towel_request
+i want fresh towls,towel_request
+i need,misc_request
+ineed,misc_request
+need,misc_request
+i want,misc_request
+need one pillow,pillow_request
+needone pillow,pillow_request
+need one pilo,pillow_request
+i one pillow,pillow_request
+i one pilow,pillow_request
+ione pillow,pillow_request
+i one pilo,pillow_request
+i need one,pillow_request
+ineed one,pillow_request
+need one,pillow_request
+can someone clean my,room_cleaning
+cansomeone clean my,room_cleaning
+i'm need a blanket,blanket_request
+i'mneed a blanket,blanket_request
+i'm need blanket,blanket_request
+can clean the rome,room_cleaning
+can clean rome,room_cleaning
+could you clean the rome,room_cleaning
+could u clean the rome,room_cleaning
+cud you clean the rome,room_cleaning
+could you clean rome,room_cleaning
+canu clean the rome,room_cleaning
+i like to report a noise disturbance,noise_complaint
+i like to report a noise distrbance,noise_complaint
+ilike to report a noise disturbance,noise_complaint
+i like report noise disturbance,noise_complaint
+i would lik report noise disturbance,noise_complaint
+i wold lik to report a noie disturbance,noise_complaint
+i would like to report a noise,noise_complaint
+i would like report noise,noise_complaint
+i wuld like to report a noise,noise_complaint
+i wud like to report a nose disturbace,noise_complaint
+i wud like report noise disturbance,noise_complaint
+can i checkout,checkout_billing
+cani checkout,checkout_billing
+can checkout late,checkout_billing
+hungry no can u send food,food_order
+hugry no can u send food,food_order
+hungy no can u send food,food_order
+hungry can you send food,food_order
+hungry can u send food,food_order
+hunry can you send food,food_order
+hungry no can you send,food_order
+hungry no can u send,food_order
+hungry no canu send,food_order
+hungry no could you send food,food_order
+hungry no could u send food,food_order
+hungryno could you send food,food_order
+hngry no could you send food,food_order
+may i request urgent repair,maintenance
+may i reuest urgent repair,maintenance
+mayi request urgent repair,maintenance
+may i request urgent rpair servic,maintenance
+mayi request urgent repair servic,maintenance
+temprature,temperature_control
+business center,concierge_general
+businesscenter,concierge_general
+turn the lights,lighting_control
+turnthe lights,lighting_control
+switch on the lights,lighting_control
+switchon the lights,lighting_control
+two three,pillow_request
+twothree,pillow_request
+two thee pilos,pillow_request
+twothree pilos,pillow_request
+bathroom items,toiletries_request
+may have additional hangers,misc_request
+may have additional hanges,misc_request
+i to get my room cleaned,room_cleaning
+ito get my room cleaned,room_cleaning
+i want to get my room,room_cleaning
+i want get my room,room_cleaning
+may request brighter lighting,lighting_control
+mayrequest brighter lighting,lighting_control
+may requst brighter lighting,lighting_control
+may rquest brightr lighing,lighting_control
+may i request brighter,lighting_control
+may i request brigter,lighting_control
+mayi request brighter,lighting_control
+conference room,concierge_general
+conferenceroom,concierge_general
+bathroom light,maintenance
+pick up laundry,laundry_service
+pick up launry,laundry_service
+pick up lundry pls,laundry_service
+pick laundry please,laundry_service
+pick laundry pease,laundry_service
+pick laundry pleas,laundry_service
+pick laundry pls,laundry_service
+pick up laundy pleas,laundry_service
+pick up laundry peas,laundry_service
+need a hairdryer,misc_request
+need a haidryer,misc_request
+i need a,misc_request
+need a,misc_request
+ineed a,misc_request
+i a hairdryer,misc_request
+ia hairdryer,misc_request
+could arrange laundry pickup,laundry_service
+could arange laundry pickup,laundry_service
+cold arrange landry pickup,laundry_service
+cud you arrange laundry pickup,laundry_service
+cud you arange laundry pickup,laundry_service
+cud you arrange laudry pickup,laundry_service
+could you arrange laundry,laundry_service
+could you range laundry,laundry_service
+could you arange laundry,laundry_service
+cud you arrange laundry,laundry_service
+freshtowls want no please,towel_request
+fresh towls want no pleez,towel_request
+fresh want no please,towel_request
+fresh want no pleez,towel_request
+fresh want no pleas,towel_request
+fresh towels want no pleas,towel_request
+fresh towls want no pleas,towel_request
+freshtowels want no pleas,towel_request
+freh towels want no pleas,towel_request
+please my room,room_cleaning
+pleasemy room,room_cleaning
+pease my room,room_cleaning
+pleas my room,room_cleaning
+pls clean my room,room_cleaning
+plsclean my room,room_cleaning
+pleasclean my room,room_cleaning
+pick up laundry at 10,laundry_service
+pick up laudry at 10,laundry_service
+pick up laundry 10,laundry_service
+pickup laundry at 10,laundry_service
+key not working,emergency
+this is an emergency,emergency
+this is an emrgency,emergency
+this is emergency,emergency
+this is an emergancy situation,emergency
+this is emergancy situation,emergency
+this is an emergncy situation,emergency
+this an emergency situation,emergency
+thisan emergency situation,emergency
+this emergency situation,emergency
+this an emergancy situation,emergency
+i need,temperature_control
+ineed,temperature_control
+need,temperature_control
+i want,temperature_control
+need ac,temperature_control
+needac,temperature_control
+i can't sleep noise pls,noise_complaint
+i ca't sleep noise pls,noise_complaint
+ican't sleep noise pls,noise_complaint
+i sleep noise please,noise_complaint
+i sleep noie plese,noise_complaint
+i sleep noise pleez,noise_complaint
+i sleep noise pleas,noise_complaint
+i would lik book taxi,concierge_taxi
+iwould lik to book a taxi,concierge_taxi
+i would like to book a,concierge_taxi
+i would lik to book a,concierge_taxi
+i wuld like to book a,concierge_taxi
+i like to book a taxi,concierge_taxi
+i like book taxi,concierge_taxi
+set alarm for 8,wake_up_call
+set alarm 8,wake_up_call
+needtwo brush,toiletries_request
+need two bush,toiletries_request
+i two brush,toiletries_request
+i two brsh,toiletries_request
+i want two brush,toiletries_request
+iwant two brush,toiletries_request
+i would lik privacy please,do_not_disturb
+i would lik privacy pleas,do_not_disturb
+i would lik privacy pls,do_not_disturb
+i would like privacy pleas,do_not_disturb
+i woud like privacy plas,do_not_disturb
+i would like privacy plas,do_not_disturb
+iwould like privacy pleas,do_not_disturb
+i would like privacy pls,do_not_disturb
+i wuld like privacy pls,do_not_disturb
+i wud like privacy please,do_not_disturb
+i wud like privacy pleez,do_not_disturb
+i wud like privacy pls,do_not_disturb
+needa taxi,concierge_taxi
+iwant a taxi,concierge_taxi
+i want taxi,concierge_taxi
+i need a,concierge_taxi
+need a,concierge_taxi
+ineed a,concierge_taxi
+i a taxi,concierge_taxi
+ia taxi,concierge_taxi
+tv too high,noise_complaint
+tvtoo high,noise_complaint
+donot disturb pls,do_not_disturb
+do disturb please,do_not_disturb
+do disturb pls,do_not_disturb
+do disturb pleez,do_not_disturb
+do not disturb plas,do_not_disturb
+donot disturb pleas,do_not_disturb
+leave me,do_not_disturb
+leaveme,do_not_disturb
+another day pleas,checkout_billing
+another day ples,checkout_billing
+no in room,maintenance
+toilet paper finish,toiletries_request
+toiletpaper finish,toiletries_request
+toiet paper finish,toiletries_request
+i like to request an iron,misc_request
+ilike to request an iron,misc_request
+i wud like request iron,misc_request
+i would lik to request an iron,misc_request
+iwould lik to request an iron,misc_request
+i would lik request iron,misc_request
+i would like to request an,misc_request
+i wud like to request an,misc_request
+iwould like to request an,misc_request
+i would like request,misc_request
+i need a,toiletries_request
+need a,toiletries_request
+ineed a,toiletries_request
+i want a toothbrush,toiletries_request
+iwant a toothbrush,toiletries_request
+turn on,temperature_control
+turnon,temperature_control
+turn,temperature_control
+turnac,temperature_control
+switch on ac,temperature_control
+swich on ac,temperature_control
+swith on ac,temperature_control
+full bag please,laundry_service
+full bag pls,laundry_service
+full bag pleas,laundry_service
+full bag pleez,laundry_service
+full laundy bag pls,laundry_service
+full laundry bag pleas,laundry_service
+full laudry bag pleas,laundry_service
+full laundry bag peas,laundry_service
+several towels,towel_request
+several towls,towel_request
+several towls please,towel_request
+severaltowls please,towel_request
+several towls pleas,towel_request
+several towls pls,towel_request
+severaltowels pleas,towel_request
+several towels peas,towel_request
+several towels pls,towel_request
+sevral towels pls,towel_request
+extrafirm pilos,pillow_request
+extra firm,pillow_request
+extrafirm,pillow_request
+four towels pleas,towel_request
+fourtowels pleas,towel_request
+four towls peas,towel_request
+four towls pleas,towel_request
+four towels,towel_request
+fourtowels,towel_request
+four towls,towel_request
+fourtowels pls,towel_request
+four towls pls,towel_request
+four towls please,towel_request
+four towls pleez,towel_request
+wake me,wake_up_call
+wakeme,wake_up_call
+don't come in no pleas,do_not_disturb
+don'tcome in no pleas,do_not_disturb
+dn't come in no pleas,do_not_disturb
+don't come no pleas,do_not_disturb
+don't in no please,do_not_disturb
+don't in no pleez,do_not_disturb
+don't in no plese,do_not_disturb
+don't in no pleas,do_not_disturb
+set ac to,temperature_control
+setac to,temperature_control
+i need another pilo,pillow_request
+i need anoher pilo,pillow_request
+need another pilo,pillow_request
+needanother pillow,pillow_request
+mayi request no housekeeping servic today,do_not_disturb
+may i request no housekeeping servic tody,do_not_disturb
+may i request no housekeeping service,do_not_disturb
+may i request no housekeeping sevice,do_not_disturb
+may i requet no housekeeping service,do_not_disturb
+get me pizza,food_order
+pickme pls,concierge_taxi
+cani get toothpaste pls,toiletries_request
+can i get toothpaste pleas,toiletries_request
+taxi pleas,concierge_taxi
+late night,noise_complaint
+i a hair dryer,misc_request
+ia hair dryer,misc_request
+i hair dryer,misc_request
+i want a hair dryr,misc_request
+i want hair dryer,misc_request
+i want a hair drer,misc_request
+need a hair dryer,misc_request
+need hair dryer,misc_request
+needa hair dryer,misc_request
+plssend soap ah,toiletries_request
+please send soap,toiletries_request
+pleas send soap,toiletries_request
+pleasesend soap,toiletries_request
+please soap ah,toiletries_request
+pleas soap ah,toiletries_request
+pls soap ah,toiletries_request
+pleasesoap ah,toiletries_request
+may have my clothes pressed,laundry_service
+may have my clothes presed,laundry_service
+turndown the heat pleas,temperature_control
+turn down heat pleas,temperature_control
+turn down the heat pls,temperature_control
+turndown the heat pls,temperature_control
+turn down heat pls,temperature_control
+bill pleas,checkout_billing
+billpleas,checkout_billing
+pillow ekak,pillow_request
+pillowekak,pillow_request
+noise at,noise_complaint
+noiseat,noise_complaint
+iwant tourist,concierge_general
+book city,concierge_general
+laundry want please,laundry_service
+laundry want pleez,laundry_service
+laundry want plese,laundry_service
+laundry want pleas,laundry_service
+laundry servic want please,laundry_service
+laundry servic want pls,laundry_service
+laundry servic want pleez,laundry_service
+four firm,pillow_request
+fourfirm,pillow_request
+more pilos send no pls,pillow_request
+more pllows send no pls,pillow_request
+morepillows send no pleas,pillow_request
+more pilows send no pleas,pillow_request
+roomservice pls,food_order
+room servis pls,food_order
+room service pleas,food_order
+roomservice pleas,food_order
+room servic pleas,food_order
+checkut 2 pm,checkout_billing
+checkout at 2,checkout_billing
+chckout at 2,checkout_billing
+the is not working,maintenance
+is not working,maintenance
+theis not working,maintenance
+the ac is not,maintenance
+ac is not,maintenance
+i a warm blanket,blanket_request
+i a warm blankit,blanket_request
+ia warm blanket,blanket_request
+i want a warm,blanket_request
+iwant a warm,blanket_request
+i want warm,blanket_request
+cud you mark this room do not dsturb,do_not_disturb
+cudyou mark this room do not disturb,do_not_disturb
+could mark this room do not disturb,do_not_disturb
+could mark this room do not disurb,do_not_disturb
+couldmark this room do not disturb,do_not_disturb
+could u mark this room do not disturb,do_not_disturb
+couldu mark this room do not disturb,do_not_disturb
+acfast fast,temperature_control
+ac fast on,temperature_control
+more send no,pillow_request
+lightblanket pleas,blanket_request
+lght banket plas,blanket_request
+light blanket,blanket_request
+lightblanket,blanket_request
+may i have more,pillow_request
+mayi have more,pillow_request
+mayi have more pilos,pillow_request
+could i get my,checkout_billing
+couldi get my,checkout_billing
+culd i get my,checkout_billing
+the tap is,maintenance
+thetap is,maintenance
+wake me tomorrow at,wake_up_call
+wake me tomorrow,wake_up_call
+wake me tomorrw at,wake_up_call
+someone my room,room_cleaning
+somene my room,room_cleaning
+get me soap,toiletries_request
+getme soap,toiletries_request
+bring me,toiletries_request
+get me,toiletries_request
+bringme,toiletries_request
+ac is not working pleas,maintenance
+the ac is not working peas,maintenance
+the ac is not workig pleas,maintenance
+ac is not working pls,maintenance
+can i have,towel_request
+can have towels,towel_request
+canhave towels,towel_request
+can have toels,towel_request
+tv working send someone,maintenance
+tv working send somene,maintenance
+skip cleaning,do_not_disturb
+skipcleaning,do_not_disturb
+pool hours pleas,concierge_general
+pool hors pleas,concierge_general
+pool hours pls,concierge_general
+may i request a cab to the,concierge_taxi
+may i requet a cab to the,concierge_taxi
+mayi request a cab to the,concierge_taxi
+may request a cab to the airport,concierge_taxi
+may requst a cab to the airport,concierge_taxi
+may request cab airport,concierge_taxi
+i clothes washed,laundry_service
+i clothes wahed,laundry_service
+iclothes washed,laundry_service
+i clothes wshed,laundry_service
+turn the ac,temperature_control
+clean bath,towel_request
+cleanbath,towel_request
+clean before dinner,room_cleaning
+cleanbefore dinner,room_cleaning
+bright lights dim karanna,lighting_control
+brigt ligts dim karana,lighting_control
+brght lights dim karanna,lighting_control
+send some food,food_order
+send up some,food_order
+sendup some,food_order
+leave alone please,do_not_disturb
+leave alone pls,do_not_disturb
+leave alone pleas,do_not_disturb
+leave me alone pleas,do_not_disturb
+leave me alne pleas,do_not_disturb
+leave me aloe plas,do_not_disturb
+book a,concierge_taxi
+cab for,concierge_taxi
+cabfor,concierge_taxi
+airconditioning pls,temperature_control
+airconditioning pleas,temperature_control
+air conditioning peas,temperature_control
+air conditioning,temperature_control
+ac strong reduce it,temperature_control
+acstrong reduce it,temperature_control
+my is messy please,room_cleaning
+my is messy pleas,room_cleaning
+my is mssy pease,room_cleaning
+my room is messy pleas,room_cleaning
+myroom is messy pleas,room_cleaning
+my room is messy peas,room_cleaning
+my room is mesy pls,room_cleaning
+few clothes to,laundry_service
+i would lik to request bathroom amenities,toiletries_request
+i would lik to requst bathroom amenities,toiletries_request
+iwould lik to request bathroom amenities,toiletries_request
+i woud lik to request bahroom amenities,toiletries_request
+i like to request bathroom amenities,toiletries_request
+ilike to request bathroom amenities,toiletries_request
+i like to request bathroom ameniies,toiletries_request
+i like request bathroom amenities,toiletries_request
+i would like to request bathroom,toiletries_request
+i would lik to request bathroom,toiletries_request
+i would like request bathroom,toiletries_request
+it's too,noise_complaint
+it'stoo,noise_complaint
+three towels,towel_request
+three towls,towel_request
+three towls pls,towel_request
+threetowels pleas,towel_request
+three towls pleas,towel_request
+need a warm blanket,blanket_request
+need warm blanket,blanket_request
+needa warm blanket,blanket_request
+may have bathroom supplies,toiletries_request
+may have bathrom supplies,toiletries_request
+where is,concierge_general
+whereis,concierge_general
+shower has no,maintenance
+showerhas no,maintenance
+shower no pressure,maintenance
+shoer no pressure,maintenance
+showerno pressure,maintenance
+can do my laundry,laundry_service
+could you do my laundry,laundry_service
+couldyou do my laundry,laundry_service
+could u do my laundry,laundry_service
+can you do my,laundry_service
+canyou do my,laundry_service
+can u do my,laundry_service
+may i schedule a morning,wake_up_call
+may i schedule morning,wake_up_call
+mayi schedule a morning,wake_up_call
+may schedule a morning call,wake_up_call
+mayschedule a morning call,wake_up_call
+may schedule morning call,wake_up_call
+ac broken no could you fix,maintenance
+ac broken no cud you fix,maintenance
+acbroken no could you fix,maintenance
+ac broken no could u fix,maintenance
+ac no can you fix,maintenance
+acno can you fix,maintenance
+ac no canu fix,maintenance
+ac no can u fix,maintenance
+ac broken no can u fix,maintenance
+acbroken no can u fix,maintenance
+chicken curry and,food_order
+chickencurry and,food_order
+cicken cury and,food_order
+chicken cury and,food_order
+chicken and rice,food_order
+chicen and rice,food_order
+i want to order food pls,food_order
+i want order food pls,food_order
+i to order food please,food_order
+ito order food please,food_order
+i to order food pls,food_order
+i to order food pleas,food_order
+i want order food pleas,food_order
+i want to order food plas,food_order
+iwant to order food pleas,food_order
+make it,lighting_control
+the needs to be cleaned,room_cleaning
+needs be cleaned,room_cleaning
+the room needs to be,room_cleaning
+theroom needs to be,room_cleaning
+room servic send ah,food_order
+roomservic send ah,food_order
+room sevic send ah,food_order
+room service send,food_order
+roomservice send,food_order
+room srvice send,food_order
+room servic send,food_order
+noise complaint pleas,noise_complaint
+noise complint pleas,noise_complaint
+noisecomplaint pleas,noise_complaint
+food order,food_order
+foodorder,food_order
+turn the lamb pls,lighting_control
+turnon the lamb pls,lighting_control
+turn lamb pls,lighting_control
+turn on the lamb pleas,lighting_control
+turnon the lamb pleas,lighting_control
+turn lamb pleas,lighting_control
+turnthe lamb please,lighting_control
+i feel,emergency
+ifeel,emergency
+i housekeeping service,room_cleaning
+ihousekeeping service,room_cleaning
+i housekeeping servic,room_cleaning
+i housekeepng service,room_cleaning
+i like housekeeping,room_cleaning
+ilike housekeeping servic,room_cleaning
+dry clean pls,laundry_service
+dryclean pls,laundry_service
+dry clan pls,laundry_service
+dry clean pleas,laundry_service
+late checkout pleas,checkout_billing
+late chckout ples,checkout_billing
+latecheckout pleas,checkout_billing
+towels need,towel_request
+towls need,towel_request
+i require immediate,emergency
+irequire immediate,emergency
+i requre immediate,emergency
+i immediate assistance,emergency
+i immediate assitance,emergency
+iimmediate assistance,emergency
+loud music pls,noise_complaint
+loudmusic pls,noise_complaint
+clothes wash,laundry_service
+clotheswash,laundry_service
+noise sleep karanna baha,noise_complaint
+noise sleep karnna baha,noise_complaint
+noise ekka sleep karanna,noise_complaint
+noiseekka sleep karanna,noise_complaint
+nise ekka sleep karanna,noise_complaint
+noise ekka sleep karana,noise_complaint
+i to check out,checkout_billing
+ito check out,checkout_billing
+i want to check,checkout_billing
+i want check,checkout_billing
+please tidy the,room_cleaning
+pleas tidy the,room_cleaning
+pleae tidy the,room_cleaning
+pleez tidy the,room_cleaning
+please the room,room_cleaning
+pleas the room,room_cleaning
+pleez the room,room_cleaning
+pleas tidy room,room_cleaning
+plas tidy the room,room_cleaning
+can clean my,room_cleaning
+canclean my,room_cleaning
+morning at 5 sharp,wake_up_call
+moring at 5 sharp,wake_up_call
+morningat 5 sharp,wake_up_call
+morning 5 sharp,wake_up_call
+morning call at 5,wake_up_call
+moring call at 5,wake_up_call
+morning call 5,wake_up_call
+gym opening,concierge_general
+uber call,concierge_taxi
+ubercall,concierge_taxi
+wakeme at 7 am pleas,wake_up_call
+wake me 7 am pls,wake_up_call
+needsoft pillows,pillow_request
+i need soft pilos,pillow_request
+i want soft pilos,pillow_request
+ineed soft pilos,pillow_request
+i soft pillows,pillow_request
+isoft pillows,pillow_request
+i soft pilos,pillow_request
+could u please arrange for room cleaning,room_cleaning
+could u please arange for room cleaning,room_cleaning
+could u pease arrane for room claning,room_cleaning
+couldu please arrange for room cleaning,room_cleaning
+could you pls arrange for room cleaning,room_cleaning
+could you pls arange for room cleaning,room_cleaning
+could you pls arrange for room claning,room_cleaning
+couldyou pls arrange for room cleaning,room_cleaning
+could you please arrange for room,room_cleaning
+could you please range for room,room_cleaning
+could you please arrange room,room_cleaning
+couldyou please arrange for room,room_cleaning
+email my,checkout_billing
+emailmy,checkout_billing
+set alarm for quarter to,wake_up_call
+set alarm for qurter to,wake_up_call
+set alarm quarter,wake_up_call
+emergency ah pls,emergency
+emergencyah pls,emergency
+emergancy ah pls,emergency
+emrgency ah pls,emergency
+emergancy ah please,emergency
+emergancy ah pleas,emergency
+emergancy ah plese,emergency
+emergency ah,emergency
+emergancy ah,emergency
+emergencyah,emergency
+clean room after,room_cleaning
+cleanroom after,room_cleaning
+clean room afer,room_cleaning
+cab ekak,concierge_taxi
+cabekak,concierge_taxi
+may have a warm blanket,blanket_request
+may have a warm blankit,blanket_request
+mayhave a warm blanket,blanket_request
+no disturbance pls,do_not_disturb
+nodisturbance pls,do_not_disturb
+no disturbance,do_not_disturb
+three call karanna,concierge_taxi
+threecall karanna,concierge_taxi
+three wheeler call,concierge_taxi
+three wheler call,concierge_taxi
+thee wheeer call,concierge_taxi
+need bath towls,towel_request
+i want bath towls,towel_request
+i bath towels,towel_request
+i bath towls,towel_request
+ibath towels,towel_request
+i want bath towels,towel_request
+iwant bath towels,towel_request
+bring me a,toiletries_request
+bring a,toiletries_request
+get me a,toiletries_request
+get me a razor,toiletries_request
+get me a razr,toiletries_request
+get me razor,toiletries_request
+could i get,food_order
+cold i get,food_order
+can i get my,checkout_billing
+taxi urgently,concierge_taxi
+heart problem,emergency
+heartproblem,emergency
+heart problem emergancy,emergency
+heartproblem emergancy,emergency
+heart poblem emergacy,emergency
+early morning,noise_complaint
+earlymorning,noise_complaint
+make 22 degrees,temperature_control
+make22 degrees,temperature_control
+can get toothpaste,toiletries_request
+canget toothpaste,toiletries_request
+call at 6,wake_up_call
+callat 6,wake_up_call
+cold ah put heater pleas,temperature_control
+cold ah put heter peas,temperature_control
+cold put heater please,temperature_control
+cold put heater pleez,temperature_control
+cold put heater pls,temperature_control
+coldput heater please,temperature_control
+coldah put heater pls,temperature_control
+cold ah put heter pls,temperature_control
+remote doesn't,maintenance
+bringice pleas,misc_request
+brig ice ples,misc_request
+bring ice,misc_request
+bringice,misc_request
+bringice pls,misc_request
+too hot can u ac on,temperature_control
+toohot can u ac on,temperature_control
+too hot can u ac,temperature_control
+too hot could you ac on,temperature_control
+too hot could u ac on,temperature_control
+too hot cold you ac on,temperature_control
+too hot could you ac,temperature_control
+too can you ac on,temperature_control
+too can you ac,temperature_control
+toocan you ac on,temperature_control
+best visit karanna,concierge_general
+bestvisit karanna,concierge_general
+clean the room,room_cleaning
+clen the room,room_cleaning
+clean room pleez,room_cleaning
+clean room plese,room_cleaning
+clean room pls,room_cleaning
+clen the room pls,room_cleaning
+cleanthe room pls,room_cleaning
+loud music next,noise_complaint
+loud musc next,noise_complaint
+set wake up,wake_up_call
+pool at what time,concierge_general
+pool what time,concierge_general
+poolat what time,concierge_general
+pool close at what,concierge_general
+pool close what,concierge_general
+increase ac,temperature_control
+wake me at 6 and,wake_up_call
+wakeme at 6 and,wake_up_call
+wake me 6 and,wake_up_call
+tidy my room,room_cleaning
+tidymy room,room_cleaning
+i a pillow,pillow_request
+i a pilo,pillow_request
+ia pillow,pillow_request
+i need pilo,pillow_request
+need a pilo,pillow_request
+ineed a pilo,pillow_request
+i need a,pillow_request
+need a,pillow_request
+ineed a,pillow_request
+i want a pillow,pillow_request
+iwant a pillow,pillow_request
+i want a pilo,pillow_request
+room dirty need clean,room_cleaning
+roomdirty need clean,room_cleaning
+dinner ekak,food_order
+maintenance want,maintenance
+maintenancewant,maintenance
+maintance want,maintenance
+maintanance want,maintenance
+blanket ekak,blanket_request
+blankit ekak,blanket_request
+blanketekak,blanket_request
+book to airport,concierge_taxi
+bookto airport,concierge_taxi
+book to airpot,concierge_taxi
+book taxi to,concierge_taxi
+morning call at 6 pls,wake_up_call
+morning call 6 pls,wake_up_call
+morningcall at 6 pls,wake_up_call
+mrning call at 6 pls,wake_up_call
+morning at 6 please,wake_up_call
+morning at 6 pleas,wake_up_call
+morningat 6 please,wake_up_call
+bring two,towel_request
+bringtwo,towel_request
+bring two towls,towel_request
+bring two twls,towel_request
+do not disturb until,do_not_disturb
+soft pillows pls,pillow_request
+soft pilos pls,pillow_request
+soft pios pease,pillow_request
+soft pilos pleas,pillow_request
+someone at door pleas,emergency
+someone door pleas,emergency
+somone at door pleas,emergency
+someonedoor please,emergency
+someone door pls,emergency
+someone door pleez,emergency
+someoneat door pls,emergency
+6 am wake up,wake_up_call
+6am wake up,wake_up_call
+6 wake up karanna,wake_up_call
+6 wake up karana,wake_up_call
+6wake up karanna,wake_up_call
+booktaxi for 8 am tomorrow pls,concierge_taxi
+book taxi 8 am tomorrow pls,concierge_taxi
+book taxi for 8 am tomorrow pleas,concierge_taxi
+book taxi 8 am tomorrow pleas,concierge_taxi
+book taxi for 8 am tomorow plas,concierge_taxi
+booktaxi for 8 am tomorrow pleas,concierge_taxi
+book taxi for 8 am tomorrow,concierge_taxi
+booktaxi for 8 am tomorrow,concierge_taxi
+cud you bring extra pilos,pillow_request
+couldyou bring extra pilos,pillow_request
+cud you bring extra pillows,pillow_request
+cud you bring exta pillos,pillow_request
+cudyou bring extra pillows,pillow_request
+could bring extra pillows,pillow_request
+couldbring extra pillows,pillow_request
+could bring extra pilos,pillow_request
+could brig extra pilows,pillow_request
+hadful of towls,towel_request
+handfulof towls,towel_request
+room cleaning,room_cleaning
+roomcleaning,room_cleaning
+switch on the lamp,lighting_control
+best to visit in colombo,concierge_general
+bestto visit in colombo,concierge_general
+best visit colombo,concierge_general
+toothbrush pleas,toiletries_request
+send someone to,room_cleaning
+send someoe to,room_cleaning
+send somone to,room_cleaning
+i need an iron pls,misc_request
+ineed an iron pls,misc_request
+i want an iron pls,misc_request
+iwant an iron please,misc_request
+i an iron please,misc_request
+ian iron please,misc_request
+i iron please,misc_request
+i an iron pease,misc_request
+cud you address the noise from next door,noise_complaint
+cudyou address the noise from next door,noise_complaint
+cud you address the noie from next door,noise_complaint
+could you address the noise from next,noise_complaint
+could you adress the noise from next,noise_complaint
+could you address noise from next,noise_complaint
+cold u addess the noise from next door,noise_complaint
+could u address noise from next door,noise_complaint
+taxi in 10,concierge_taxi
+taxi 10 minutes,concierge_taxi
+taxi10 minutes,concierge_taxi
+very noisy no can you,noise_complaint
+verynoisy no can you,noise_complaint
+very noisy no canu,noise_complaint
+very noisy no could you stop,noise_complaint
+very noisy no could u stop,noise_complaint
+very noisy no cud you stop,noise_complaint
+verynoisy no can u stop,noise_complaint
+wake tomorrow at ate,wake_up_call
+wake tomrrow at ate,wake_up_call
+wake tomorrow ate,wake_up_call
+i can't get in my,emergency
+i can't get my,emergency
+i cn't get in my,emergency
+ican't get in my,emergency
+taxi shopping mall,concierge_taxi
+taxishopping mall,concierge_taxi
+taxi to shopping,concierge_taxi
+taxito shopping,concierge_taxi
+i wuld lik to chane the temperature,temperature_control
+i would lik to change the temprature,temperature_control
+i like to change the temperature,temperature_control
+i like to change the temprature,temperature_control
+i like to change the temp,temperature_control
+i would like to change the,temperature_control
+i would lik to change the,temperature_control
+i would like change,temperature_control
+i woud like to change the,temperature_control
+hand towels,towel_request
+hand towls,towel_request
+hand towls pls,towel_request
+handtowels pls,towel_request
+hand towels pleas,towel_request
+handtowels pleas,towel_request
+hand towls pleas,towel_request
+face tows neeed,towel_request
+face towels,towel_request
+face towls,towel_request
+facetowels,towel_request
+turn down the,temperature_control
+turn the heat,temperature_control
+i would lik to request a wake up call,wake_up_call
+i would lik request wake up call,wake_up_call
+iwould lik to request a wake up call,wake_up_call
+iwud like to request a wake up call,wake_up_call
+i wud like request wake up call,wake_up_call
+i would like to request a wake up,wake_up_call
+i wuld like to reqest a wake up,wake_up_call
+i would lik to request a wake up,wake_up_call
+i wuld like to request a wake up,wake_up_call
+i would lik to request additional towels,towel_request
+i would lik to request additionl towels,towel_request
+i would lik to request additional towls,towel_request
+i would lik request additional towels,towel_request
+i wud like to request additional towels,towel_request
+i wud like to request additional towls,towel_request
+i wud like to rquest additional towels,towel_request
+i like to request additional towels,towel_request
+i like request additional towels,towel_request
+i like to request additional towls,towel_request
+i would like to request additional towls,towel_request
+iwould like to request additional towls,towel_request
+i would like request additional towls,towel_request
+ironpleas,misc_request
+bringtwo pilos,pillow_request
+bring two pils,pillow_request
+bring two,pillow_request
+bringtwo,pillow_request
+white towels pleas,towel_request
+white towls pleas,towel_request
+whitetowels pleas,towel_request
+white towels pls,towel_request
+white towls pls,towel_request
+white towes pls,towel_request
+whitetowels pls,towel_request
+white towls pleae,towel_request
+six tows please,towel_request
+sixtowls please,towel_request
+six towels,towel_request
+six towls,towel_request
+six towels pls,towel_request
+six towls pls,towel_request
+sixtowels pls,towel_request
+six twels pls,towel_request
+six toels ples,towel_request
+sixtowels pleas,towel_request
+know cleaning pls,do_not_disturb
+know cleaing pls,do_not_disturb
+knowcleaning pls,do_not_disturb
+know cleaning,do_not_disturb
+knowcleaning,do_not_disturb
+next day wake up,wake_up_call
+nextday wake up,wake_up_call
+the neighbors are,noise_complaint
+i need a taxi pls,concierge_taxi
+i need taxi pls,concierge_taxi
+need a taxi pls,concierge_taxi
+i a taxi please,concierge_taxi
+i a taxi pleas,concierge_taxi
+i a taxi pls,concierge_taxi
+ia taxi please,concierge_taxi
+i need a taxi pleas,concierge_taxi
+i need taxi pleas,concierge_taxi
+i want a taxi pleas,concierge_taxi
+i need a taxi plas,concierge_taxi
+i want eggs and,food_order
+iwant eggs and,food_order
+i eggs and toast,food_order
+i eggs and tost,food_order
+twoblankets pls,blanket_request
+two blankes pls,blanket_request
+two blankets,blanket_request
+twoblankets,blanket_request
+two blankits,blanket_request
+two blanets pleas,blanket_request
+twoblankets pleas,blanket_request
+wake at 5:30 am,wake_up_call
+wakeat 5:30 am,wake_up_call
+wake 5:30 am,wake_up_call
+all lights,lighting_control
+cab to,concierge_taxi
+cabto,concierge_taxi
+coat hngers pleas,misc_request
+coathangers pleas,misc_request
+safe won't,maintenance
+safewon't,maintenance
+i to order food,food_order
+i order food,food_order
+room open karanna,emergency
+roomopen karanna,emergency
+fresh hand,towel_request
+need a razor,toiletries_request
+clean room in one hour,room_cleaning
+cleanroom in one hour,room_cleaning
+clean my room in one,room_cleaning
+clean my room one,room_cleaning
+verydark lights,lighting_control
+could please send toiletries,toiletries_request
+could please send toileties,toiletries_request
+couldplease send toiletries,toiletries_request
+could u please send toiletries,toiletries_request
+couldu please send toiletries,toiletries_request
+could u pleas send toiletries,toiletries_request
+cud you please send toiletries,toiletries_request
+cudyou please send toiletries,toiletries_request
+cud you pls send toiletries,toiletries_request
+light karanna please,lighting_control
+light karanna pleas,lighting_control
+light karanna pleez,lighting_control
+light kranna pease,lighting_control
+light off karanna,lighting_control
+lightoff karanna,lighting_control
+lightoff karanna pleas,lighting_control
+light off karanna ples,lighting_control
+i want one,pillow_request
+iwant one pilo,pillow_request
+five towls please,towel_request
+five towls pleas,towel_request
+five twls plese,towel_request
+fivetowels pleas,towel_request
+five towels ples,towel_request
+five towels,towel_request
+five towls,towel_request
+desk lamp ples,lighting_control
+desklamp pleas,lighting_control
+desk lamp,lighting_control
+cansend towls,towel_request
+can send,towel_request
+cansend,towel_request
+large towels pleas,towel_request
+largetowels pleas,towel_request
+large toels pleas,towel_request
+large towels,towel_request
+largetowels,towel_request
+large towls pls,towel_request
+large towls pleae,towel_request
+two wake up calls 7 and,wake_up_call
+twowake up calls 7 and,wake_up_call
+currency exchange,concierge_general
+currencyexchange,concierge_general
+can order lunch,food_order
+canorder lunch,food_order
+i want ride,concierge_taxi
+need a ride,concierge_taxi
+room needs,room_cleaning
+i my bill,checkout_billing
+help want,emergency
+increase the,temperature_control
+increasethe,temperature_control
+fresh towls,towel_request
+checking out,checkout_billing
+checkingout,checkout_billing
+brng me towls please,towel_request
+bring me towls pleez,towel_request
+bring me towels pleas,towel_request
+get me towels pleas,towel_request
+bring me towls ples,towel_request
+bringme towels pleas,towel_request
+bring me towels,towel_request
+brig me towls,towel_request
+get me towels,towel_request
+bringme towels,towel_request
+get me towels please,towel_request
+get me towels pleez,towel_request
+get me towls please,towel_request
+need a wake up call,wake_up_call
+needa wake up call,wake_up_call
+need wake up call,wake_up_call
+i need a wake up,wake_up_call
+need a wake up,wake_up_call
+i need wake up,wake_up_call
+ineed a wake up,wake_up_call
+all bathroom amenities pls,toiletries_request
+allbathroom amenities pls,toiletries_request
+all bathroom amenties pls,toiletries_request
+all amenities please,toiletries_request
+all amenities pls,toiletries_request
+allamenities please,toiletries_request
+someone at,emergency
+someoneat,emergency
+fix the sink pleas,maintenance
+fixthe sink pleas,maintenance
+fix the sink ples,maintenance
+fix sink pleas,maintenance
+fix sink pls,maintenance
+fix sink please,maintenance
+fix sink pleez,maintenance
+temprature 24 pls,temperature_control
+temprature 24 pleez,temperature_control
+temperature 24,temperature_control
+temprature 24,temperature_control
+temp 24,temperature_control
+temperature 24 pls,temperature_control
+temp 24 pls,temperature_control
+temperature24 pls,temperature_control
+6 am exactly,wake_up_call
+6 am exctly,wake_up_call
+6 am exactly pls,wake_up_call
+6am exactly pls,wake_up_call
+6 exactly please,wake_up_call
+6 exactly pleez,wake_up_call
+6 exactly plase,wake_up_call
+6 exactly pleas,wake_up_call
+memory foam pilos,pillow_request
+memory foam plos,pillow_request
+memory foam,pillow_request
+prepare bill please,checkout_billing
+prepare bill pleas,checkout_billing
+prepare bill pleez,checkout_billing
+preparebill please,checkout_billing
+prepare my bill pls,checkout_billing
+preparemy bill pls,checkout_billing
+prpare my bill pls,checkout_billing
+preparemy bill pleas,checkout_billing
+book to air port,concierge_taxi
+bookto air port,concierge_taxi
+where i eat,concierge_general
+wherei eat,concierge_general
+where can i,concierge_general
+wherecan i,concierge_general
+switch on bedside lamp,lighting_control
+sitch on beside lamp,lighting_control
+switch on bedsde lamp,lighting_control
+switchon bedside lamp,lighting_control
+turn bedsde lamp,lighting_control
+cold blanket thiyanna,blanket_request
+cold blaket thiyanna,blanket_request
+cold blankit thiyanna,blanket_request
+cold ah blanket,blanket_request
+cold ah blnket,blanket_request
+cold ah blanet,blanket_request
+cold ah blankit,blanket_request
+i'm cold pleas,temperature_control
+i'mcold pleas,temperature_control
+7 wake me,wake_up_call
+7 o'clock wake,wake_up_call
+7o'clock wake,wake_up_call
+club sandwich pleas,food_order
+club sandwich,food_order
+set temperature to 20,temperature_control
+set temprature to 20,temperature_control
+set temp to 20,temperature_control
+set temperature 20,temperature_control
+set temprature to 20 degrees,temperature_control
+settemprature to 20 degrees,temperature_control
+set temprature 20 degrees,temperature_control
+pilos,pillow_request
+i to do not disturb,do_not_disturb
+i to do not distrb,do_not_disturb
+i do not disturb,do_not_disturb
+i want to do not,do_not_disturb
+i want do not,do_not_disturb
+kindly my room no,room_cleaning
+kindlymy room no,room_cleaning
+more bath,towel_request
+where is the,concierge_general
+whereis the,concierge_general
+toilet flush properly,maintenance
+toilt flsh properly,maintenance
+toilt flush properly,maintenance
+i housekeeping assistance,room_cleaning
+i housekeping assistance,room_cleaning
+ihousekeeping assistance,room_cleaning
+i require housekeeping,room_cleaning
+i need the,room_cleaning
+i want the,room_cleaning
+need the,room_cleaning
+i the maid,room_cleaning
+ithe maid,room_cleaning
+i want maid,room_cleaning
+iwant the maid,room_cleaning
+skip housekeeping pls,do_not_disturb
+skiphousekeeping pls,do_not_disturb
+skip housekeeping pleas,do_not_disturb
+i wud like to report a maintenance issue,maintenance
+i wud like to report a maintance issue,maintenance
+iwud like to report a maintenance issue,maintenance
+i wud like to report a maintanance issue,maintenance
+iwould lik to report a maintenance issue,maintenance
+i would lik to rport a maintenance issue,maintenance
+i like to report a maintenance issue,maintenance
+ilike to report a maintenance issue,maintenance
+i like to report a maintance issue,maintenance
+i like to report a maintanance issue,maintenance
+warm blanket want no pleas,blanket_request
+warm banket want no pleas,blanket_request
+warm blankit want no pleas,blanket_request
+warm blanket want no pls,blanket_request
+warm blankit want no pls,blanket_request
+warmblanket want no pls,blanket_request
+warm want no please,blanket_request
+warm want no pleas,blanket_request
+warm want no pleez,blanket_request
+very no need ac,temperature_control
+veryno need ac,temperature_control
+clean towels pleas,towel_request
+cleantowels pleas,towel_request
+cean towls peas,towel_request
+cean towls please,towel_request
+clean towls pleez,towel_request
+clean towels pls,towel_request
+cleantowels pls,towel_request
+clen towels pls,towel_request
+clean towels,towel_request
+clean towls,towel_request
+i want sum,food_order
+i need,room_cleaning
+ineed,room_cleaning
+need,room_cleaning
+i want,room_cleaning
+deep clean my,room_cleaning
+deepclean my,room_cleaning
+deep my room,room_cleaning
+deepmy room,room_cleaning
+tomorrow delivery pleas,laundry_service
+tomorrowdelivery pleas,laundry_service
+tomorrow delivry pleas,laundry_service
+heating high lower it please,temperature_control
+heating high lower it pls,temperature_control
+heting high lower it plase,temperature_control
+cool to 19,temperature_control
+may i request temprature adjustment,temperature_control
+may i requst temprature adjustmet,temperature_control
+may request temperature adjustment,temperature_control
+may request temp adjustment,temperature_control
+mayrequest temperature adjustment,temperature_control
+may rquest temperature adjusment,temperature_control
+may i request temperature,temperature_control
+mayi request temperature,temperature_control
+may i request temp,temperature_control
+cudyou bring ice and glasses,misc_request
+could you bring ice and,misc_request
+cud you bring ice and,misc_request
+couldyou bring ice and,misc_request
+could you brng ice and,misc_request
+could bring ice and glasses,misc_request
+couldbring ice and glasses,misc_request
+i want my bill please,checkout_billing
+i want my bill pleez,checkout_billing
+i want my bill pls,checkout_billing
+iwant my bill please,checkout_billing
+i my bill please,checkout_billing
+i my bill pleez,checkout_billing
+imy bill please,checkout_billing
+i my bill pls,checkout_billing
+i need my bill pleas,checkout_billing
+need my bill pleas,checkout_billing
+i need my bill plas,checkout_billing
+ineed my bill pleas,checkout_billing
+blankit ekak send pleas,blanket_request
+blanketekak send pleas,blanket_request
+blanket send please,blanket_request
+blanket send pleas,blanket_request
+blanket send pls,blanket_request
+blankit send please,blanket_request
+blanket ekak send pls,blanket_request
+blanketekak send pls,blanket_request
+blnket ekak send pls,blanket_request
+cold ah put,temperature_control
+cold put heater,temperature_control
+coldput heater,temperature_control
+make bed please,room_cleaning
+make bed pls,room_cleaning
+makebed please,room_cleaning
+make bed pleez,room_cleaning
+make my bed,room_cleaning
+makemy bed,room_cleaning
+makemy bed pls,room_cleaning
+i need body,toiletries_request
+need body,toiletries_request
+ineed body,toiletries_request
+late checkout by 2,checkout_billing
+latecheckout by 2,checkout_billing
+shampoothiyanna pleas,toiletries_request
+shampoo tiyanna peas,toiletries_request
+shampoo thiyanna ples,toiletries_request
+shampoo thiyanna pls,toiletries_request
+shampoothiyanna pls,toiletries_request
+i shower jell,toiletries_request
+need shower jell,toiletries_request
+needshower jell,toiletries_request
+i need shower,toiletries_request
+need shower,toiletries_request
+i want shower,toiletries_request
+clean organize my room,room_cleaning
+cean organze my room,room_cleaning
+clen organize my room,room_cleaning
+pleasesend towls no,towel_request
+pleas send towls no,towel_request
+pleez send towls no,towel_request
+ples send towels no,towel_request
+pleassend towels no,towel_request
+please towels no,towel_request
+pleae towels no,towel_request
+please towls no,towel_request
+pleas towels no,towel_request
+could u please adjust the air conditioning,temperature_control
+could u pls adjust the air conditioning,temperature_control
+could u pleas adjust the air conditioning,temperature_control
+couldu please adjust the air conditioning,temperature_control
+could you please adjust the air,temperature_control
+coud you please adjut the air,temperature_control
+could u please adjust the air,temperature_control
+could you pleas adjust the air,temperature_control
+could please adjust the air conditioning,temperature_control
+could pleas adjust the air conditioning,temperature_control
+could pleez adjust the air conditioning,temperature_control
+couldplease adjust the air conditioning,temperature_control
+cudyou please adjust the air conditioning,temperature_control
+cud you please adjust the air conitioning,temperature_control
+may have restaurant recommendations,concierge_general
+may have restaurant recmmendations,concierge_general
+may have restaurant recommendatons,concierge_general
+can get some towels,towel_request
+can get some towls,towel_request
+can i get some,towel_request
+cani get some,towel_request
+cani get some towls,towel_request
+i want more,pillow_request
+iwant more,pillow_request
+needshower gel,toiletries_request
+iwant shower gel,toiletries_request
+towels quickly,towel_request
+towls quickly,towel_request
+towlsquickly send,towel_request
+ples clean my room ah,room_cleaning
+pleas clan my room ah,room_cleaning
+pls clean my room ah,room_cleaning
+pls clan my room ah,room_cleaning
+please my room ah,room_cleaning
+pleez my room ah,room_cleaning
+pleas my room ah,room_cleaning
+pease my room ah,room_cleaning
+don't my room please,do_not_disturb
+don't my room pleas,do_not_disturb
+dn't my room pleae,do_not_disturb
+don't enter my room pls,do_not_disturb
+don'tenter my room pls,do_not_disturb
+don't enter my room pleas,do_not_disturb
+don't enter my room plas,do_not_disturb
+warm blanket want,blanket_request
+warm blankit want,blanket_request
+warmblanket want,blanket_request
+warm want no,blanket_request
+warmwant no,blanket_request
+towls,towel_request
+may i place a food,food_order
+mayi place a food,food_order
+may i place food,food_order
+may place a food order,food_order
+may place a food ordr,food_order
+may place food order,food_order
+mayplace a food order,food_order
+i two towels please,towel_request
+itwo towels please,towel_request
+i two towls please,towel_request
+i need two towls pls,towel_request
+i want two towels pls,towel_request
+i need two towels pleas,towel_request
+ineed two towels pleas,towel_request
+i want two towels pleas,towel_request
+i want two towels please,towel_request
+i want two toels plese,towel_request
+i want two towls please,towel_request
+buddhist temples,concierge_general
+soap ekak,toiletries_request
+tree towels,towel_request
+treetowels,towel_request
+treetowels pls,towel_request
+tree towels pleas,towel_request
+treetowels pleas,towel_request
+tree towels peas,towel_request
+tree towls pleas,towel_request
+vegetarian food pleas,food_order
+vegetarianfood pleas,food_order
+vegetarian food ples,food_order
+vegetarian food,food_order
+vegetarianfood,food_order
+towls need ah pleas,towel_request
+towelsneed ah pleas,towel_request
+towels need ah pls,towel_request
+towls need ah pls,towel_request
+towls need ah please,towel_request
+towls need ah pleez,towel_request
+know hot,maintenance
+cool to 19 degrees pls,temperature_control
+cool 19 degrees pls,temperature_control
+cool to 19 degrees plas,temperature_control
+coolto 19 degrees pleas,temperature_control
+cool19 degrees please,temperature_control
+a couple of twls,towel_request
+a cuple of towls,towel_request
+a of towels,towel_request
+aof towels,towel_request
+clean room in the,room_cleaning
+cleanroom in the,room_cleaning
+clean in the evening,room_cleaning
+cleanin the evening,room_cleaning
+prvacy thiynna pls,do_not_disturb
+send a,blanket_request
+senda,blanket_request
+good restaurants,concierge_general
+one more,checkout_billing
+i want shapo,toiletries_request
+iwant shampo,toiletries_request
+iced tea pls,food_order
+iced tea,food_order
+icedtea pleas,food_order
+i need,concierge_general
+ineed,concierge_general
+need,concierge_general
+i want,concierge_general
+set alarm for quarter to 8 pleas,wake_up_call
+setalarm for quarter to 8 pleas,wake_up_call
+set alam for quarer to 8 plas,wake_up_call
+set alarm for quarter to 8 pls,wake_up_call
+set alarm quarter 8 pls,wake_up_call
+i more pillows,pillow_request
+i more pilos,pillow_request
+i more pllows,pillow_request
+i need more,pillow_request
+ineed more,pillow_request
+need more,pillow_request
+need more pillws,pillow_request
+needmore pillows,pillow_request
+make it cooler pleas,temperature_control
+makeit cooler pleas,temperature_control
+make cooler please,temperature_control
+make cooler plase,temperature_control
+make cooler pleez,temperature_control
+coldpls,temperature_control
+no spicy,food_order
+could u send maintenance staff,maintenance
+couldu send maintenance staff,maintenance
+could u send maintance staff,maintenance
+could u send maintanance staff,maintenance
+could you send maintenance,maintenance
+could you send maintenane,maintenance
+cud you send maintenance,maintenance
+cud you send mainenance saff,maintenance
+cud you send maintanance staff,maintenance
+could send maintenance staff,maintenance
+couldsend maintenance staff,maintenance
+culd send maintenance staff,maintenance
+water leaking,maintenance
+waterleaking,maintenance
+hand wash neded pls,laundry_service
+handwash needed pleas,laundry_service
+no service,do_not_disturb
+noservice,do_not_disturb
+no servis,do_not_disturb
+no servic today,do_not_disturb
+no srvic today,do_not_disturb
+wifi very,maintenance
+can get lunch,food_order
+canget lunch,food_order
+just shirt press,laundry_service
+justshirt press,laundry_service
+i would like to order from room,food_order
+i wud like to order from room,food_order
+iwould like to order from room,food_order
+i like to order from room service,food_order
+i like order from room service,food_order
+i like to order from room servis,food_order
+i would lik to order from room service,food_order
+i would lik order from room service,food_order
+i wold lik to ordr from room service,food_order
+i would lik to order from room servic,food_order
+privacy want pls,do_not_disturb
+privacywant pls,do_not_disturb
+i want the maid please,room_cleaning
+iwant the maid please,room_cleaning
+i want the maid pleas,room_cleaning
+i want the maid pls,room_cleaning
+need the maid pls,room_cleaning
+need the maid pleae,room_cleaning
+i need the maid pls,room_cleaning
+i want another blanket please,blanket_request
+i want another blanket pls,blanket_request
+i want another blanket pleas,blanket_request
+need another blanket pleez,blanket_request
+need another blanket pleae,blanket_request
+need another blanket pls,blanket_request
+i need one towl,towel_request
+ineed one towl,towel_request
+i want one towl,towel_request
+iwant one towel,towel_request
+i want one toel,towel_request
+need one toel,towel_request
+need one towl,towel_request
+i one towel,towel_request
+i one towl,towel_request
+local where please,concierge_general
+localwhere please,concierge_general
+local where pleez,concierge_general
+localmarket where pleas,concierge_general
+local market where pls,concierge_general
+lcal market where pls,concierge_general
+localmarket where pls,concierge_general
+could provide tourist information,concierge_general
+couldprovide tourist information,concierge_general
+coud provde tourist informaion,concierge_general
+cud you provide tourist information,concierge_general
+cud you provide tourist infomation,concierge_general
+could you provide tourist,concierge_general
+could you provide tourst,concierge_general
+couldyou provide tourist,concierge_general
+could u provide tourist,concierge_general
+mayi have more towls,towel_request
+may i have more,towel_request
+mayi have more,towel_request
+express laundry pls,laundry_service
+expres laundry pls,laundry_service
+expresslaundry pls,laundry_service
+bring shampoo pleas,toiletries_request
+bring shampoo peas,toiletries_request
+bringshampoo pleas,toiletries_request
+bring shampoo,toiletries_request
+bringshampoo,toiletries_request
+things to,concierge_general
+thingsto,concierge_general
+sigiriya day,concierge_general
+sigiriyaday,concierge_general
+soapekak ona pleas,toiletries_request
+soap ona please,toiletries_request
+soap ona pls,toiletries_request
+soap ona pleas,toiletries_request
+i want too towers,towel_request
+iwant too towers,towel_request
+needtoo towers,towel_request
+i too towers,towel_request
+itoo towers,towel_request
+i too toers,towel_request
+make room,temperature_control
+i like to request housekeeping service,room_cleaning
+i like to request housekeeping servic,room_cleaning
+i like request housekeeping service,room_cleaning
+i like to request housekeeping servis,room_cleaning
+iwud like to request housekeeping service,room_cleaning
+i wud like to request housekeeping servic,room_cleaning
+i wud like to request husekeeping service,room_cleaning
+i would lik to request housekeeping service,room_cleaning
+i would lik to requst housekeeping servie,room_cleaning
+i would lik to request housekeeping servic,room_cleaning
+extra pilos thiyanna please,pillow_request
+extra pilos thiyanna pleez,pillow_request
+extra pilos thiyanna pls,pillow_request
+extra pilos thiyanna pleae,pillow_request
+exra pillows thiyanna pls,pillow_request
+extra pillows thianna pls,pillow_request
+extrapillows thiyanna pleas,pillow_request
+extra pillows thiyana peas,pillow_request
+don't enter my,do_not_disturb
+don'tenter my,do_not_disturb
+fresh want no,towel_request
+freshwant no,towel_request
+fesh want no,towel_request
+fresh towels want,towel_request
+freshtowels want,towel_request
+fresh twels want,towel_request
+fresh towls want no,towel_request
+freshtowls want no,towel_request
+i two towels,towel_request
+i two towls,towel_request
+itwo towels,towel_request
+needtwo towels,towel_request
+need two towes,towel_request
+need two towls,towel_request
+i need two towls,towel_request
+i want two towls,towel_request
+ineed two towls,towel_request
+hairdryer pls,misc_request
+hairdryerpls,misc_request
+too paste,toiletries_request
+toopaste,toiletries_request
+too paste pleas,toiletries_request
+too pate pleas,toiletries_request
+too paste pls,toiletries_request
+too pate pls,toiletries_request
+switch off ceiling light,lighting_control
+sitch off ceilng liht,lighting_control
+switchoff ceiling light,lighting_control
+turn ceiling light,lighting_control
+turnceiling light,lighting_control
+stay one more,checkout_billing
+stayone more,checkout_billing
+extra pillows pls,pillow_request
+extra pilos pls,pillow_request
+exra pillows pls,pillow_request
+exta pillows pls,pillow_request
+extra pillows pleas,pillow_request
+extrapillows pleas,pillow_request
+etra pillows pleas,pillow_request
+extra pilos pleas,pillow_request
+extrapilos please,pillow_request
+extra pilos pleez,pillow_request
+neighbors loud music pls,noise_complaint
+neighborsloud music pls,noise_complaint
+neighbors loud musc pls,noise_complaint
+neighbors loud msic pls,noise_complaint
+neighbors music please,noise_complaint
+neighbors music pls,noise_complaint
+neghbors music plese,noise_complaint
+neighbors music pleas,noise_complaint
+neihbors loud music pleas,noise_complaint
+neighborsloud music pleas,noise_complaint
+neghbors loud music pleas,noise_complaint
+bring some towers,towel_request
+bring some toers,towel_request
+getme some towers,towel_request
+need towls,towel_request
+needtowls,towel_request
+urgent repair,maintenance
+may have restaurant recommendations please,concierge_general
+may have restaurant recommendations pls,concierge_general
+may have restaurant recommendtions pease,concierge_general
+may i have restaurant recommendations pleas,concierge_general
+may i have restaurant recommendations plas,concierge_general
+mayi have restaurant recommendations pleas,concierge_general
+i want showr,toiletries_request
+iwant shower,toiletries_request
+couldi get some towls,towel_request
+could i get some,towel_request
+coud i get some,towel_request
+couldi get some,towel_request
+i need more towls please,towel_request
+i need more tols please,towel_request
+i need more tows please,towel_request
+i want more towls please,towel_request
+ineed more towels pleas,towel_request
+i need more towls pleas,towel_request
+need more towels please,towel_request
+needmore towels please,towel_request
+need more towels pleez,towel_request
+need more towels pease,towel_request
+adjust the temprature,temperature_control
+adjustthe temprature,temperature_control
+adjust the,temperature_control
+i need a doctor pleas,emergency
+i want a doctor pleas,emergency
+i need a doctor ples,emergency
+need a doctor please,emergency
+needa doctor please,emergency
+need a doctor pls,emergency
+need a doctor pleez,emergency
+i a doctor please,emergency
+ia doctor please,emergency
+i doctor please,emergency
+i a doctor pleez,emergency
+i'd like housekeeping,room_cleaning
+i'dlike housekeeping,room_cleaning
+i'd like housekeeping servic,room_cleaning
+i'd like husekeeping servic,room_cleaning
+i'd like houekeeping servic,room_cleaning
+i'dlike housekeeping servic,room_cleaning
+late night,food_order
+i sum food,food_order
+isum food,food_order
+i need sum,food_order
+need sum,food_order
+ineed sum,food_order
+i want extra,pillow_request
+iwant extra,pillow_request
+i want etra,pillow_request
+i extra pillows,pillow_request
+i extra pilows,pillow_request
+iextra pillows,pillow_request
+need conditioner,toiletries_request
+whattime is breakfast pls,concierge_general
+what time is breakfst pls,concierge_general
+what is breakfast please,concierge_general
+what is breakfast pleas,concierge_general
+what is breakfast pleez,concierge_general
+what time is breakfast pleas,concierge_general
+what time is beakfast pleas,concierge_general
+whattime is breakfast pleas,concierge_general
+i'm starving pleas,food_order
+i'm starvig peas,food_order
+i'mstarving pleas,food_order
+hand snitizer pleas,toiletries_request
+hand sanitizer plas,toiletries_request
+handsanitizer pleas,toiletries_request
+one night please,checkout_billing
+one night plase,checkout_billing
+onenight please,checkout_billing
+one night pleas,checkout_billing
+one more night pls,checkout_billing
+taxi train station,concierge_taxi
+lights tiyanna pls,lighting_control
+lightsthiyanna pls,lighting_control
+lights thianna pleas,lighting_control
+lightsthiyanna pleas,lighting_control
+my is messy,room_cleaning
+tea pleas,food_order
+teapleas,food_order
+clean room and change sheets,room_cleaning
+clean room and change shees,room_cleaning
+i body lotion,toiletries_request
+ibody lotion,toiletries_request
+press clothes please,laundry_service
+press clothes pleez,laundry_service
+press clohes please,laundry_service
+press my clothes pleas,laundry_service
+pess my clthes peas,laundry_service
+pressmy clothes pls,laundry_service
+tv remote not,maintenance
+tvremote not,maintenance
+tv remte not,maintenance
+need directions pls,concierge_general
+need directions pleez,concierge_general
+need directions pleas,concierge_general
+ineed directions pls,concierge_general
+i need directions ples,concierge_general
+send pillows,pillow_request
+send pilos,pillow_request
+get pillows,pillow_request
+getpillows,pillow_request
+get pilos,pillow_request
+pillows please,pillow_request
+pillows pleas,pillow_request
+pillowsplease,pillow_request
+pillows pls,pillow_request
+pillow please,pillow_request
+pillow pleas,pillow_request
+pilo please,pillow_request
+pillow pls,pillow_request
+turn on lights,lighting_control
+turn on lghts,lighting_control
+switch on lights,lighting_control
+switchon lights,lighting_control
+open lights,lighting_control
+openlights,lighting_control
+close lights,lighting_control
+air conditioning on,temperature_control
+air condiioning on,temperature_control
+air conditioning off,temperature_control
+airconditioning off,temperature_control
+change temperature,temperature_control
+change temprature,temperature_control
+change temp,temperature_control
+turn lights on,lighting_control
+turn ligts on,lighting_control
+turnlights on,lighting_control
+turn lights off,lighting_control
+turn lghts off,lighting_control
+turnlights off,lighting_control
+switch lights on,lighting_control
+switchlights on,lighting_control
+switch lights off,lighting_control
+switchlights off,lighting_control
+swich ligts off,lighting_control
+my bill,checkout_billing
+mybill,checkout_billing
+final bill,checkout_billing
+account please,checkout_billing
+account pleas,checkout_billing
+accountplease,checkout_billing
+account pleez,checkout_billing
+dont disturb,do_not_disturb
+dontdisturb,do_not_disturb
+no disturb,do_not_disturb
+nodisturb,do_not_disturb
+dont clean,do_not_disturb
+dontclean,do_not_disturb
+too loud,noise_complaint
+cant sleep noise,noise_complaint
+cantsleep noise,noise_complaint
+neighbors loud,noise_complaint
+party next door,noise_complaint
+partynext door,noise_complaint
+quiet them down,noise_complaint
+quet them down,noise_complaint
+quietthem down,noise_complaint
+noise problem,noise_complaint
+noiseproblem,noise_complaint
+reduce noise,noise_complaint
+bring blanket,blanket_request
+bringblanket,blanket_request
+blanket please,blanket_request
+blankit please,blanket_request
+blanket pls,blanket_request
+another blanket,blanket_request
+another blankit,blanket_request
+get blanket,blanket_request
+getblanket,blanket_request
+send blanket,blanket_request
+send blankit,blanket_request
+sendblanket,blanket_request
+can i have blanket,blanket_request
+can i have blnket,blanket_request
+can i have blankit,blanket_request
+blanketpls,blanket_request
+blanket karanna,blanket_request
+blankit karanna,blanket_request
+cold need blanket,blanket_request
+coldneed blanket,blanket_request
+cold need blankit,blanket_request
+extra blankets,blanket_request
+extrablankets,blanket_request
+help me,emergency
+helpme,emergency
+emergency please,emergency
+emergency pls,emergency
+emergancy please,emergency
+emrgency please,emergency
+this is urgent,emergency
+urgent help,emergency
+urgenthelp,emergency
+call help,emergency
+need assistance,emergency
+emergency situation,emergency
+emergancy situation,emergency
+emergencysituation,emergency
+emrgency situation,emergency
+help needed,emergency
+urgent please,emergency
+urgent pleas,emergency
+urgent pleez,emergency
+i feel unsafe,emergency
+not safe,emergency
+notsafe,emergency
+scared,emergency
+fire,emergency
+injured,emergency
+help please,emergency
+emergency help,emergency
+assistance,emergency
+medical,emergency
+cant breath,emergency
+unsafe,emergency
+danger,emergency
+call police,emergency
+help pls,emergency
+urgent pls,emergency
+need help now,emergency
+help quick,emergency
+transportation,concierge_taxi
+ride,concierge_taxi
+arrange transport,concierge_taxi
+book taxi,concierge_taxi
+call taxi,concierge_taxi
+get taxi,concierge_taxi
+arrange transportation,concierge_taxi
+transport arrange,concierge_taxi
+need cab,concierge_taxi
+call cab,concierge_taxi
+pickup,concierge_taxi
+drop,concierge_taxi
+arange transport,concierge_taxi
+transport pls,concierge_taxi
+need ride,concierge_taxi
+order food,food_order
+snack,food_order
+water,food_order
+juice,food_order
+sandwich,food_order
+burger,food_order
+pizza,food_order
+pasta,food_order
+rice,food_order
+curry,food_order
+order breakfast,food_order
+order lunch,food_order
+order dinner,food_order
+send food,food_order
+food karanna,food_order
+food pls,food_order
+clean room,room_cleaning
+rome cleaning,room_cleaning
+clean karanna,room_cleaning
+cleaning pls,room_cleaning
+bed making,room_cleaning
+tidy please,room_cleaning
+housekeping,room_cleaning
+towel,towel_request
+need towel,towel_request
+bring towel,towel_request
+towel please,towel_request
+extra towel,towel_request
+send towel,towel_request
+towl,towel_request
+towel pls,towel_request
+towel karanna,towel_request
+two towels,towel_request
+towels bring,towel_request
+fix,maintenance
+repair,maintenance
+ac broken,maintenance
+tv not working,maintenance
+problem,maintenance
+issue,maintenance
+something broken,maintenance
+need fix,maintenance
+call maintenance,maintenance
+light broke,maintenance
+tv broke,maintenance
+fix pls,maintenance

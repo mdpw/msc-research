@@ -8,7 +8,7 @@ __pycache__/
 
 # Virtual Environments
 hotel_env/
-backend_env/
+hotel-backend-env/
 *.venv
 
 # Jupyter Notebook checkpoints

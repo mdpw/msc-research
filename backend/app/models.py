@@ -21,4 +21,14 @@ class StatusUpdate(BaseModel):
 class DepartmentUpdate(BaseModel):
     """Model for updating request department"""
     request_id: int
-    department: str  # 'Housekeeping', 'Room Service', 'Maintenance', 'Front Desk'
+    department: str  # 'Housekeeping', 'Room Service', 'Maintenance', 'Front Desk', 'Concierge'
+
+class Request(BaseModel):
+    """Complete request model"""
+    id: int
+    room_number: str
+    request_text: str
+    intent: Optional[str] = None
+    department: str
+    status: str
+    timestamp: str
