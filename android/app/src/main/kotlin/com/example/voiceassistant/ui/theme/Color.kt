@@ -1,4 +1,4 @@
-package example.voiceassistant.ui.theme
+package com.example.voiceassistant.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

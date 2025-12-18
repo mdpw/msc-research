@@ -25,28 +25,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.voiceassistant.NLUService
 import kotlinx.coroutines.launch
 import java.util.*
 
-// Data class for request history
 data class RequestItem(
     val id: Int,
     val requestText: String,
     val intent: String,
-    val confidence: Float,  // Added confidence
+    val confidence: Float,
     val status: String,
     val timestamp: String
 )
 
-// Intent result data class
-data class IntentResult(
-    val name: String,
-    val confidence: Float
-)
-
 class MainActivity : ComponentActivity() {
-
+    private lateinit var wakeWordService: WakeWordService
     private lateinit var voskService: VoskService
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var nluService: NLUService
@@ -55,17 +47,14 @@ class MainActivity : ComponentActivity() {
     private lateinit var webSocketService: WebSocketService
     private var ttsReady = false
     private val TAG = "MainActivity"
-
-    // Fixed room number for device
     private val ROOM_NUMBER = "101"
-
-    // Mutable state for request history that can be updated from WebSocket
     private val _requestHistory = mutableStateListOf<RequestItem>()
+    private val _wakeWordDetected = mutableStateOf(false)
+    private val _wakeWordEnabled = mutableStateOf(true)
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        Log.d(TAG, "🎤 Microphone permission result: $isGranted")
         if (!isGranted) {
             Toast.makeText(this, "Microphone permission required", Toast.LENGTH_LONG).show()
         }
@@ -74,59 +63,40 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d(TAG, "=".repeat(60))
-        Log.d(TAG, "🚀 Starting Hotel Voice Assistant")
-        Log.d(TAG, "   Room: $ROOM_NUMBER")
-        Log.d(TAG, "=".repeat(60))
-
-        // Request permission
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
-        // Initialize services
-        try {
-            Log.d(TAG, "Initializing Vosk service...")
-            voskService = VoskService(this)
+        wakeWordService = WakeWordService(this)
+        voskService = VoskService(this)
+        audioRecorder = AudioRecorder(this)
+        nluService = NLUService(this)
+        apiService = ApiService()
 
-            Log.d(TAG, "Initializing Audio recorder...")
-            audioRecorder = AudioRecorder(this)
-
-            Log.d(TAG, "Initializing NLU service...")
-            nluService = NLUService(this)
-            // NLU service will run automatic tests on initialization
-
-            Log.d(TAG, "Initializing API service...")
-            apiService = ApiService()
-
-            Log.d(TAG, "✅ All services initialized")
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Service initialization failed", e)
-            Toast.makeText(this, "Failed to initialize services: ${e.message}", Toast.LENGTH_LONG).show()
+        lifecycleScope.launch {
+            voskService.initialize()
         }
 
-        // Initialize TTS
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = tts.setLanguage(Locale.US)
-                ttsReady = result != TextToSpeech.LANG_MISSING_DATA &&
-                        result != TextToSpeech.LANG_NOT_SUPPORTED
-                if (ttsReady) {
-                    Toast.makeText(this, "✅ TTS Ready", Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, "✅ TTS initialized successfully")
-                } else {
-                    Log.e(TAG, "❌ TTS language not supported")
-                }
-            } else {
-                Log.e(TAG, "❌ TTS initialization failed")
+                tts.setLanguage(Locale.US)
+                ttsReady = true
             }
         }
 
-        // Initialize WebSocket
+        wakeWordService.initialize()
+        wakeWordService.startListening(
+            onDetected = { wakeWord ->
+                Log.d(TAG, "🎯 Wake word detected: $wakeWord")
+                runOnUiThread {
+                    _wakeWordDetected.value = !_wakeWordDetected.value
+                }
+            },
+            onErrorCallback = { error ->
+                Log.e(TAG, "❌ Wake word error: $error")
+            }
+        )
+
         connectWebSocket()
 
         setContent {
@@ -138,7 +108,14 @@ class MainActivity : ComponentActivity() {
                 apiService = apiService,
                 lifecycleScope = lifecycleScope,
                 requestHistory = _requestHistory,
-                onSpeakResponse = { message -> speakResponse(message) },
+                wakeWordDetected = _wakeWordDetected,
+                wakeWordEnabled = _wakeWordEnabled,
+                wakeWordService = wakeWordService,
+                onSpeakResponse = { message ->
+                    if (ttsReady) {
+                        tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                    }
+                },
                 onAddRequest = { request -> _requestHistory.add(0, request) }
             )
         }
@@ -146,75 +123,47 @@ class MainActivity : ComponentActivity() {
 
     private fun connectWebSocket() {
         try {
-            Log.d(TAG, "Connecting to WebSocket...")
             webSocketService = WebSocketService(ROOM_NUMBER)
             webSocketService.connect(
                 onMessage = { message ->
                     runOnUiThread {
-                        speakResponse(message)
+                        if (ttsReady) {
+                            tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
+                        }
                         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-                        Log.d(TAG, "📱 Received message: $message")
                     }
                 },
                 onStatusChange = { requestId, status ->
                     runOnUiThread {
-                        // Update request status in history
                         val index = _requestHistory.indexOfFirst { it.id == requestId }
                         if (index != -1) {
                             val oldRequest = _requestHistory[index]
                             _requestHistory[index] = oldRequest.copy(status = status)
-                            Log.d(TAG, "📱 Request $requestId status updated to: $status")
+
+                            if (ttsReady) {
+                                val statusMessage = when (status) {
+                                    "in_progress" -> "Your request ID $requestId is being processed"
+                                    "completed" -> "Your request ID $requestId is completed"
+                                    else -> "Your request ID $requestId status is $status"
+                                }
+                                tts.speak(statusMessage, TextToSpeech.QUEUE_ADD, null, null)
+                            }
                         }
                     }
                 }
             )
-            Log.d(TAG, "✅ WebSocket connected")
         } catch (e: Exception) {
-            Log.e(TAG, "❌ WebSocket connection failed", e)
-        }
-    }
-
-    private fun speakResponse(message: String) {
-        if (ttsReady) {
-            tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, null)
-            Log.d(TAG, "🔊 Speaking: $message")
-        } else {
-            Log.w(TAG, "⚠️ TTS not ready, cannot speak: $message")
-            Toast.makeText(this, "TTS not ready", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "WebSocket error", e)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        Log.d(TAG, "Cleaning up services...")
-
-        try {
-            voskService.release()
-            Log.d(TAG, "✅ Vosk service released")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error releasing Vosk", e)
-        }
-
-        try {
-            nluService.close()  // Changed from release() to close()
-            Log.d(TAG, "✅ NLU service released")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error releasing NLU", e)
-        }
-
-        if (::tts.isInitialized) {
-            tts.stop()
-            tts.shutdown()
-            Log.d(TAG, "✅ TTS shutdown")
-        }
-
-        if (::webSocketService.isInitialized) {
-            webSocketService.disconnect()
-            Log.d(TAG, "✅ WebSocket disconnected")
-        }
-
-        Log.d(TAG, "👋 MainActivity destroyed")
+        wakeWordService.release()
+        tts.shutdown()
+        voskService.release()
+        nluService.close()
+        webSocketService.disconnect()
     }
 }
 
@@ -227,333 +176,404 @@ fun VoiceAssistantScreen(
     apiService: ApiService,
     lifecycleScope: kotlinx.coroutines.CoroutineScope,
     requestHistory: List<RequestItem>,
+    wakeWordDetected: MutableState<Boolean>,
+    wakeWordEnabled: MutableState<Boolean>,
+    wakeWordService: WakeWordService,
     onSpeakResponse: (String) -> Unit,
     onAddRequest: (RequestItem) -> Unit
 ) {
-    var status by remember { mutableStateOf("Initializing...") }
+    val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
-    var isInitialized by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
+    var statusMessage by remember { mutableStateOf("") }
     var lastTranscription by remember { mutableStateOf("") }
     var lastIntent by remember { mutableStateOf("") }
     var lastConfidence by remember { mutableStateOf(0f) }
 
-    val context = LocalContext.current
-    val TAG = "VoiceAssistantScreen"
-
-    // Initialize STT (NLU is already initialized in MainActivity)
-    LaunchedEffect(Unit) {
-        try {
-            Log.d(TAG, "Initializing speech recognition...")
-            status = "Initializing speech recognition..."
-            voskService.initialize()
-
-            status = "✅ Ready! Press the button to speak"
-            isInitialized = true
-
-            Log.d(TAG, "✅ Screen initialized and ready")
-
-            // Optional: Run NLU debug tests
-            // Uncomment to see detailed logs for the test phrases
-            // nluService.runDebugTests()
-
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Initialization error: ${e.message}", e)
-            status = "❌ Error: ${e.message}"
+    // Update status message based on mode
+    LaunchedEffect(wakeWordEnabled.value) {
+        statusMessage = if (wakeWordEnabled.value) {
+            "Listening for 'Hello Hotel'..."
+        } else {
+            "Tap microphone to start"
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            // Header
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🏨 Hotel Voice Assistant",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Room $roomNumber",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+    // Wake word detection handler
+    LaunchedEffect(wakeWordDetected.value) {
+        if (wakeWordEnabled.value && !isRecording && !isProcessing) {
+            wakeWordService.stopListening()
 
-            Spacer(modifier = Modifier.height(16.dp))
+            statusMessage = "Wake word detected! Hello Guest, How can I help you?"
+            onSpeakResponse("Hello Guest, How can I help you?")
 
-            // Recording Button
-            Button(
-                onClick = {
-                    try {
-                        if (isRecording) {
-                            Log.d(TAG, "🛑 Stopping recording...")
-                            isRecording = false
-                            status = "Processing audio..."
+            kotlinx.coroutines.delay(2000)
 
-                            lifecycleScope.launch {
-                                try {
-                                    // Stop recording and get audio
-                                    val audioData = audioRecorder.stopRecording()
-                                    Log.d(TAG, "📊 Got ${audioData.size} audio samples")
-
-                                    if (audioData.isEmpty()) {
-                                        status = "❌ No audio recorded. Try again."
-                                        Log.w(TAG, "⚠️ Empty audio data")
-                                    } else {
-                                        // Step 1: Transcribe with Vosk
-                                        status = "🎤 Transcribing audio..."
-                                        val text = voskService.transcribeAudio(audioData)
-                                        lastTranscription = text
-
-                                        Log.d(TAG, "📝 Transcription: '$text'")
-
-                                        if (text.isNotEmpty()) {
-                                            // Step 2: Classify intent with NLU
-                                            status = "🧠 Understanding request..."
-
-                                            // Get intent with confidence
-                                            val (intent, confidence) = nluService.classifyIntent(text)
-                                            lastIntent = intent
-                                            lastConfidence = confidence
-
-                                            Log.d(TAG, "🎯 Intent: $intent (${(confidence * 100).toInt()}% confidence)")
-
-                                            // Check confidence threshold
-                                            if (confidence < 0.5f) {
-                                                Log.w(TAG, "⚠️ Low confidence: ${(confidence * 100).toInt()}%")
-                                                status = "⚠️ Not sure I understood. Intent: $intent (${(confidence * 100).toInt()}%)"
-                                                onSpeakResponse("I'm not sure I understood. Did you say $intent?")
-                                            } else {
-                                                // Step 3: Submit to backend
-                                                status = "📤 Sending to backend..."
-                                                apiService.submitRequest(
-                                                    roomNumber = roomNumber,
-                                                    requestText = text,
-                                                    intent = intent,
-                                                    onSuccess = { response ->
-                                                        lifecycleScope.launch {
-                                                            // Add to history
-                                                            val newRequest = RequestItem(
-                                                                id = response.requestId,
-                                                                requestText = text,
-                                                                intent = intent,
-                                                                confidence = confidence,
-                                                                status = "pending",
-                                                                timestamp = getCurrentTime()
-                                                            )
-                                                            onAddRequest(newRequest)
-
-                                                            status = "✅ Request sent: $intent"
-                                                            onSpeakResponse(response.message)
-
-                                                            Log.d(TAG, "✅ Request submitted successfully")
-                                                            Log.d(TAG, "   Request ID: ${response.requestId}")
-                                                            Log.d(TAG, "   Message: ${response.message}")
-                                                        }
-                                                    },
-                                                    onError = { error ->
-                                                        lifecycleScope.launch {
-                                                            status = "❌ Backend error: $error"
-                                                            Log.e(TAG, "❌ API error: $error")
-                                                        }
-                                                    }
-                                                )
-                                            }
-
-                                        } else {
-                                            status = "❌ Could not understand speech. Try again."
-                                            Log.w(TAG, "⚠️ Empty transcription from Vosk")
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "❌ Processing error", e)
-                                    status = "❌ Error: ${e.message}"
-                                }
-                            }
-                        } else {
-                            // Start recording
-                            Log.d(TAG, "▶️ Starting recording...")
-                            if (ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.RECORD_AUDIO
-                                ) == PackageManager.PERMISSION_GRANTED
-                            ) {
-                                audioRecorder.startRecording()
-                                isRecording = true
-                                status = "🎤 Listening... Speak now!"
-                                lastTranscription = ""
-                                lastIntent = ""
-                                lastConfidence = 0f
-                                Log.d(TAG, "✅ Recording started")
-                            } else {
-                                status = "❌ Microphone permission required"
-                                Log.e(TAG, "❌ Missing microphone permission")
-                                Toast.makeText(context, "Please grant microphone permission", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "❌ Button click error", e)
-                        status = "❌ Error: ${e.message}"
-                        isRecording = false
-                    }
+            processVoiceRequest(
+                audioRecorder = audioRecorder,
+                voskService = voskService,
+                nluService = nluService,
+                apiService = apiService,
+                roomNumber = roomNumber,
+                lifecycleScope = lifecycleScope,
+                onRecordingStart = { isRecording = true },
+                onRecordingStop = { isRecording = false },
+                onProcessingStart = { isProcessing = true },
+                onProcessingStop = { isProcessing = false },
+                onStatusUpdate = { statusMessage = it },
+                onTranscriptionUpdate = { lastTranscription = it },
+                onIntentUpdate = { intent, confidence ->
+                    lastIntent = intent
+                    lastConfidence = confidence
                 },
-                enabled = isInitialized,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isRecording)
-                        MaterialTheme.colorScheme.error
-                    else
-                        MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(
-                    text = if (isRecording) "🛑 Stop Recording" else "🎤 Start Recording",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Status Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = status,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-
-                    // Show last transcription and intent if available
-                    if (lastTranscription.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Divider()
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "Transcription:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = "\"$lastTranscription\"",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-
-                        if (lastIntent.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (lastConfidence > 0.75f)
-                                    Color(0xFF155724)
-                                else if (lastConfidence > 0.5f)
-                                    Color(0xFF856404)
-                                else
-                                    Color(0xFF721c24)
-                            )
+                onSpeakResponse = onSpeakResponse,
+                onAddRequest = onAddRequest,
+                onComplete = {
+                    wakeWordService.startListening(
+                        onDetected = { wakeWord ->
+                            android.util.Log.d("MainActivity", "🎯 Wake word detected: $wakeWord")
+                            wakeWordDetected.value = !wakeWordDetected.value
+                        },
+                        onErrorCallback = { error ->
+                            android.util.Log.e("MainActivity", "❌ Wake word error: $error")
                         }
+                    )
+                }
+            )
+        }
+    }
+
+    MaterialTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Hotel Voice Assistant",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Room $roomNumber",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Request History Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Recent Requests",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                if (requestHistory.isNotEmpty()) {
-                    Text(
-                        text = "${requestHistory.size} total",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Request History List
-            if (requestHistory.isEmpty()) {
+                // Wake Word Toggle
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Column {
+                            Text(
+                                text = "Wake Word Detection",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = if (wakeWordEnabled.value) "Say 'Hello Hotel' to activate" else "Use button to record",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Switch(
+                            checked = wakeWordEnabled.value,
+                            onCheckedChange = { enabled ->
+                                wakeWordEnabled.value = enabled
+                                if (enabled) {
+                                    wakeWordService.startListening(
+                                        onDetected = { wakeWord ->
+                                            android.util.Log.d("MainActivity", "🎯 Wake word detected: $wakeWord")
+                                            wakeWordDetected.value = !wakeWordDetected.value
+                                        },
+                                        onErrorCallback = { error ->
+                                            android.util.Log.e("MainActivity", "❌ Wake word error: $error")
+                                        }
+                                    )
+                                    statusMessage = "Listening for 'Hello Hotel'..."
+                                } else {
+                                    wakeWordService.stopListening()
+                                    statusMessage = "Tap microphone to start"
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = when {
+                                isRecording -> "🎤 Recording..."
+                                isProcessing -> "⚙️ Processing..."
+                                else -> "👂 ${if (wakeWordEnabled.value) "Listening" else "Ready"}"
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = statusMessage)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Microphone Button (only clickable when wake word is OFF)
+                        Button(
+                            onClick = {
+                                if (!wakeWordEnabled.value && !isRecording && !isProcessing) {
+                                    lifecycleScope.launch {
+                                        statusMessage = "Hello Guest, How can I help you?"
+                                        onSpeakResponse("Hello Guest, How can I help you?")
+
+                                        kotlinx.coroutines.delay(2500)
+
+                                        processVoiceRequest(
+                                            audioRecorder = audioRecorder,
+                                            voskService = voskService,
+                                            nluService = nluService,
+                                            apiService = apiService,
+                                            roomNumber = roomNumber,
+                                            lifecycleScope = lifecycleScope,
+                                            onRecordingStart = { isRecording = true },
+                                            onRecordingStop = { isRecording = false },
+                                            onProcessingStart = { isProcessing = true },
+                                            onProcessingStop = { isProcessing = false },
+                                            onStatusUpdate = { statusMessage = it },
+                                            onTranscriptionUpdate = { lastTranscription = it },
+                                            onIntentUpdate = { intent, confidence ->
+                                                lastIntent = intent
+                                                lastConfidence = confidence
+                                            },
+                                            onSpeakResponse = onSpeakResponse,
+                                            onAddRequest = onAddRequest,
+                                            onComplete = {
+                                                statusMessage = "Tap microphone to start"
+                                            }
+                                        )
+                                    }
+                                }
+                            },
+                            enabled = !wakeWordEnabled.value && !isRecording && !isProcessing,
+                            modifier = Modifier.size(100.dp),
+                            shape = RoundedCornerShape(50),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = when {
+                                    isRecording -> MaterialTheme.colorScheme.error
+                                    isProcessing -> MaterialTheme.colorScheme.tertiary
+                                    wakeWordEnabled.value -> Color.Gray
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                            )
                         ) {
                             Text(
-                                text = "📝",
-                                fontSize = 48.sp
+                                text = when {
+                                    isRecording -> "⏺️"
+                                    isProcessing -> "⚙️"
+                                    wakeWordEnabled.value -> "🔒"
+                                    else -> "🎤"
+                                },
+                                fontSize = 40.sp
                             )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = if (wakeWordEnabled.value) "Say 'Hello Hotel' or 'Hi Hotel'" else "Tap to speak",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        if (lastTranscription.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "No requests yet",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Start by pressing the microphone button",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            )
+                            Divider()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(text = "Transcription:")
+                            Text(text = "\"$lastTranscription\"", fontWeight = FontWeight.Medium)
+                            if (lastIntent.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)")
+                            }
                         }
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    items(requestHistory) { request ->
-                        RequestCard(request = request)
+                    Text(
+                        text = "Recent Requests",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (requestHistory.isNotEmpty()) {
+                        Text(text = "${requestHistory.size} total")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (requestHistory.isEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = "📝", fontSize = 48.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(text = "No requests yet")
+                                Text(
+                                    text = if (wakeWordEnabled.value) "Say 'Hello Hotel' to start" else "Tap microphone to start",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(requestHistory) { request ->
+                            RequestCard(request = request)
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+suspend fun processVoiceRequest(
+    audioRecorder: AudioRecorder,
+    voskService: VoskService,
+    nluService: NLUService,
+    apiService: ApiService,
+    roomNumber: String,
+    lifecycleScope: kotlinx.coroutines.CoroutineScope,
+    onRecordingStart: () -> Unit,
+    onRecordingStop: () -> Unit,
+    onProcessingStart: () -> Unit,
+    onProcessingStop: () -> Unit,
+    onStatusUpdate: (String) -> Unit,
+    onTranscriptionUpdate: (String) -> Unit,
+    onIntentUpdate: (String, Float) -> Unit,
+    onSpeakResponse: (String) -> Unit,
+    onAddRequest: (RequestItem) -> Unit,
+    onComplete: () -> Unit
+) {
+    try {
+        onRecordingStart()
+        onStatusUpdate("Recording your request...")
+
+        audioRecorder.startRecording()
+        kotlinx.coroutines.delay(5000)
+
+        val audioData = audioRecorder.stopRecording()
+        onRecordingStop()
+        onProcessingStart()
+        onStatusUpdate("Processing...")
+
+        lifecycleScope.launch {
+            try {
+                onStatusUpdate("Transcribing...")
+                val transcription = voskService.transcribeAudio(audioData)
+                onTranscriptionUpdate(transcription)
+
+                if (transcription.isEmpty()) {
+                    onStatusUpdate("No speech detected")
+                    onProcessingStop()
+                    onComplete()
+                    return@launch
+                }
+
+                onStatusUpdate("Understanding...")
+                val (intent, confidence) = nluService.classifyIntent(transcription)
+                onIntentUpdate(intent, confidence)
+
+                onStatusUpdate("Submitting...")
+                apiService.submitRequest(
+                    roomNumber = roomNumber,
+                    requestText = transcription,
+                    intent = intent,
+                    onSuccess = { response ->
+                        onAddRequest(
+                            RequestItem(
+                                id = response.requestId,
+                                requestText = transcription,
+                                intent = intent,
+                                confidence = confidence,
+                                status = "pending",
+                                timestamp = getCurrentTime()
+                            )
+                        )
+
+                        val responseWithId = "Your request ID ${response.requestId} has been received. ${response.message}"
+                        onSpeakResponse(responseWithId)
+                        onProcessingStop()
+                        onComplete()
+                    },
+                    onError = { error ->
+                        android.widget.Toast.makeText(null, error, android.widget.Toast.LENGTH_LONG).show()
+                        onProcessingStop()
+                        onComplete()
+                    }
+                )
+            } catch (e: Exception) {
+                onProcessingStop()
+                onComplete()
+            }
+        }
+    } catch (e: Exception) {
+        onRecordingStop()
+        onProcessingStop()
+        onComplete()
     }
 }
 
@@ -564,61 +584,28 @@ fun RequestCard(request: RequestItem) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
+            modifier = Modifier.fillMaxWidth().padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Request #${request.id}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                StatusBadge(status = request.status)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = request.requestText,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Intent: ${request.intent}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = request.timestamp,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(text = "Request #${request.id}", fontWeight = FontWeight.Bold)
+                StatusBadge(status = request.status)
             }
-
-            // Show confidence
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = request.requestText)
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Intent: ${request.intent}")
+                Text(text = request.timestamp)
+            }
             if (request.confidence > 0) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Confidence: ${(request.confidence * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (request.confidence > 0.75f)
-                        Color(0xFF155724)
-                    else if (request.confidence > 0.5f)
-                        Color(0xFF856404)
-                    else
-                        Color(0xFF721c24)
-                )
+                Text(text = "Confidence: ${(request.confidence * 100).toInt()}%")
             }
         }
     }
@@ -638,12 +625,7 @@ fun StatusBadge(status: String) {
             .background(backgroundColor, RoundedCornerShape(12.dp))
             .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = text, color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
