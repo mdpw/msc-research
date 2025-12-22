@@ -7,6 +7,8 @@ import org.vosk.Recognizer
 import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 
 class VoskService(private val context: Context) {
@@ -14,30 +16,34 @@ class VoskService(private val context: Context) {
     private var model: Model? = null
     private var recognizer: Recognizer? = null
     private val TAG = "VoskService"
+    
+    private val initMutex = Mutex()
+    private var isReady = false
 
     suspend fun initialize() = withContext(Dispatchers.IO) {
-        try {
-            //val modelDir = File(context.filesDir, "vosk-model")
-            val modelDir = File(context.filesDir, "vosk-model-en-us-0.22-lgraph")
+        initMutex.withLock {
+            if (isReady) return@withLock
+            
+            try {
+                Log.d(TAG, "🔧 Starting Vosk initialization...")
+                val modelDir = File(context.filesDir, "vosk-model-en-us-0.22")
 
-            if (!modelDir.exists()) {
-                Log.d(TAG, "📥 Copying model from assets...")
-                copyAssetFolder("models", modelDir.absolutePath)
-            } else {
-                Log.d(TAG, "✅ Model already exists")
+                if (!modelDir.exists()) {
+                    Log.d(TAG, "📥 Copying model from assets (this may take a while)...")
+                    copyAssetFolder("models", modelDir.absolutePath)
+                }
+
+                Log.d(TAG, "🔍 Loading Vosk model into memory...")
+                model = Model(modelDir.absolutePath)
+                recognizer = Recognizer(model, 16000.0f)
+                
+                isReady = true
+                Log.d(TAG, "✅ Vosk initialized successfully")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Init failed: ${e.message}", e)
+                throw Exception("Failed to initialize Vosk: ${e.message}")
             }
-
-            Log.d(TAG, "🔍 Initializing Vosk model...")
-            model = Model(modelDir.absolutePath)
-
-            // Create recognizer once during initialization
-            recognizer = Recognizer(model, 16000.0f)
-
-            Log.d(TAG, "✅ Vosk initialized successfully")
-
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Init failed: ${e.message}", e)
-            throw Exception("Failed to initialize Vosk: ${e.message}")
         }
     }
 
@@ -46,12 +52,10 @@ class VoskService(private val context: Context) {
         val files = assetManager.list(srcName) ?: arrayOf()
 
         val destDir = File(dstName)
-        if (!destDir.exists()) {
-            destDir.mkdirs()
-        }
+        if (!destDir.exists()) destDir.mkdirs()
 
         for (filename in files) {
-            val srcPath = "$srcName/$filename"
+            val srcPath = if (srcName.isEmpty()) filename else "$srcName/$filename"
             val dstPath = "$dstName/$filename"
 
             val subFiles = assetManager.list(srcPath)
@@ -68,47 +72,46 @@ class VoskService(private val context: Context) {
     }
 
     suspend fun transcribeAudio(audioData: FloatArray): String = withContext(Dispatchers.IO) {
+        // Wait if initialization is still happening
+        if (!isReady) {
+            Log.d(TAG, "⏳ Transcription requested but Vosk not ready. Waiting for init...")
+            initialize() 
+        }
+
         try {
-            Log.d(TAG, "🎤 Starting transcription of ${audioData.size} samples")
+            val rec = recognizer ?: return@withContext ""
+            Log.d(TAG, "🎤 Transcribing ${audioData.size} samples...")
 
-            if (recognizer == null) {
-                Log.e(TAG, "❌ Recognizer is null!")
-                return@withContext ""
-            }
+            // Reset recognizer for fresh start
+            rec.reset()
 
-            if (audioData.isEmpty()) {
-                Log.e(TAG, "❌ Audio data is empty!")
-                return@withContext ""
-            }
-
-            // Reset recognizer for new audio
-            recognizer?.reset()
-
-            // Convert float to byte array (16-bit PCM)
+            // Convert FloatArray to 16-bit PCM ByteArray
             val byteArray = ByteArray(audioData.size * 2)
             for (i in audioData.indices) {
                 val sample = (audioData[i] * 32767).toInt().coerceIn(-32768, 32767)
                 byteArray[i * 2] = (sample and 0xFF).toByte()
                 byteArray[i * 2 + 1] = ((sample shr 8) and 0xFF).toByte()
             }
-            Log.d(TAG, "✅ Audio converted to bytes: ${byteArray.size} bytes")
 
-            // Feed all audio at once
-            recognizer?.acceptWaveForm(byteArray, byteArray.size)
+            // Feed in chunks of 4096 bytes for better processing
+            val chunkSize = 4096
+            var offset = 0
+            while (offset < byteArray.size) {
+                val length = Math.min(chunkSize, byteArray.size - offset)
+                rec.acceptWaveForm(byteArray.sliceArray(offset until offset + length), length)
+                offset += length
+            }
 
-            // Get final result
-            val result = recognizer?.finalResult ?: ""
-            Log.d(TAG, "✅ Got result: $result")
+            val finalResult = rec.finalResult
+            Log.d(TAG, "✅ Raw Result: $finalResult")
 
-            val json = JSONObject(result)
-            val text = json.optString("text", "")
-
-            Log.d(TAG, "🎤 Transcribed: '$text'")
+            val text = JSONObject(finalResult).optString("text", "")
+            Log.d(TAG, "🎤 Final Transcription: '$text'")
+            
             return@withContext text.trim()
 
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Transcription failed: ${e.message}", e)
-            e.printStackTrace()
+            Log.e(TAG, "❌ Transcription error: ${e.message}")
             return@withContext ""
         }
     }
@@ -116,12 +119,11 @@ class VoskService(private val context: Context) {
     fun release() {
         try {
             recognizer?.close()
-            recognizer = null
             model?.close()
-            model = null
-            Log.d(TAG, "🔚 Vosk released")
+            isReady = false
+            Log.d(TAG, "🔚 Vosk resources released")
         } catch (e: Exception) {
-            Log.e(TAG, "Error releasing Vosk: ${e.message}", e)
+            Log.e(TAG, "Error releasing Vosk: ${e.message}")
         }
     }
 }

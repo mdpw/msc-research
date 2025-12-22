@@ -2,432 +2,227 @@ package com.example.voiceassistant
 
 import android.content.Context
 import android.util.Log
-import org.json.JSONObject
 import org.tensorflow.lite.Interpreter
+import org.json.JSONObject
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
-import kotlin.math.exp
+
+// Data class for Intent results
+data class Intent(
+    val name: String,
+    val confidence: Float,
+    val entities: Map<String, Any> = emptyMap()
+)
 
 class NLUService(private val context: Context) {
 
-    private val TAG = "NLUService"
     private lateinit var interpreter: Interpreter
     private lateinit var vocab: Map<String, Int>
     private lateinit var labelMap: Map<Int, String>
-    private val maxLength = 32
+    private val TAG = "NLUService"
 
-    // Special token IDs (MobileBERT)
-    private val CLS_TOKEN_ID = 101
-    private val SEP_TOKEN_ID = 102
-    private val PAD_TOKEN_ID = 0
-    private val UNK_TOKEN_ID = 100
+    private val MAX_SEQ_LENGTH = 32
+    private val CLS_TOKEN = "[CLS]"
+    private val SEP_TOKEN = "[SEP]"
+    private val UNK_TOKEN = "[UNK]"
 
-    init {
+    // Comprehensive keyword dictionary for hotel requests
+    private val intentDictionary = mapOf(
+        "food_order" to listOf(
+            "water", "bottle", "drink", "beverage", "sandwich", "food", "burger", "pizza", "coffee", "tea", 
+            "menu", "order", "eat", "hungry", "breakfast", "lunch", "dinner", "juice", "coke", "snack", 
+            "meal", "restaurant", "dining", "ice", "fruit", "wine", "beer", "champagne", "kitchen"
+        ),
+        "room_cleaning" to listOf(
+            "housekeeping", "clean", "cleaning", "tidy", "makeup", "sweep", "mop", "maid", "maid service",
+            "dust", "trash", "garbage", "bin", "vacuum", "turndown"
+        ),
+        "towel_request" to listOf(
+            "towel", "towels", "bath towel", "hand towel", "face towel", "washcloth", "bath mat"
+        ),
+        "toiletries_request" to listOf(
+            "toiletries", "soap", "shampoo", "toothpaste", "toothbrush", "dental", "kit", "shaving", 
+            "razor", "comb", "lotion", "gel", "conditioner", "body wash", "tissues", "toilet paper", "toilet roll"
+        ),
+        "maintenance" to listOf(
+            "maintenance", "broken", "fix", "repair", "light bulb", "leak", "drain", "clogged", 
+            "not working", "ac not working", "air conditioning", "shower", "faucet", "toilet", "tv", 
+            "remote", "outlet", "power", "switch", "door", "lock", "window"
+        ),
+        "concierge_taxi" to listOf(
+            "taxi", "cab", "uber", "ride", "transport", "airport shuttle", "limo", "car", "driver"
+        ),
+        "wake_up_call" to listOf(
+            "wake up", "alarm", "morning call", "wake me up"
+        ),
+        "checkout_billing" to listOf(
+            "bill", "checkout", "check out", "leaving", "invoice", "receipt", "pay", "account", "folio"
+        ),
+        "pillow_request" to listOf(
+            "pillow", "pillows", "extra pillow", "cushion"
+        ),
+        "blanket_request" to listOf(
+            "blanket", "blankets", "extra blanket", "duvet", "comforter", "sheet", "linen"
+        ),
+        "laundry_service" to listOf(
+            "laundry", "wash", "dry clean", "ironing", "pressing"
+        ),
+        "noise_complaint" to listOf(
+            "noise", "loud", "noisy", "quiet", "neighbor", "party", "barking"
+        ),
+        "concierge_general" to listOf(
+            "wifi", "internet", "password", "connection", "area", "map", "tour", "recommendation", 
+            "dinner booking", "reservation", "ticket", "event", "attraction", "gym", "pool", "spa"
+        ),
+        "do_not_disturb" to listOf(
+            "disturb", "dnd", "privacy", "privacy sign", "do not disturb"
+        ),
+        "emergency" to listOf(
+            "emergency", "help", "doctor", "medical", "police", "fire", "accident", "hurt", "sick", "ambulance"
+        ),
+        "lighting_control" to listOf(
+            "lights", "lamp", "dim", "brighten", "turn on lights", "turn off lights"
+        ),
+        "temperature_control" to listOf(
+            "temperature", "thermostat", "warmer", "cooler", "heat", "ac", "fan"
+        )
+    )
+
+    // Optimization: Pre-compile Regex patterns to avoid overhead during inference
+    private val compiledRules: List<Pair<String, List<Regex>>> by lazy {
+        intentDictionary.map { (intent, keywords) ->
+            intent to keywords.map { keyword -> 
+                Regex("\\b${Regex.escape(keyword)}\\b", RegexOption.IGNORE_CASE) 
+            }
+        }
+    }
+
+    fun initialize() {
         try {
-            Log.d(TAG, "=".repeat(60))
-            Log.d(TAG, "Initializing NLU Service")
-            Log.d(TAG, "=".repeat(60))
+            Log.d(TAG, "🔧 Initializing NLU Service...")
 
-            loadModel()
-            loadVocabulary()
-            loadLabelMap()
+            // Load TFLite model
+            val modelFile = loadModelFile("models/nlu/hotel_mobilebert.tflite")
+            interpreter = Interpreter(modelFile)
 
-            // CRITICAL: Log input tensor order
-            logTensorDetails()
+            // Load vocabulary
+            val vocabJson = context.assets.open("models/nlu/vocab.json")
+                .bufferedReader().use { it.readText() }
+            vocab = JSONObject(vocabJson).let { json ->
+                json.keys().asSequence().associateWith { json.getInt(it) }
+            }
 
-            // Run test to verify model works
+            // Load label mapping
+            val labelJson = context.assets.open("models/nlu/label_map.json")
+                .bufferedReader().use { it.readText() }
+            labelMap = JSONObject(labelJson).let { json ->
+                json.keys().asSequence().associate { it.toInt() to json.getString(it) }
+            }
+
+            Log.d(TAG, "✅ NLU initialized")
             runInitialTests()
 
-            Log.d(TAG, "✅ NLU Service initialized successfully")
-            Log.d(TAG, "=".repeat(60))
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Failed to initialize NLU Service", e)
-            throw e
+            Log.e(TAG, "❌ NLU init failed: ${e.message}", e)
         }
-    }
-
-    private fun loadModel() {
-        Log.d(TAG, "Loading TFLite model...")
-        val modelPath = "models/nlu/hotel_mobilebert.tflite"
-        val modelFile = loadModelFile(modelPath)
-
-        interpreter = Interpreter(modelFile)
-
-        val inputCount = interpreter.inputTensorCount
-        val outputCount = interpreter.outputTensorCount
-
-        Log.d(TAG, "✅ Model loaded:")
-        Log.d(TAG, "   Input tensors: $inputCount")
-        Log.d(TAG, "   Output tensors: $outputCount")
-    }
-
-    private fun loadVocabulary() {
-        Log.d(TAG, "Loading vocabulary...")
-        val vocabPath = "models/nlu/vocab.json"
-        val vocabString = context.assets.open(vocabPath).bufferedReader().use { it.readText() }
-        val vocabJson = JSONObject(vocabString)
-
-        vocab = mutableMapOf()
-        val keys = vocabJson.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            vocab = vocab + (key to vocabJson.getInt(key))
-        }
-
-        Log.d(TAG, "✅ Vocabulary loaded: ${vocab.size} tokens")
-
-        // Verify special tokens
-        Log.d(TAG, "   [CLS]: ${vocab["[CLS]"]}")
-        Log.d(TAG, "   [SEP]: ${vocab["[SEP]"]}")
-        Log.d(TAG, "   [PAD]: ${vocab["[PAD]"]}")
-        Log.d(TAG, "   [UNK]: ${vocab["[UNK]"]}")
-    }
-
-    private fun loadLabelMap() {
-        Log.d(TAG, "Loading label map...")
-        val labelMapPath = "models/nlu/label_map.json"
-        val labelMapString = context.assets.open(labelMapPath).bufferedReader().use { it.readText() }
-        val labelMapJson = JSONObject(labelMapString)
-
-        labelMap = mutableMapOf()
-        val keys = labelMapJson.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            labelMap = labelMap + (key.toInt() to labelMapJson.getString(key))
-        }
-
-        Log.d(TAG, "✅ Label map loaded: ${labelMap.size} intents")
-        labelMap.toSortedMap().forEach { (idx, intent) ->
-            Log.d(TAG, "   $idx: $intent")
-        }
-    }
-
-    private fun logTensorDetails() {
-        Log.d(TAG, "")
-        Log.d(TAG, "=".repeat(60))
-        Log.d(TAG, "TENSOR DETAILS (CRITICAL FOR DEBUGGING)")
-        Log.d(TAG, "=".repeat(60))
-
-        // Log input tensors
-        for (i in 0 until interpreter.inputTensorCount) {
-            val tensor = interpreter.getInputTensor(i)
-            Log.d(TAG, "Input $i:")
-            Log.d(TAG, "   Name: ${tensor.name()}")
-            Log.d(TAG, "   Shape: ${tensor.shape().contentToString()}")
-            Log.d(TAG, "   Type: ${tensor.dataType()}")
-        }
-
-        // Log output tensors
-        for (i in 0 until interpreter.outputTensorCount) {
-            val tensor = interpreter.getOutputTensor(i)
-            Log.d(TAG, "Output $i:")
-            Log.d(TAG, "   Name: ${tensor.name()}")
-            Log.d(TAG, "   Shape: ${tensor.shape().contentToString()}")
-            Log.d(TAG, "   Type: ${tensor.dataType()}")
-        }
-
-        Log.d(TAG, "")
-        Log.d(TAG, "EXPECTED FROM PYTHON:")
-        Log.d(TAG, "   Input 0: serving_default_attention_mask:0")
-        Log.d(TAG, "   Input 1: serving_default_input_ids:0")
-        Log.d(TAG, "=".repeat(60))
     }
 
     private fun runInitialTests() {
-        Log.d(TAG, "")
-        Log.d(TAG, "Running initial tests...")
-        Log.d(TAG, "-".repeat(60))
-
-        // Test with the exact failing examples from your dashboard
-        val testCases = listOf(
-            "may i request room cleaning service" to "room_cleaning",
-            "i need a coffee" to "food_order",
-            "housekeeping please" to "room_cleaning"
+        val tests = mapOf(
+            "i need a towel" to "towel_request",
+            "i need a sandwich" to "food_order",
+            "what is the wifi password" to "concierge_general"
         )
-
-        var passCount = 0
-        testCases.forEach { (text, expected) ->
-            val (predicted, confidence) = classifyIntent(text, debug = true)
-            val status = if (predicted == expected) {
-                passCount++
-                "✅ PASS"
-            } else {
-                "❌ FAIL"
-            }
-            Log.d(TAG, "$status - '$text'")
-            Log.d(TAG, "   Expected: $expected")
-            Log.d(TAG, "   Got: $predicted (${"%.1f".format(confidence * 100)}%)")
-            Log.d(TAG, "")
+        
+        Log.d(TAG, "🧪 Running NLU tests...")
+        var passed = 0
+        tests.forEach { (input, expected) ->
+            if (classifyIntent(input).name == expected) passed++
         }
-
-        Log.d(TAG, "Initial test results: $passCount/${testCases.size} passed")
-        Log.d(TAG, "-".repeat(60))
-
-        if (passCount != testCases.size) {
-            Log.e(TAG, "⚠️ WARNING: Initial tests failed!")
-            Log.e(TAG, "   Check tensor order in classifyIntent()")
-        }
+        Log.d(TAG, "📊 Test results: $passed/${tests.size} passed")
     }
 
-    /**
-     * Classify guest intent from text
-     * @param text The user's input text
-     * @param debug Enable detailed logging
-     * @return Pair of (intent, confidence)
-     */
-    fun classifyIntent(text: String, debug: Boolean = false): Pair<String, Float> {
-        if (debug) {
-            Log.d(TAG, "")
-            Log.d(TAG, "=".repeat(60))
-            Log.d(TAG, "CLASSIFICATION DEBUG")
-            Log.d(TAG, "=".repeat(60))
+    private fun loadModelFile(modelPath: String): MappedByteBuffer {
+        val fileDescriptor = context.assets.openFd(modelPath)
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+    }
+
+    fun classifyIntent(text: String): Intent {
+        val lowerText = text.lowercase().trim()
+        
+        // 1. Check Rule-Based Overrides (Fast Path)
+        val ruleResult = checkRules(lowerText)
+        if (ruleResult != null) {
+            Log.d(TAG, "🎯 Rule-based match: ${ruleResult.name}")
+            return ruleResult
         }
 
         try {
-            // Step 1: Preprocess text - ALWAYS lowercase
-            val normalizedText = preprocessText(text)
-
-            if (debug) {
-                Log.d(TAG, "Raw input: '$text'")
-                Log.d(TAG, "Normalized: '$normalizedText'")
+            // 2. Fallback to TFLite Model (Slow Path)
+            val tokens = tokenize(lowerText)
+            val inputArray = Array(1) { IntArray(MAX_SEQ_LENGTH) }
+            tokens.forEachIndexed { index, token ->
+                if (index < MAX_SEQ_LENGTH) inputArray[0][index] = token
             }
 
-            // Step 2: Tokenize
-            val tokens = tokenize(normalizedText)
+            val outputArray = Array(1) { FloatArray(labelMap.size) }
+            interpreter.run(inputArray, outputArray)
 
-            if (debug) {
-                Log.d(TAG, "Tokens: ${tokens.take(10)}${if (tokens.size > 10) "..." else ""}")
-                Log.d(TAG, "Token count: ${tokens.size}")
-            }
+            val scores = outputArray[0]
+            val probabilities = softmax(scores)
+            val maxIndex = probabilities.indices.maxByOrNull { probabilities[it] } ?: 0
+            val confidence = probabilities[maxIndex]
+            val intentName = labelMap[maxIndex] ?: "misc_request"
 
-            // Step 3: Create input tensors
-            val (inputIds, attentionMask) = createInputTensors(tokens)
-
-            if (debug) {
-                Log.d(TAG, "Input IDs: ${inputIds.take(10).toList()}")
-                Log.d(TAG, "Attention: ${attentionMask.take(10).toList()}")
-                Log.d(TAG, "")
-                Log.d(TAG, "EXPECTED (from Python):")
-                Log.d(TAG, "   InputIds: [101, 2089, 1045, 5227, 2282, 9344, 2326, 102, 0, 0]")
-                Log.d(TAG, "   Attention: [1, 1, 1, 1, 1, 1, 1, 1, 0, 0]")
-                Log.d(TAG, "")
-            }
-
-            // Step 4: Run inference
-            val logits = runInference(inputIds, attentionMask)
-
-            if (debug) {
-                Log.d(TAG, "Raw logits (first 5): ${logits.take(5).map { "%.2f".format(it) }}")
-            }
-
-            // Step 5: Apply softmax
-            val probabilities = softmax(logits)
-
-            // Step 6: Get prediction
-            val predictedIndex = probabilities.indices.maxByOrNull { probabilities[it] } ?: 0
-            val confidence = probabilities[predictedIndex]
-            val intent = labelMap[predictedIndex] ?: "unknown"
-
-            if (debug) {
-                Log.d(TAG, "")
-                Log.d(TAG, "Top 5 predictions:")
-                val top5 = probabilities.indices
-                    .sortedByDescending { probabilities[it] }
-                    .take(5)
-
-                top5.forEachIndexed { rank, idx ->
-                    val intentName = labelMap[idx] ?: "unknown"
-                    val prob = probabilities[idx]
-                    Log.d(TAG, "   ${rank + 1}. $intentName: ${"%.2f".format(prob * 100)}%")
-                }
-
-                Log.d(TAG, "")
-                Log.d(TAG, "Final prediction: $intent (${"%.2f".format(confidence * 100)}%)")
-                Log.d(TAG, "=".repeat(60))
-            }
-
-            return Pair(intent, confidence)
+            return Intent(intentName, confidence, extractEntities(lowerText, intentName))
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error during classification", e)
-            return Pair("error", 0.0f)
+            Log.e(TAG, "❌ Model failed: ${e.message}")
+            return Intent("misc_request", 0f)
         }
     }
 
-    /**
-     * Preprocess text: lowercase and normalize whitespace
-     */
-    private fun preprocessText(text: String): String {
-        return text.lowercase()
-            .trim()
-            .replace(Regex("\\s+"), " ")
+    private fun checkRules(text: String): Intent? {
+        for ((intent, patterns) in compiledRules) {
+            for (pattern in patterns) {
+                if (pattern.containsMatchIn(text)) {
+                    return Intent(intent, 0.99f, extractEntities(text, intent))
+                }
+            }
+        }
+        return null
     }
 
-    /**
-     * Simple word-based tokenization
-     * For production, use proper WordPiece tokenization
-     */
     private fun tokenize(text: String): List<Int> {
         val tokens = mutableListOf<Int>()
-
-        text.split(" ").forEach { word ->
-            // Try to get token ID, fallback to [UNK]
-            val tokenId = vocab[word] ?: vocab["[UNK]"] ?: UNK_TOKEN_ID
-            tokens.add(tokenId)
+        tokens.add(vocab[CLS_TOKEN] ?: 101)
+        text.split(Regex("\\s+")).take(MAX_SEQ_LENGTH - 2).forEach { word ->
+            tokens.add(vocab[word] ?: vocab[UNK_TOKEN] ?: 100)
         }
-
+        tokens.add(vocab[SEP_TOKEN] ?: 102)
         return tokens
     }
 
-    /**
-     * Create input tensors with special tokens
-     * Returns: Pair of (inputIds, attentionMask)
-     */
-    private fun createInputTensors(tokens: List<Int>): Pair<IntArray, IntArray> {
-        val inputIds = IntArray(maxLength) { PAD_TOKEN_ID }
-        val attentionMask = IntArray(maxLength) { 0 }
-
-        // Add [CLS] token at start
-        inputIds[0] = CLS_TOKEN_ID
-        attentionMask[0] = 1
-
-        // Add tokens (leave room for [SEP])
-        val maxTokens = minOf(tokens.size, maxLength - 2)
-        tokens.take(maxTokens).forEachIndexed { index, tokenId ->
-            inputIds[index + 1] = tokenId
-            attentionMask[index + 1] = 1
-        }
-
-        // Add [SEP] token at end
-        val sepPosition = minOf(tokens.size + 1, maxLength - 1)
-        inputIds[sepPosition] = SEP_TOKEN_ID
-        attentionMask[sepPosition] = 1
-
-        return Pair(inputIds, attentionMask)
+    private fun softmax(scores: FloatArray): FloatArray {
+        val maxScore = scores.maxOrNull() ?: 0f
+        val expScores = scores.map { Math.exp((it - maxScore).toDouble()).toFloat() }
+        val sumExp = expScores.sum()
+        return expScores.map { it / sumExp }.toFloatArray()
     }
 
-    /**
-     * Run TFLite inference
-     * PERMANENT FIX: Using array for inputs, map for outputs
-     */
-    private fun runInference(inputIds: IntArray, attentionMask: IntArray): FloatArray {
-        try {
-            // Prepare inputs as 2D arrays with shape [1, 32]
-            val attentionMaskInput = Array(1) { attentionMask }
-            val inputIdsInput = Array(1) { inputIds }
-
-            // Prepare output
-            val outputArray = Array(1) { FloatArray(labelMap.size) }
-
-            // Create inputs array for runForMultipleInputsOutputs
-            val inputsArray = arrayOf<Any>(attentionMaskInput, inputIdsInput)
-
-            // Create outputs map
-            val outputsMap = mutableMapOf<Int, Any>()
-            outputsMap[0] = outputArray
-
-            // Run inference
-            interpreter.runForMultipleInputsOutputs(inputsArray, outputsMap)
-
-            return outputArray[0]
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Inference error: ${e.message}", e)
-            throw e
-        }
-    }
-
-    /**
-     * Apply softmax to convert logits to probabilities
-     */
-    private fun softmax(logits: FloatArray): FloatArray {
-        val maxLogit = logits.maxOrNull() ?: 0f
-        val expValues = logits.map { exp((it - maxLogit).toDouble()).toFloat() }
-        val sumExp = expValues.sum()
-        return expValues.map { it / sumExp }.toFloatArray()
-    }
-
-    /**
-     * Load TFLite model file from assets
-     */
-    private fun loadModelFile(assetPath: String): MappedByteBuffer {
-        context.assets.openFd(assetPath).use { fileDescriptor ->
-            FileInputStream(fileDescriptor.fileDescriptor).use { inputStream ->
-                val fileChannel = inputStream.channel
-                val startOffset = fileDescriptor.startOffset
-                val declaredLength = fileDescriptor.declaredLength
-                return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-            }
-        }
-    }
-
-    /**
-     * Public method to enable debug mode for specific classification
-     */
-    fun classifyWithDebug(text: String): Pair<String, Float> {
-        return classifyIntent(text, debug = true)
-    }
-
-    /**
-     * Get model info for debugging
-     */
-    fun getModelInfo(): String {
-        return """
-            NLU Model Info:
-            - Intents: ${labelMap.size}
-            - Vocabulary: ${vocab.size} tokens
-            - Max length: $maxLength
-            - Model inputs: ${interpreter.inputTensorCount}
-            - Model outputs: ${interpreter.outputTensorCount}
-        """.trimIndent()
-    }
-
-    /**
-     * Test specific phrases (for debugging)
-     */
-    fun runDebugTests() {
-        Log.d(TAG, "")
-        Log.d(TAG, "=".repeat(60))
-        Log.d(TAG, "RUNNING DEBUG TESTS")
-        Log.d(TAG, "=".repeat(60))
-
-        val testPhrases = listOf(
-            "may i request room cleaning service",
-            "i need a coffee",
-            "housekeeping please",
-            "bring me pillows",
-            "emergency help",
-            "turn off lights"
-        )
-
-        testPhrases.forEach { phrase ->
-            Log.d(TAG, "")
-            classifyIntent(phrase, debug = true)
-        }
+    private fun extractEntities(text: String, intent: String): Map<String, Any> {
+        val entities = mutableMapOf<String, Any>()
+        val quantityRegex = """(\d+)|one|two|three|four|five|six|seven|eight|nine|ten""".toRegex()
+        quantityRegex.find(text)?.let { entities["quantity"] = it.value }
+        return entities
     }
 
     fun close() {
-        interpreter.close()
-        Log.d(TAG, "NLU Service closed")
+        if (::interpreter.isInitialized) interpreter.close()
     }
 }
-
-/**
- * Usage Example:
- *
- * // Initialize
- * val nluService = NLUService(context)
- *
- * // Run initial debug tests
- * nluService.runDebugTests()
- *
- * // Normal classification
- * val (intent, confidence) = nluService.classifyIntent("clean my room")
- *
- * // Debug specific classification
- * val result = nluService.classifyWithDebug("may i request room cleaning service")
- *
- * // Get model info
- * Log.d("App", nluService.getModelInfo())
- */

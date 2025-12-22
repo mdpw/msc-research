@@ -1,6 +1,7 @@
 package com.example.voiceassistant
 
 import android.util.Log
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -86,6 +87,55 @@ class ApiService {
 
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error: ${e.message}", e)
+                onError(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun getRequestHistory(
+        roomNumber: String,
+        onSuccess: (List<RequestItem>) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        thread {
+            try {
+                Log.d(TAG, "📤 Fetching history for room $roomNumber...")
+
+                val url = URL("$BASE_URL/api/request-history?room_number=$roomNumber")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                    val responseText = reader.readText()
+                    reader.close()
+
+                    // FIXED: First parse as JSONObject, then get the "requests" JSONArray
+                    val jsonResponse = JSONObject(responseText)
+                    val jsonArray = jsonResponse.getJSONArray("requests")
+                    
+                    val history = mutableListOf<RequestItem>()
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        history.add(RequestItem(
+                            id = obj.getInt("id"),
+                            requestText = obj.getString("request_text"),
+                            intent = obj.getString("intent"),
+                            confidence = obj.optDouble("confidence", 0.0).toFloat(),
+                            status = obj.getString("status"),
+                            timestamp = obj.optString("created_at", "") // Using created_at from your log
+                        ))
+                    }
+                    onSuccess(history)
+                } else {
+                    onError("Server error: $responseCode")
+                }
+                connection.disconnect()
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ History Error: ${e.message}")
                 onError(e.message ?: "Unknown error")
             }
         }

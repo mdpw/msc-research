@@ -125,3 +125,32 @@ def update_request_department(request_id, department):
     
     conn.commit()
     conn.close()
+
+def get_requests_by_room(room_number):
+    """Get all requests for a specific room"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT id, room_number, request_text, intent, department, status, created_at
+        FROM requests
+        WHERE room_number = ?
+        ORDER BY created_at DESC
+    """, (room_number,))
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    requests = []
+    for row in rows:
+        requests.append({
+            "id": row[0],
+            "room_number": row[1],
+            "request_text": row[2],
+            "intent": row[3],
+            "department": row[4],
+            "status": row[5],
+            "created_at": row[6]
+        })
+    
+    return requests

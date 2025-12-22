@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from app.models import RequestSubmit, RequestResponse, StatusUpdate, DepartmentUpdate
-from app.database import init_db, add_request, get_all_requests, update_request_status, get_request_by_id, update_request_department
+from app.database import init_db, add_request, get_all_requests, update_request_status, get_request_by_id, update_request_department, get_requests_by_room
 import json
 
 app = FastAPI(title="Hotel Voice Assistant API")
@@ -134,6 +134,12 @@ async def get_requests():
     requests = get_all_requests()
     return {"requests": requests}
 
+@app.get("/api/request-history")
+async def get_request_history(room_number: str):
+    """Get history of requests for a specific room"""
+    requests = get_requests_by_room(room_number)
+    return {"room_number": room_number, "requests": requests}
+
 @app.post("/api/update-status")
 async def update_status(update: StatusUpdate):
     request_info = get_request_by_id(update.request_id)
@@ -230,7 +236,7 @@ async def guest_websocket(websocket: WebSocket, room_number: str):
             await websocket.receive_text()
             
     except WebSocketDisconnect:
-        if room_number in guest_connections:
+        if room_number in guest_connections and guest_connections[room_number] == websocket:
             del guest_connections[room_number]
         print(f"📱 Guest Room {room_number} disconnected. Remaining: {len(guest_connections)}")
 

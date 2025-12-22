@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +30,7 @@
             background: white;
             padding: 40px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             width: 350px;
         }
 
@@ -87,7 +88,7 @@
         .header {
             background: white;
             padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -142,7 +143,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .stat-card h3 {
@@ -167,7 +168,7 @@
             padding: 20px;
             margin-bottom: 15px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             border-left: 4px solid #667eea;
         }
 
@@ -218,11 +219,25 @@
             color: white;
         }
 
-        .dept-housekeeping { background: #10b981; }
-        .dept-room-service { background: #f59e0b; }
-        .dept-maintenance { background: #ef4444; }
-        .dept-front-desk { background: #3b82f6; }
-        .dept-concierge { background: #8b5cf6; }
+        .dept-housekeeping {
+            background: #10b981;
+        }
+
+        .dept-room-service {
+            background: #f59e0b;
+        }
+
+        .dept-maintenance {
+            background: #ef4444;
+        }
+
+        .dept-front-desk {
+            background: #3b82f6;
+        }
+
+        .dept-concierge {
+            background: #8b5cf6;
+        }
 
         .request-footer {
             display: flex;
@@ -323,6 +338,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Login Screen -->
     <div class="login-container" id="loginScreen">
@@ -387,176 +403,176 @@
     </div>
 
     <script>
-    let ws;
-    let currentDepartment = '';
-    let currentStaff = '';
-    let allRequests = [];
-    let requestIds = new Set(); // Track request IDs to prevent duplicates
+        let ws;
+        let currentDepartment = '';
+        let currentStaff = '';
+        let allRequests = [];
+        let requestIds = new Set(); // Track request IDs to prevent duplicates
 
-    // Department list (UPDATED with Concierge)
-    const DEPARTMENTS = [
-        'Housekeeping',
-        'Room Service',
-        'Maintenance',
-        'Front Desk',
-        'Concierge'
-    ];
+        // Department list (UPDATED with Concierge)
+        const DEPARTMENTS = [
+            'Housekeeping',
+            'Room Service',
+            'Maintenance',
+            'Front Desk',
+            'Concierge'
+        ];
 
-    // Login
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        currentDepartment = document.getElementById('department').value;
-        currentStaff = document.getElementById('staffName').value;
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            currentDepartment = document.getElementById('department').value;
+            currentStaff = document.getElementById('staffName').value;
 
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('dashboard').classList.add('active');
-        document.getElementById('dashboardTitle').textContent = currentDepartment + ' Dashboard';
-        document.getElementById('staffNameDisplay').textContent = currentStaff;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            document.getElementById('dashboardTitle').textContent = currentDepartment + ' Dashboard';
+            document.getElementById('staffNameDisplay').textContent = currentStaff;
 
-        connectWebSocket();
-    });
+            connectWebSocket();
+        });
 
-    // Logout
-    function logout() {
-        if (ws) ws.close();
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('dashboard').classList.remove('active');
-        currentDepartment = '';
-        currentStaff = '';
-        allRequests = [];
-        requestIds.clear();
-    }
+        // Logout
+        function logout() {
+            if (ws) ws.close();
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').classList.remove('active');
+            currentDepartment = '';
+            currentStaff = '';
+            allRequests = [];
+            requestIds.clear();
+        }
 
-    // Connect to WebSocket
-    function connectWebSocket() {
-        ws = new WebSocket('ws://localhost:8000/ws/dashboard');
+        // Connect to WebSocket
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8000/ws/dashboard');
 
-        ws.onopen = function() {
-            console.log('✅ Connected to server');
-            updateConnectionStatus(true);
-        };
+            ws.onopen = function () {
+                console.log('✅ Connected to server');
+                updateConnectionStatus(true);
+            };
 
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            console.log('📨 Received:', data.type, data);
-            
-            if (data.type === 'initial') {
-                // Clear existing data
-                allRequests = [];
-                requestIds.clear();
-                
-                // Load all requests
-                data.requests.forEach(req => {
-                    requestIds.add(req.id);
-                    allRequests.push(req);
-                });
-                console.log(`📋 Loaded ${data.requests.length} requests`);
-                renderRequests();
-            } else if (data.type === 'new_request') {
-                // Only add if not already exists
-                if (!requestIds.has(data.id)) {
-                    requestIds.add(data.id);
-                    allRequests.unshift(data);
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                console.log('📨 Received:', data.type, data);
+
+                if (data.type === 'initial') {
+                    // Clear existing data
+                    allRequests = [];
+                    requestIds.clear();
+
+                    // Load all requests
+                    data.requests.forEach(req => {
+                        requestIds.add(req.id);
+                        allRequests.push(req);
+                    });
+                    console.log(`📋 Loaded ${data.requests.length} requests`);
                     renderRequests();
-                    console.log('✅ Added new request:', data.id);
-                    
-                    // Show notification if it's for this department
-                    if (data.department === currentDepartment) {
-                        showNotification(`New request from Room ${data.room_number}`);
+                } else if (data.type === 'new_request') {
+                    // Only add if not already exists
+                    if (!requestIds.has(data.id)) {
+                        requestIds.add(data.id);
+                        allRequests.unshift(data);
+                        renderRequests();
+                        console.log('✅ Added new request:', data.id);
+
+                        // Show notification if it's for this department
+                        if (data.department === currentDepartment) {
+                            showNotification(`New request #${data.id} from Room ${data.room_number}`);
+                        }
                     }
+                } else if (data.type === 'status_update') {
+                    updateRequestStatus(data.request_id, data.status);
+                } else if (data.type === 'department_update') {
+                    updateRequestDepartment(data.request_id, data.department);
                 }
-            } else if (data.type === 'status_update') {
-                updateRequestStatus(data.request_id, data.status);
-            } else if (data.type === 'department_update') {
-                updateRequestDepartment(data.request_id, data.department);
+            };
+
+            ws.onclose = function () {
+                console.log('❌ Disconnected from server');
+                updateConnectionStatus(false);
+                setTimeout(() => {
+                    console.log('🔄 Attempting to reconnect...');
+                    connectWebSocket();
+                }, 3000);
+            };
+
+            ws.onerror = function (error) {
+                console.error('❌ WebSocket error:', error);
+                updateConnectionStatus(false);
+            };
+        }
+
+        // Show notification
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Hotel Assistant', { body: message });
             }
-        };
-
-        ws.onclose = function() {
-            console.log('❌ Disconnected from server');
-            updateConnectionStatus(false);
-            setTimeout(() => {
-                console.log('🔄 Attempting to reconnect...');
-                connectWebSocket();
-            }, 3000);
-        };
-
-        ws.onerror = function(error) {
-            console.error('❌ WebSocket error:', error);
-            updateConnectionStatus(false);
-        };
-    }
-
-    // Show notification
-    function showNotification(message) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('Hotel Assistant', { body: message });
         }
-    }
 
-    // Request notification permission on load
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
-
-    // Update connection status
-    function updateConnectionStatus(connected) {
-        const status = document.getElementById('connectionStatus');
-        if (connected) {
-            status.textContent = '● Connected';
-            status.className = 'connection-status connected';
-        } else {
-            status.textContent = '● Disconnected';
-            status.className = 'connection-status disconnected';
+        // Request notification permission on load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
         }
-    }
 
-    // Filter requests by department
-    function getMyRequests() {
-        return allRequests.filter(req => req.department === currentDepartment);
-    }
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const status = document.getElementById('connectionStatus');
+            if (connected) {
+                status.textContent = '● Connected';
+                status.className = 'connection-status connected';
+            } else {
+                status.textContent = '● Disconnected';
+                status.className = 'connection-status disconnected';
+            }
+        }
 
-    // Get department badge class
-    function getDepartmentClass(department) {
-        const classMap = {
-            'Housekeeping': 'dept-housekeeping',
-            'Room Service': 'dept-room-service',
-            'Maintenance': 'dept-maintenance',
-            'Front Desk': 'dept-front-desk',
-            'Concierge': 'dept-concierge'
-        };
-        return classMap[department] || 'dept-front-desk';
-    }
+        // Filter requests by department
+        function getMyRequests() {
+            return allRequests.filter(req => req.department === currentDepartment);
+        }
 
-    // Render requests
-    function renderRequests() {
-        const myRequests = getMyRequests();
-        const pending = myRequests.filter(r => r.status === 'pending');
-        const inProgress = myRequests.filter(r => r.status === 'in_progress');
-        const completed = myRequests.filter(r => r.status === 'completed');
+        // Get department badge class
+        function getDepartmentClass(department) {
+            const classMap = {
+                'Housekeeping': 'dept-housekeeping',
+                'Room Service': 'dept-room-service',
+                'Maintenance': 'dept-maintenance',
+                'Front Desk': 'dept-front-desk',
+                'Concierge': 'dept-concierge'
+            };
+            return classMap[department] || 'dept-front-desk';
+        }
 
-        // Update stats
-        document.getElementById('pendingCount').textContent = pending.length;
-        document.getElementById('progressCount').textContent = inProgress.length;
-        document.getElementById('completedCount').textContent = completed.length;
+        // Render requests
+        function renderRequests() {
+            const myRequests = getMyRequests();
+            const pending = myRequests.filter(r => r.status === 'pending');
+            const inProgress = myRequests.filter(r => r.status === 'in_progress');
+            const completed = myRequests.filter(r => r.status === 'completed');
 
-        // Render request cards
-        const requestsList = document.getElementById('requestsList');
-        
-        if (myRequests.length === 0) {
-            requestsList.innerHTML = `
+            // Update stats
+            document.getElementById('pendingCount').textContent = pending.length;
+            document.getElementById('progressCount').textContent = inProgress.length;
+            document.getElementById('completedCount').textContent = completed.length;
+
+            // Render request cards
+            const requestsList = document.getElementById('requestsList');
+
+            if (myRequests.length === 0) {
+                requestsList.innerHTML = `
                 <div class="empty-state">
                     <h3>No requests yet</h3>
                     <p>Waiting for guest requests in ${currentDepartment}...</p>
                 </div>
             `;
-            return;
-        }
+                return;
+            }
 
-        requestsList.innerHTML = myRequests.map(req => `
+            requestsList.innerHTML = myRequests.map(req => `
             <div class="request-card ${req.status === 'completed' ? 'completed' : ''}">
                 <div class="request-header">
-                    <span class="room-number">Room ${req.room_number}</span>
+                    <span class="room-number">Req. No : ${req.id} | Room No : ${req.room_number}</span>
                     <span class="status-badge status-${req.status}">${formatStatus(req.status)}</span>
                 </div>
                 <div class="request-text">${req.request_text}</div>
@@ -567,9 +583,9 @@
                 </div>
                 <div class="request-footer">
                     ${req.status !== 'completed' ? `
-                        ${req.status === 'pending' ? 
-                            `<button class="btn btn-progress" onclick="updateStatus(${req.id}, 'in_progress')">Start Working</button>` : 
-                            ''}
+                        ${req.status === 'pending' ?
+                        `<button class="btn btn-progress" onclick="updateStatus(${req.id}, 'in_progress')">Start Working</button>` :
+                        ''}
                         <button class="btn btn-complete" onclick="updateStatus(${req.id}, 'completed')">Mark Complete</button>
                     ` : ''}
                     
@@ -582,98 +598,99 @@
                 </div>
             </div>
         `).join('');
-    }
-
-    // Update request status
-    function updateStatus(requestId, status) {
-        console.log('🔄 Updating status:', requestId, '→', status);
-        fetch('http://localhost:8000/api/update-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ request_id: requestId, status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('✅ Status updated:', data);
-        })
-        .catch(error => console.error('❌ Error updating status:', error));
-    }
-
-    // Change department
-    function changeDepartment(requestId, newDepartment) {
-        if (!newDepartment || newDepartment === '') return;
-        
-        const request = allRequests.find(r => r.id === requestId);
-        if (request && request.department === newDepartment) {
-            console.log('⚠️ Same department, skipping');
-            return;
         }
-        
-        console.log('🔄 Transferring request:', requestId, '→', newDepartment);
-        fetch('http://localhost:8000/api/update-department', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ request_id: requestId, department: newDepartment })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('✅ Department updated:', data);
-        })
-        .catch(error => console.error('❌ Error updating department:', error));
-    }
 
-    // Update local request status
-    function updateRequestStatus(requestId, status) {
-        console.log('🔄 Updating local status:', requestId, '→', status);
-        const request = allRequests.find(r => r.id === requestId);
-        if (request) {
-            request.status = status;
-            renderRequests();
-            console.log('✅ Status updated in UI');
-        } else {
-            console.log('⚠️ Request not found:', requestId);
+        // Update request status
+        function updateStatus(requestId, status) {
+            console.log('🔄 Updating status:', requestId, '→', status);
+            fetch('http://localhost:8000/api/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request_id: requestId, status: status })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Status updated:', data);
+                })
+                .catch(error => console.error('❌ Error updating status:', error));
         }
-    }
 
-    // Update local request department
-    function updateRequestDepartment(requestId, department) {
-        console.log('🔄 Updating local department:', requestId, '→', department);
-        const request = allRequests.find(r => r.id === requestId);
-        if (request) {
-            request.department = department;
-            renderRequests();
-            console.log('✅ Department updated in UI');
-        } else {
-            console.log('⚠️ Request not found:', requestId);
+        // Change department
+        function changeDepartment(requestId, newDepartment) {
+            if (!newDepartment || newDepartment === '') return;
+
+            const request = allRequests.find(r => r.id === requestId);
+            if (request && request.department === newDepartment) {
+                console.log('⚠️ Same department, skipping');
+                return;
+            }
+
+            console.log('🔄 Transferring request:', requestId, '→', newDepartment);
+            fetch('http://localhost:8000/api/update-department', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request_id: requestId, department: newDepartment })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Department updated:', data);
+                })
+                .catch(error => console.error('❌ Error updating department:', error));
         }
-    }
 
-    // Format status
-    function formatStatus(status) {
-        const statusMap = {
-            'pending': 'Pending',
-            'in_progress': 'In Progress',
-            'completed': 'Completed'
-        };
-        return statusMap[status] || status;
-    }
+        // Update local request status
+        function updateRequestStatus(requestId, status) {
+            console.log('🔄 Updating local status:', requestId, '→', status);
+            const request = allRequests.find(r => r.id === requestId);
+            if (request) {
+                request.status = status;
+                renderRequests();
+                console.log('✅ Status updated in UI');
+            } else {
+                console.log('⚠️ Request not found:', requestId);
+            }
+        }
 
-    // Format time
-    function formatTime(timestamp) {
-        if (!timestamp) return 'Just now';
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now - date;
-        const minutes = Math.floor(diff / 60000);
-        
-        if (minutes < 1) return 'Just now';
-        if (minutes < 60) return `${minutes} min ago`;
-        
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-        
-        return date.toLocaleString();
-    }
-</script>
+        // Update local request department
+        function updateRequestDepartment(requestId, department) {
+            console.log('🔄 Updating local department:', requestId, '→', department);
+            const request = allRequests.find(r => r.id === requestId);
+            if (request) {
+                request.department = department;
+                renderRequests();
+                console.log('✅ Department updated in UI');
+            } else {
+                console.log('⚠️ Request not found:', requestId);
+            }
+        }
+
+        // Format status
+        function formatStatus(status) {
+            const statusMap = {
+                'pending': 'Pending',
+                'in_progress': 'In Progress',
+                'completed': 'Completed'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Format time
+        function formatTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} min ago`;
+
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+
+            return date.toLocaleString();
+        }
+    </script>
 </body>
+
 </html>
