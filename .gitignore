@@ -9,6 +9,8 @@ __pycache__/
 # Virtual Environments
 hotel_env/
 backend_env/
+wake-word-model-env/
+wake_word_data/
 *.venv
 
 # Jupyter Notebook checkpoints
