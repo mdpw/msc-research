@@ -19,7 +19,7 @@ class WebSocketService(private val roomNumber: String) {
     private var reconnectAttempts = 0
     private val MAX_RECONNECT_DELAY = 30000L // 30 seconds
 
-    private val WS_URL = "ws://10.0.2.2:8000/ws/guest/$roomNumber"
+    private val WS_URL = "ws://192.168.1.103:8000/ws/guest/$roomNumber"
 
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)

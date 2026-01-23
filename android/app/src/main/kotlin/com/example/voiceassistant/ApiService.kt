@@ -19,8 +19,8 @@ data class RequestResponse(
 class ApiService {
     private val TAG = "ApiService"
 
-    // Change this to your server IP
-    private val BASE_URL = "http://10.0.2.2:8000"
+    // Server IP
+    private val BASE_URL = "http://192.168.1.103:8000"
 
     fun submitRequest(
         roomNumber: String,
