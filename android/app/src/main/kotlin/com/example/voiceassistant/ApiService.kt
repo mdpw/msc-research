@@ -16,11 +16,8 @@ data class RequestResponse(
     val requestId: Int
 )
 
-class ApiService {
+class ApiService(private val baseUrl: String) {
     private val TAG = "ApiService"
-
-    // Server IP
-    private val BASE_URL = "http://192.168.1.103:8000"
 
     fun submitRequest(
         roomNumber: String,
@@ -33,7 +30,7 @@ class ApiService {
             try {
                 Log.d(TAG, "📤 Sending request to server...")
 
-                val url = URL("$BASE_URL/api/submit-request")
+                val url = URL("$baseUrl/api/submit-request")
                 val connection = url.openConnection() as HttpURLConnection
 
                 connection.requestMethod = "POST"
@@ -101,7 +98,7 @@ class ApiService {
             try {
                 Log.d(TAG, "📤 Fetching history for room $roomNumber...")
 
-                val url = URL("$BASE_URL/api/request-history?room_number=$roomNumber")
+                val url = URL("$baseUrl/api/request-history?room_number=$roomNumber")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.connectTimeout = 5000

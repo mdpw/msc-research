@@ -7,19 +7,17 @@ import okhttp3.*
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
-class WebSocketService(private val roomNumber: String) {
+class WebSocketService(private val roomNumber: String, private val wsUrl: String) {
 
     private val TAG = "WebSocketService"
     private var webSocket: WebSocket? = null
     private var onMessageReceived: ((String) -> Unit)? = null
     private var onStatusUpdate: ((Int, String) -> Unit)? = null
-    
+
     private var isConnected = false
     private val reconnectHandler = Handler(Looper.getMainLooper())
     private var reconnectAttempts = 0
     private val MAX_RECONNECT_DELAY = 30000L // 30 seconds
-
-    private val WS_URL = "ws://192.168.1.103:8000/ws/guest/$roomNumber"
 
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
@@ -35,9 +33,9 @@ class WebSocketService(private val roomNumber: String) {
     }
 
     private fun internalConnect() {
-        Log.d(TAG, "🔌 Attempting to connect to WebSocket...")
+        Log.d(TAG, "🔌 Attempting to connect to WebSocket: $wsUrl")
         val request = Request.Builder()
-            .url(WS_URL)
+            .url(wsUrl)
             .build()
 
         webSocket = client.newWebSocket(request, object : WebSocketListener() {

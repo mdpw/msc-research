@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -15,7 +16,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -41,19 +47,25 @@ data class RequestItem(
 )
 
 class MainActivity : ComponentActivity() {
-    private lateinit var wakeWordService: WakeWordService
     private lateinit var voskService: VoskService
     private lateinit var audioRecorder: AudioRecorder
     private lateinit var nluService: NLUService
-    private lateinit var apiService: ApiService
+    private val _apiService = mutableStateOf<ApiService?>(null)
+    private var apiService: ApiService
+        get() = _apiService.value!!
+        set(value) { _apiService.value = value }
     private lateinit var tts: TextToSpeech
     private lateinit var webSocketService: WebSocketService
     private var ttsReady = false
     private val TAG = "MainActivity"
     private val ROOM_NUMBER = "101"
     private val _requestHistory = mutableStateListOf<RequestItem>()
-    private val _wakeWordDetected = mutableIntStateOf(0)
-    private val _wakeWordEnabled = mutableStateOf(false)
+
+    // Network & server config state
+    private val _wifiSsid = mutableStateOf<String?>(null)
+    private val _deviceIp = mutableStateOf<String?>(null)
+    private val _activeProfileIndex = mutableIntStateOf(0)
+    private val _profiles = mutableStateListOf<NetworkProfile>()
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -65,14 +77,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            refreshNetworkInfo()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Load server config from SharedPreferences
+        ServerConfig.load(this)
+        _profiles.clear()
+        _profiles.addAll(ServerConfig.profiles)
+        _activeProfileIndex.intValue = ServerConfig.activeProfileIndex
 
         voskService = VoskService(this)
         audioRecorder = AudioRecorder(this)
         nluService = NLUService(this)
-        apiService = ApiService()
-        wakeWordService = WakeWordService(this)
+        apiService = ApiService(ServerConfig.baseUrl)
 
         tts = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
@@ -94,6 +119,13 @@ class MainActivity : ComponentActivity() {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
+        // Request location permission for WiFi SSID detection
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            refreshNetworkInfo()
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
         connectWebSocket()
 
         setContent {
@@ -102,30 +134,30 @@ class MainActivity : ComponentActivity() {
                 voskService = voskService,
                 audioRecorder = audioRecorder,
                 nluService = nluService,
-                apiService = apiService,
+                apiService = _apiService.value ?: return@setContent,
                 lifecycleScope = lifecycleScope,
                 requestHistory = _requestHistory,
-                wakeWordDetected = _wakeWordDetected,
-                wakeWordEnabled = _wakeWordEnabled,
-                wakeWordService = wakeWordService,
-                onSpeakResponse = { message ->
-                    if (ttsReady) {
-                        val params = Bundle()
-                        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UtteranceId")
-                        tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "UtteranceId")
-                    }
-                },
+                wifiSsid = _wifiSsid,
+                deviceIp = _deviceIp,
+                profiles = _profiles,
+                activeProfileIndex = _activeProfileIndex,
+                onSpeakAndWait = { message -> speakAndWait(message) },
+                onSpeakResponse = { message -> speakFire(message) },
                 onAddRequest = { request -> _requestHistory.add(0, request) },
                 onCloseApp = { finish() },
-                onRefreshRequests = { refreshRequests() }
+                onRefreshRequests = { refreshRequests() },
+                onProfileSwitch = { index -> switchProfile(index) },
+                onProfileUpdate = { index, profile -> updateProfile(index, profile) },
+                onProfileAdd = { profile -> addProfile(profile) },
+                onProfileRemove = { index -> removeProfile(index) }
             )
         }
-        
+
         refreshRequests()
     }
 
     private fun refreshRequests() {
-        apiService.getRequestHistory(ROOM_NUMBER, 
+        apiService.getRequestHistory(ROOM_NUMBER,
             onSuccess = { history ->
                 runOnUiThread {
                     _requestHistory.clear()
@@ -135,6 +167,7 @@ class MainActivity : ComponentActivity() {
             onError = { error ->
                 runOnUiThread {
                     Toast.makeText(this, "Sync failed", Toast.LENGTH_SHORT).show()
+                    speakFire("There is an issue with network connectivity. Please contact the help desk using the land line phone.")
                 }
             }
         )
@@ -146,36 +179,94 @@ class MainActivity : ComponentActivity() {
             voskService.initialize()
         }
         nluService.initialize()
-        wakeWordService.initialize()
-        
-        if (_wakeWordEnabled.value) {
-            startWakeWordListening()
+    }
+
+    private fun refreshNetworkInfo() {
+        _wifiSsid.value = NetworkUtils.getWifiSsid(this)
+        _deviceIp.value = NetworkUtils.getDeviceIp(this)
+        Log.d(TAG, "Network: SSID=${_wifiSsid.value}, IP=${_deviceIp.value}")
+    }
+
+    private fun switchProfile(index: Int) {
+        ServerConfig.switchProfile(this, index)
+        _activeProfileIndex.intValue = index
+        reconnectToServer()
+        Toast.makeText(this, "Switched to: ${ServerConfig.activeProfile.name}", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateProfile(index: Int, profile: NetworkProfile) {
+        ServerConfig.updateProfile(this, index, profile)
+        _profiles.clear()
+        _profiles.addAll(ServerConfig.profiles)
+        if (index == _activeProfileIndex.intValue) {
+            reconnectToServer()
         }
     }
 
-    private fun startWakeWordListening() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) return
-        
-        try {
-            wakeWordService.startListening(
-                onDetected = { wakeWord ->
-                    Log.d(TAG, "🎯 Wake word detected: $wakeWord")
-                    runOnUiThread {
-                        _wakeWordDetected.intValue += 1
-                    }
-                },
-                onErrorCallback = { error ->
-                    Log.e(TAG, "❌ Wake word error: $error")
-                }
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start wake word listening", e)
+    private fun addProfile(profile: NetworkProfile) {
+        ServerConfig.addProfile(this, profile)
+        _profiles.clear()
+        _profiles.addAll(ServerConfig.profiles)
+    }
+
+    private fun removeProfile(index: Int) {
+        ServerConfig.removeProfile(this, index)
+        _profiles.clear()
+        _profiles.addAll(ServerConfig.profiles)
+        _activeProfileIndex.intValue = ServerConfig.activeProfileIndex
+        reconnectToServer()
+    }
+
+    private fun speakFire(message: String) {
+        if (ttsReady) {
+            val params = Bundle()
+            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "fire")
+            tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "fire")
         }
+    }
+
+    private suspend fun speakAndWait(message: String) {
+        if (!ttsReady) return
+        val deferred = CompletableDeferred<Unit>()
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {}
+            override fun onDone(utteranceId: String?) { deferred.complete(Unit) }
+            @Deprecated("Deprecated in Java")
+            override fun onError(utteranceId: String?) { deferred.complete(Unit) }
+        })
+        val params = Bundle()
+        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "greeting")
+        tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "greeting")
+        deferred.await()
+    }
+
+    private fun reconnectToServer() {
+        apiService = ApiService(ServerConfig.baseUrl)
+        if (::webSocketService.isInitialized) {
+            webSocketService.disconnect()
+        }
+        connectWebSocket()
+        // Check connectivity by fetching history
+        apiService.getRequestHistory(ROOM_NUMBER,
+            onSuccess = { history ->
+                runOnUiThread {
+                    _requestHistory.clear()
+                    _requestHistory.addAll(history)
+                    speakFire("Successfully connected to ${ServerConfig.activeProfile.name}. System is ready.")
+                }
+            },
+            onError = { error ->
+                runOnUiThread {
+                    speakFire("Failed to connect to ${ServerConfig.activeProfile.name}. Please check the network connection or contact the help desk using the land line phone.")
+                }
+            }
+        )
+        Log.d(TAG, "Server config updated: ${ServerConfig.baseUrl}")
     }
 
     private fun connectWebSocket() {
         try {
-            webSocketService = WebSocketService(ROOM_NUMBER)
+            webSocketService = WebSocketService(ROOM_NUMBER, ServerConfig.wsUrl(ROOM_NUMBER))
             webSocketService.connect(
                 onMessage = { message ->
                     runOnUiThread {
@@ -208,12 +299,14 @@ class MainActivity : ComponentActivity() {
             )
         } catch (e: Exception) {
             Log.e(TAG, "WebSocket error", e)
+            runOnUiThread {
+                speakFire("There is an issue with network connectivity. Please contact the help desk using the land line phone.")
+            }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        wakeWordService.release()
         tts.shutdown()
         voskService.release()
         nluService.close()
@@ -230,70 +323,28 @@ fun VoiceAssistantScreen(
     apiService: ApiService,
     lifecycleScope: kotlinx.coroutines.CoroutineScope,
     requestHistory: List<RequestItem>,
-    wakeWordDetected: MutableIntState,
-    wakeWordEnabled: MutableState<Boolean>,
-    wakeWordService: WakeWordService,
+    wifiSsid: State<String?>,
+    deviceIp: State<String?>,
+    profiles: List<NetworkProfile>,
+    activeProfileIndex: MutableIntState,
+    onSpeakAndWait: suspend (String) -> Unit,
     onSpeakResponse: (String) -> Unit,
     onAddRequest: (RequestItem) -> Unit,
     onCloseApp: () -> Unit,
-    onRefreshRequests: () -> Unit
+    onRefreshRequests: () -> Unit,
+    onProfileSwitch: (Int) -> Unit,
+    onProfileUpdate: (Int, NetworkProfile) -> Unit,
+    onProfileAdd: (NetworkProfile) -> Unit,
+    onProfileRemove: (Int) -> Unit
 ) {
     val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
     var isProcessing by remember { mutableStateOf(false) }
-    var statusMessage by remember { mutableStateOf("") }
+    var statusMessage by remember { mutableStateOf("Tap microphone to start") }
     var lastTranscription by remember { mutableStateOf("") }
     var lastIntent by remember { mutableStateOf("") }
     var lastConfidence by remember { mutableStateOf(0f) }
-
-    LaunchedEffect(wakeWordEnabled.value) {
-        statusMessage = if (wakeWordEnabled.value) "Listening for 'Hello Hotel'..." else "Tap microphone to start"
-    }
-
-    LaunchedEffect(wakeWordDetected.intValue) {
-        if (wakeWordDetected.intValue > 0 && wakeWordEnabled.value && !isRecording && !isProcessing) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                return@LaunchedEffect
-            }
-
-            wakeWordService.stopListening()
-            statusMessage = "Hello Guest, How can I help you?"
-            onSpeakResponse("Hello Guest, How can I help you?")
-
-            kotlinx.coroutines.delay(2000)
-
-            processVoiceRequest(
-                audioRecorder = audioRecorder,
-                voskService = voskService,
-                nluService = nluService,
-                apiService = apiService,
-                roomNumber = roomNumber,
-                lifecycleScope = lifecycleScope,
-                onRecordingStart = { isRecording = true },
-                onRecordingStop = { isRecording = false },
-                onProcessingStart = { isProcessing = true },
-                onProcessingStop = { isProcessing = false },
-                onStatusUpdate = { statusMessage = it },
-                onTranscriptionUpdate = { lastTranscription = it },
-                onIntentUpdate = { intent, confidence ->
-                    lastIntent = intent
-                    lastConfidence = confidence
-                },
-                onSpeakResponse = onSpeakResponse,
-                onAddRequest = onAddRequest,
-                onComplete = {
-                    if (wakeWordEnabled.value) {
-                        try {
-                            wakeWordService.startListening(
-                                onDetected = { wakeWordDetected.intValue += 1 },
-                                onErrorCallback = { }
-                            )
-                        } catch (e: Exception) { }
-                    }
-                }
-            )
-        }
-    }
+    var showServerDialog by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -301,7 +352,7 @@ fun VoiceAssistantScreen(
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
                     Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Column {
-                            Text(text = "Hotel Voice Assistant", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                            Text(text = "Sera - Voice Assistant", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                             Text(text = "Room $roomNumber", style = MaterialTheme.typography.titleMedium)
                         }
                         IconButton(onClick = onCloseApp) {
@@ -310,33 +361,76 @@ fun VoiceAssistantScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(text = "Wake Word Detection", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(text = if (wakeWordEnabled.value) "Say 'Hello Hotel' to activate" else "Use button to record", style = MaterialTheme.typography.bodySmall)
+                // Network Info + Profile Selector Card
+                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(
+                                text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "IP: ${deviceIp.value ?: "N/A"}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                        Switch(
-                            checked = wakeWordEnabled.value,
-                            onCheckedChange = { enabled ->
-                                wakeWordEnabled.value = enabled
-                                if (enabled) {
-                                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                                        wakeWordService.startListening(onDetected = { wakeWordDetected.intValue += 1 }, onErrorCallback = { })
-                                        statusMessage = "Listening for 'Hello Hotel'..."
-                                    }
-                                } else {
-                                    wakeWordService.stopListening()
-                                    statusMessage = "Tap microphone to start"
-                                }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        // Profile toggle buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            profiles.forEachIndexed { index, profile ->
+                                val isActive = index == activeProfileIndex.intValue
+                                FilterChip(
+                                    selected = isActive,
+                                    onClick = {
+                                        if (!isActive) onProfileSwitch(index)
+                                    },
+                                    label = { Text(profile.name, fontSize = 12.sp) },
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
-                        )
+                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(18.dp))
+                            }
+                        }
+                        // Show active server
+                        val active = profiles.getOrNull(activeProfileIndex.intValue)
+                        if (active != null) {
+                            Text(
+                                text = "Server: ${active.serverIp}:${active.serverPort}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF2E7D32)
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Profile edit dialog
+                if (showServerDialog) {
+                    ProfileEditDialog(
+                        profiles = profiles,
+                        activeIndex = activeProfileIndex.intValue,
+                        onDismiss = { showServerDialog = false },
+                        onUpdateProfile = { index, profile ->
+                            onProfileUpdate(index, profile)
+                        },
+                        onAddProfile = { profile ->
+                            onProfileAdd(profile)
+                        },
+                        onRemoveProfile = { index ->
+                            onProfileRemove(index)
+                            if (profiles.size <= 1) showServerDialog = false
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -344,7 +438,7 @@ fun VoiceAssistantScreen(
                             text = when {
                                 isRecording -> "🎤 Recording..."
                                 isProcessing -> "⚙️ Processing..."
-                                else -> "👂 ${if (wakeWordEnabled.value) "Listening" else "Ready"}"
+                                else -> "👂 Ready"
                             },
                             style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold
                         )
@@ -354,11 +448,10 @@ fun VoiceAssistantScreen(
 
                         Button(
                             onClick = {
-                                if (!wakeWordEnabled.value && !isRecording && !isProcessing) {
+                                if (!isRecording && !isProcessing) {
                                     lifecycleScope.launch {
-                                        statusMessage = "Hello Guest, How can I help you?"
-                                        onSpeakResponse("Hello Guest, How can I help you?")
-                                        kotlinx.coroutines.delay(2500)
+                                        statusMessage = "Hello! I'm Sera. How can I help you?"
+                                        onSpeakAndWait("Hello! I'm Sera. How can I help you?")
                                         processVoiceRequest(
                                             audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
                                             { isRecording = true }, { isRecording = false }, { isProcessing = true }, { isProcessing = false },
@@ -368,23 +461,22 @@ fun VoiceAssistantScreen(
                                     }
                                 }
                             },
-                            enabled = !wakeWordEnabled.value && !isRecording && !isProcessing,
+                            enabled = !isRecording && !isProcessing,
                             modifier = Modifier.size(100.dp), shape = RoundedCornerShape(50),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = when {
                                     isRecording -> MaterialTheme.colorScheme.error
                                     isProcessing -> MaterialTheme.colorScheme.tertiary
-                                    wakeWordEnabled.value -> Color.Gray
                                     else -> MaterialTheme.colorScheme.primary
                                 }
                             )
                         ) {
-                            val buttonIcon = if (isRecording) "⏺️" else if (isProcessing) "⚙️" else if (wakeWordEnabled.value) "🔒" else "🎤"
+                            val buttonIcon = if (isRecording) "⏺️" else if (isProcessing) "⚙️" else "🎤"
                             Text(text = buttonIcon, fontSize = 40.sp)
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = if (wakeWordEnabled.value) "Say 'Hello Hotel' or 'Hi Hotel'" else "Tap to speak", style = MaterialTheme.typography.bodySmall)
+                        Text(text = "Tap to speak", style = MaterialTheme.typography.bodySmall)
 
                         if (lastTranscription.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(8.dp)); HorizontalDivider(); Spacer(modifier = Modifier.height(8.dp))
@@ -415,7 +507,7 @@ fun VoiceAssistantScreen(
                                     Text(text = "📝", fontSize = 48.sp)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(text = "No requests yet")
-                                    Text(text = if (wakeWordEnabled.value) "Say 'Hello Hotel' to start" else "Tap microphone to start", style = MaterialTheme.typography.bodySmall)
+                                    Text(text = "Tap microphone to start", style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }
@@ -455,10 +547,14 @@ suspend fun processVoiceRequest(
     }
 
     try {
-        onRecordingStart(); onStatusUpdate("Recording..."); audioRecorder.startRecording()
-        kotlinx.coroutines.delay(5000)
+        onRecordingStart(); onStatusUpdate("Listening... (speak now)")
 
-        val audioData = audioRecorder.stopRecording()
+        val audioData = audioRecorder.recordWithVAD(
+            silenceTimeoutMs = 1500L,
+            maxDurationMs = 10000L,
+            onStateChange = { state -> onStatusUpdate(state) }
+        )
+
         onRecordingStop(); onProcessingStart(); onStatusUpdate("Processing...")
 
         lifecycleScope.launch {
@@ -472,7 +568,8 @@ suspend fun processVoiceRequest(
                 }
 
                 onStatusUpdate("Understanding...")
-                val intentResult = nluService.classifyIntent(transcription)
+                val cleanedTranscription = cleanTranscription(transcription)
+                val intentResult = nluService.classifyIntent(cleanedTranscription)
                 onIntentUpdate(intentResult.name, intentResult.confidence)
 
                 onStatusUpdate("Submitting...")
@@ -484,7 +581,11 @@ suspend fun processVoiceRequest(
                         onSpeakResponse(speechText)
                         onProcessingStop(); onComplete()
                     },
-                    onError = { onStatusUpdate("Submission failed"); onProcessingStop(); onComplete() }
+                    onError = {
+                        onStatusUpdate("Submission failed")
+                        onSpeakResponse("Sorry, I could not send your request due to a network issue. Please contact the help desk using the land line phone.")
+                        onProcessingStop(); onComplete()
+                    }
                 )
             } catch (e: Exception) { onStatusUpdate("Error occurred"); onProcessingStop(); onComplete() }
         }
@@ -519,6 +620,123 @@ fun StatusBadge(status: String) {
     Box(modifier = Modifier.background(backgroundColor, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 4.dp)) {
         Text(text = text, color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
+}
+
+@Composable
+fun ProfileEditDialog(
+    profiles: List<NetworkProfile>,
+    activeIndex: Int,
+    onDismiss: () -> Unit,
+    onUpdateProfile: (Int, NetworkProfile) -> Unit,
+    onAddProfile: (NetworkProfile) -> Unit,
+    onRemoveProfile: (Int) -> Unit
+) {
+    var editingIndex by remember { mutableStateOf<Int?>(null) }
+    var editName by remember { mutableStateOf("") }
+    var editIp by remember { mutableStateOf("") }
+    var editPort by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Network Profiles") },
+        text = {
+            Column {
+                profiles.forEachIndexed { index, profile ->
+                    if (editingIndex == index) {
+                        OutlinedTextField(
+                            value = editName,
+                            onValueChange = { editName = it },
+                            label = { Text("Name") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = editIp,
+                            onValueChange = { editIp = it },
+                            label = { Text("Server IP") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = editPort,
+                            onValueChange = { editPort = it },
+                            label = { Text("Port") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(onClick = {
+                                onUpdateProfile(index, NetworkProfile(editName.trim(), editIp.trim(), editPort.toIntOrNull() ?: 8000))
+                                editingIndex = null
+                            }) { Text("Save") }
+                            TextButton(onClick = { editingIndex = null }) { Text("Cancel") }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = profile.name + if (index == activeIndex) " (Active)" else "",
+                                    fontWeight = if (index == activeIndex) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = "${profile.serverIp}:${profile.serverPort}",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            IconButton(onClick = {
+                                editingIndex = index
+                                editName = profile.name
+                                editIp = profile.serverIp
+                                editPort = profile.serverPort.toString()
+                            }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
+                            }
+                            if (profiles.size > 1) {
+                                IconButton(onClick = { onRemoveProfile(index) }, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = Color.Red)
+                                }
+                            }
+                        }
+                    }
+                    if (index < profiles.lastIndex) HorizontalDivider()
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onAddProfile(NetworkProfile("New Network", "192.168.1.100", 8000))
+            }) { Text("Add Profile") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Close") }
+        }
+    )
+}
+
+fun cleanTranscription(text: String): String {
+    val prefixPatterns = listOf(
+        "hi sera", "hey sera", "hello sera", "sera",
+        "hi there", "hey there", "hello there",
+        "hi", "hey", "hello",
+        "excuse me", "please", "can you", "could you", "i need you to"
+    )
+    var cleaned = text.lowercase().trim()
+    for (pattern in prefixPatterns) {
+        if (cleaned.startsWith(pattern)) {
+            cleaned = cleaned.removePrefix(pattern).trim()
+            cleaned = cleaned.removePrefix(",").removePrefix(".").trim()
+            break
+        }
+    }
+    return cleaned.ifEmpty { text.trim() }
 }
 
 fun getCurrentTime(): String {
