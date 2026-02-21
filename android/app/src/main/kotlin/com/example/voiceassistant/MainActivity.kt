@@ -42,6 +42,7 @@ data class RequestItem(
     val requestText: String,
     val intent: String,
     val confidence: Float,
+    val department: String,
     val status: String,
     val timestamp: String
 )
@@ -344,69 +345,90 @@ fun VoiceAssistantScreen(
     var lastTranscription by remember { mutableStateOf("") }
     var lastIntent by remember { mutableStateOf("") }
     var lastConfidence by remember { mutableStateOf(0f) }
+    var lastDepartment by remember { mutableStateOf("") }
     var showServerDialog by remember { mutableStateOf(false) }
+    var settingsExpanded by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
-                    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(text = "Sera - Voice Assistant", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                            Text(text = "Room $roomNumber", style = MaterialTheme.typography.titleMedium)
-                        }
-                        IconButton(onClick = onCloseApp) {
-                            Icon(Icons.Default.Close, contentDescription = "Close App", tint = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                }
+            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Network Info + Profile Selector Card
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(
-                                text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "IP: ${deviceIp.value ?: "N/A"}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        // Profile toggle buttons
+                // ── Collapsible Settings Panel (About + Network) ──
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // Always-visible header row
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            profiles.forEachIndexed { index, profile ->
-                                val isActive = index == activeProfileIndex.intValue
-                                FilterChip(
-                                    selected = isActive,
-                                    onClick = {
-                                        if (!isActive) onProfileSwitch(index)
-                                    },
-                                    label = { Text(profile.name, fontSize = 12.sp) },
-                                    modifier = Modifier.weight(1f)
-                                )
+                            Column {
+                                Text(text = "Sera - Voice Assistant", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                Text(text = "Room $roomNumber", style = MaterialTheme.typography.bodySmall)
                             }
-                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(18.dp))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { settingsExpanded = !settingsExpanded }, modifier = Modifier.size(32.dp)) {
+                                    Icon(
+                                        if (settingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = "Toggle Settings"
+                                    )
+                                }
+                                IconButton(onClick = onCloseApp, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.Close, contentDescription = "Close App", tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
-                        // Show active server
-                        val active = profiles.getOrNull(activeProfileIndex.intValue)
-                        if (active != null) {
-                            Text(
-                                text = "Server: ${active.serverIp}:${active.serverPort}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF2E7D32)
-                            )
+
+                        // Collapsible content: Network info + Profile selector
+                        AnimatedVisibility(visible = settingsExpanded) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text(
+                                            text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = "IP: ${deviceIp.value ?: "N/A"}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        profiles.forEachIndexed { index, profile ->
+                                            val isActive = index == activeProfileIndex.intValue
+                                            FilterChip(
+                                                selected = isActive,
+                                                onClick = { if (!isActive) onProfileSwitch(index) },
+                                                label = { Text(profile.name, fontSize = 11.sp) },
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+                                        IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(16.dp))
+                                        }
+                                    }
+                                    val active = profiles.getOrNull(activeProfileIndex.intValue)
+                                    if (active != null) {
+                                        Text(
+                                            text = "Server: ${active.serverIp}:${active.serverPort}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF2E7D32)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -417,12 +439,8 @@ fun VoiceAssistantScreen(
                         profiles = profiles,
                         activeIndex = activeProfileIndex.intValue,
                         onDismiss = { showServerDialog = false },
-                        onUpdateProfile = { index, profile ->
-                            onProfileUpdate(index, profile)
-                        },
-                        onAddProfile = { profile ->
-                            onProfileAdd(profile)
-                        },
+                        onUpdateProfile = { index, profile -> onProfileUpdate(index, profile) },
+                        onAddProfile = { profile -> onProfileAdd(profile) },
                         onRemoveProfile = { index ->
                             onProfileRemove(index)
                             if (profiles.size <= 1) showServerDialog = false
@@ -430,22 +448,18 @@ fun VoiceAssistantScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = when {
-                                isRecording -> "🎤 Recording..."
-                                isProcessing -> "⚙️ Processing..."
-                                else -> "👂 Ready"
-                            },
-                            style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = statusMessage)
-                        Spacer(modifier = Modifier.height(16.dp))
-
+                // ── Mic Section (1/3 of remaining space) ──
+                Card(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Button(
                             onClick = {
                                 if (!isRecording && !isProcessing) {
@@ -455,14 +469,17 @@ fun VoiceAssistantScreen(
                                         processVoiceRequest(
                                             audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
                                             { isRecording = true }, { isRecording = false }, { isProcessing = true }, { isProcessing = false },
-                                            { statusMessage = it }, { lastTranscription = it }, { i, c -> lastIntent = i; lastConfidence = c },
-                                            onSpeakResponse, onAddRequest, { statusMessage = "Tap microphone to start" }
+                                            { statusMessage = it }, { lastTranscription = it },
+                                            { i, c -> lastIntent = i; lastConfidence = c },
+                                            onSpeakResponse,
+                                            { request -> lastDepartment = request.department; onAddRequest(request) },
+                                            { statusMessage = "Tap microphone to start" }
                                         )
                                     }
                                 }
                             },
                             enabled = !isRecording && !isProcessing,
-                            modifier = Modifier.size(100.dp), shape = RoundedCornerShape(50),
+                            modifier = Modifier.size(80.dp), shape = RoundedCornerShape(50),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = when {
                                     isRecording -> MaterialTheme.colorScheme.error
@@ -472,47 +489,65 @@ fun VoiceAssistantScreen(
                             )
                         ) {
                             val buttonIcon = if (isRecording) "⏺️" else if (isProcessing) "⚙️" else "🎤"
-                            Text(text = buttonIcon, fontSize = 40.sp)
+                            Text(text = buttonIcon, fontSize = 32.sp)
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Tap to speak", style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = when {
+                                isRecording -> "Recording..."
+                                isProcessing -> "Processing..."
+                                else -> "Tap to speak"
+                            },
+                            style = MaterialTheme.typography.bodySmall
+                        )
 
                         if (lastTranscription.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp)); HorizontalDivider(); Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Transcription:"); Text(text = "\"$lastTranscription\"", fontWeight = FontWeight.Medium)
+                            Spacer(modifier = Modifier.height(6.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = "Transcription:", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "\"$lastTranscription\"", fontWeight = FontWeight.Medium, fontSize = 13.sp)
                             if (lastIntent.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)")
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall)
+                            }
+                            if (lastDepartment.isNotEmpty()) {
+                                Text(text = "Department: $lastDepartment", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Recent Requests", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = onRefreshRequests) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh Requests")
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // ── Recent Requests Section (2/3 of remaining space) ──
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Recent Requests", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    IconButton(onClick = onRefreshRequests, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", modifier = Modifier.size(18.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                Box(modifier = Modifier.fillMaxWidth().weight(2f)) {
                     if (requestHistory.isEmpty()) {
                         Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = "📝", fontSize = 48.sp)
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(text = "No requests yet")
-                                    Text(text = "Tap microphone to start", style = MaterialTheme.typography.bodySmall)
+                                    Text(text = "📝", fontSize = 40.sp)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(text = "No requests yet", style = MaterialTheme.typography.bodySmall)
                                 }
                             }
                         }
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             items(requestHistory) { request -> RequestCard(request = request) }
                         }
                     }
@@ -576,7 +611,7 @@ suspend fun processVoiceRequest(
                 apiService.submitRequest(
                     roomNumber = roomNumber, requestText = transcription, intent = intentResult.name,
                     onSuccess = { response ->
-                        onAddRequest(RequestItem(response.requestId, transcription, intentResult.name, intentResult.confidence, "pending", getCurrentTime()))
+                        onAddRequest(RequestItem(response.requestId, transcription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime()))
                         val speechText = "Your request No.${response.requestId} has been received."
                         onSpeakResponse(speechText)
                         onProcessingStop(); onComplete()
@@ -602,7 +637,7 @@ fun RequestCard(request: RequestItem) {
             }
             Spacer(modifier = Modifier.height(8.dp)); Text(text = request.requestText); Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Intent: ${request.intent}", style = MaterialTheme.typography.bodySmall)
+                Text(text = "${request.intent} | ${request.department}", style = MaterialTheme.typography.bodySmall)
                 Text(text = request.timestamp, style = MaterialTheme.typography.bodySmall)
             }
         }

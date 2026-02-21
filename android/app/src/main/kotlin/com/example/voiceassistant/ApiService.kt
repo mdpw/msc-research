@@ -122,8 +122,9 @@ class ApiService(private val baseUrl: String) {
                             requestText = obj.getString("request_text"),
                             intent = obj.getString("intent"),
                             confidence = obj.optDouble("confidence", 0.0).toFloat(),
+                            department = obj.optString("department", "Pending"),
                             status = obj.getString("status"),
-                            timestamp = obj.optString("created_at", "") // Using created_at from your log
+                            timestamp = obj.optString("created_at", "")
                         ))
                     }
                     onSuccess(history)
