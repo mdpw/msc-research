@@ -177,6 +177,11 @@
             border-left-color: #28a745;
         }
 
+        .request-card.cancelled {
+            opacity: 0.5;
+            border-left-color: #6c757d;
+        }
+
         .request-header {
             display: flex;
             justify-content: space-between;
@@ -297,6 +302,11 @@
             color: #155724;
         }
 
+        .status-cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
         .department-select {
             padding: 6px 12px;
             border: 1px solid #ddd;
@@ -335,6 +345,97 @@
         .connection-status.disconnected {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        /* Staff Message Input */
+        .message-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .message-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-send {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn-send:hover {
+            background: #5568d3;
+        }
+
+        .btn-send:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Staff Messages List */
+        .staff-messages {
+            margin-top: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .staff-msg {
+            background: #f0f4ff;
+            padding: 6px 10px;
+            border-radius: 5px;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .staff-msg .msg-sender {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Rating Display */
+        .rating-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 10px;
+        }
+
+        .rating-display .star {
+            color: #f59e0b;
+            font-size: 16px;
+        }
+
+        .rating-display .star.empty {
+            color: #ddd;
+        }
+
+        .rating-label {
+            font-size: 12px;
+            color: #666;
+            margin-left: 4px;
         }
     </style>
 </head>
@@ -388,6 +489,10 @@
                 <div class="stat-card">
                     <h3>Completed</h3>
                     <div class="number" id="completedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Cancelled</h3>
+                    <div class="number" id="cancelledCount">0</div>
                 </div>
             </div>
 
@@ -485,6 +590,10 @@
                     updateRequestStatus(data.request_id, data.status);
                 } else if (data.type === 'department_update') {
                     updateRequestDepartment(data.request_id, data.department);
+                } else if (data.type === 'staff_message') {
+                    addStaffMessageToRequest(data.request_id, data.message, data.staff_name);
+                } else if (data.type === 'rating_update') {
+                    updateRequestRating(data.request_id, data.rating);
                 }
             };
 
@@ -550,11 +659,13 @@
             const pending = myRequests.filter(r => r.status === 'pending');
             const inProgress = myRequests.filter(r => r.status === 'in_progress');
             const completed = myRequests.filter(r => r.status === 'completed');
+            const cancelled = myRequests.filter(r => r.status === 'cancelled');
 
             // Update stats
             document.getElementById('pendingCount').textContent = pending.length;
             document.getElementById('progressCount').textContent = inProgress.length;
             document.getElementById('completedCount').textContent = completed.length;
+            document.getElementById('cancelledCount').textContent = cancelled.length;
 
             // Render request cards
             const requestsList = document.getElementById('requestsList');
@@ -569,35 +680,59 @@
                 return;
             }
 
-            requestsList.innerHTML = myRequests.map(req => `
-            <div class="request-card ${req.status === 'completed' ? 'completed' : ''}">
-                <div class="request-header">
-                    <span class="room-number">Req. No : ${req.id} | Room No : ${req.room_number}</span>
-                    <span class="status-badge status-${req.status}">${formatStatus(req.status)}</span>
-                </div>
-                <div class="request-text">${req.request_text}</div>
-                <div class="request-meta">
-                    <span class="department-badge ${getDepartmentClass(req.department)}">${req.department}</span>
-                    <span><strong>Intent:</strong> ${req.intent || 'N/A'}</span>
-                    <span><strong>Time:</strong> ${formatTime(req.created_at)}</span>
-                </div>
-                <div class="request-footer">
-                    ${req.status !== 'completed' ? `
-                        ${req.status === 'pending' ?
-                        `<button class="btn btn-progress" onclick="updateStatus(${req.id}, 'in_progress')">Start Working</button>` :
-                        ''}
-                        <button class="btn btn-complete" onclick="updateStatus(${req.id}, 'completed')">Mark Complete</button>
+            requestsList.innerHTML = myRequests.map(req => {
+                const isTerminal = req.status === 'completed' || req.status === 'cancelled';
+                const ratingHtml = req.rating ? renderRating(req.rating) : (req.status === 'completed' ? '<span class="rating-label">No rating yet</span>' : '');
+
+                return `
+                <div class="request-card ${req.status}">
+                    <div class="request-header">
+                        <span class="room-number">Req. No : ${req.id} | Room No : ${req.room_number}</span>
+                        <span>
+                            <span class="status-badge status-${req.status}">${formatStatus(req.status)}</span>
+                            ${ratingHtml}
+                        </span>
+                    </div>
+                    <div class="request-text">${req.request_text}</div>
+                    <div class="request-meta">
+                        <span class="department-badge ${getDepartmentClass(req.department)}">${req.department}</span>
+                        <span><strong>Intent:</strong> ${req.intent || 'N/A'}</span>
+                        <span><strong>Time:</strong> ${formatTime(req.created_at)}</span>
+                    </div>
+                    <div class="request-footer">
+                        ${!isTerminal ? `
+                            ${req.status === 'pending' ?
+                            `<button class="btn btn-progress" onclick="updateStatus(${req.id}, 'in_progress')">Start Working</button>` :
+                            ''}
+                            <button class="btn btn-complete" onclick="updateStatus(${req.id}, 'completed')">Mark Complete</button>
+                        ` : ''}
+
+                        <select class="department-select" onchange="changeDepartment(${req.id}, this.value)" ${isTerminal ? 'disabled' : ''}>
+                            <option value="">Transfer to...</option>
+                            ${DEPARTMENTS.map(dept => `
+                                <option value="${dept}" ${req.department === dept ? 'selected' : ''}>${dept}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+
+                    ${!isTerminal ? `
+                    <div class="message-section">
+                        <div class="message-input-row">
+                            <input type="text" class="message-input" id="msg-${req.id}" placeholder="Send message to guest in Room ${req.room_number}..." onkeypress="if(event.key==='Enter') sendMessage(${req.id})">
+                            <button class="btn-send" onclick="sendMessage(${req.id})">Send</button>
+                        </div>
+                        ${req.messages && req.messages.length > 0 ? `
+                            <div class="staff-messages">
+                                ${req.messages.map(m => `
+                                    <div class="staff-msg"><span class="msg-sender">${m.staff_name}:</span> ${m.message}</div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
                     ` : ''}
-                    
-                    <select class="department-select" onchange="changeDepartment(${req.id}, this.value)" ${req.status === 'completed' ? 'disabled' : ''}>
-                        <option value="">Transfer to...</option>
-                        ${DEPARTMENTS.map(dept => `
-                            <option value="${dept}" ${req.department === dept ? 'selected' : ''}>${dept}</option>
-                        `).join('')}
-                    </select>
                 </div>
-            </div>
-        `).join('');
+                `;
+            }).join('');
         }
 
         // Update request status
@@ -664,12 +799,80 @@
             }
         }
 
+        // Send staff message to guest
+        function sendMessage(requestId) {
+            const input = document.getElementById(`msg-${requestId}`);
+            const message = input.value.trim();
+            if (!message) return;
+
+            const btn = input.nextElementSibling;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            fetch('http://localhost:8000/api/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    request_id: requestId,
+                    message: message,
+                    staff_name: currentStaff
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = '';
+                    console.log('Message sent to guest');
+                } else {
+                    alert('Failed to send message: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Send';
+            });
+        }
+
+        // Add staff message to local request data
+        function addStaffMessageToRequest(requestId, message, staffName) {
+            const request = allRequests.find(r => r.id === requestId);
+            if (request) {
+                if (!request.messages) request.messages = [];
+                request.messages.push({ message, staff_name: staffName });
+                renderRequests();
+            }
+        }
+
+        // Update request rating locally
+        function updateRequestRating(requestId, rating) {
+            const request = allRequests.find(r => r.id === requestId);
+            if (request) {
+                request.rating = rating;
+                renderRequests();
+            }
+        }
+
+        // Render star rating
+        function renderRating(rating) {
+            let stars = '<span class="rating-display">';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star ${i <= rating ? '' : 'empty'}">${i <= rating ? '★' : '☆'}</span>`;
+            }
+            stars += `<span class="rating-label">${rating}/5</span></span>`;
+            return stars;
+        }
+
         // Format status
         function formatStatus(status) {
             const statusMap = {
                 'pending': 'Pending',
                 'in_progress': 'In Progress',
-                'completed': 'Completed'
+                'completed': 'Completed',
+                'cancelled': 'Cancelled'
             };
             return statusMap[status] || status;
         }

@@ -27,9 +27,9 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import com.example.voiceassistant.ui.theme.VoiceAssistantTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,49 +59,11 @@ data class RequestItem(
     val confidence: Float,
     val department: String,
     val status: String,
-    val timestamp: String
+    val timestamp: String,
+    val rating: Int = 0
 )
 
-// ── Theme Colors ──
-private val SeraLightColors = lightColorScheme(
-    primary = Color(0xFF1565C0),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE3F2FD),
-    onPrimaryContainer = Color(0xFF0D47A1),
-    secondary = Color(0xFF00897B),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE0F2F1),
-    onSecondaryContainer = Color(0xFF004D40),
-    tertiary = Color(0xFFFF8F00),
-    onTertiary = Color.White,
-    error = Color(0xFFD32F2F),
-    background = Color(0xFFF5F5F5),
-    surface = Color.White,
-    surfaceVariant = Color(0xFFF0F0F0),
-    onBackground = Color(0xFF212121),
-    onSurface = Color(0xFF212121),
-    onSurfaceVariant = Color(0xFF757575)
-)
-
-private val SeraDarkColors = darkColorScheme(
-    primary = Color(0xFF64B5F6),
-    onPrimary = Color(0xFF0D47A1),
-    primaryContainer = Color(0xFF1A237E),
-    onPrimaryContainer = Color(0xFFBBDEFB),
-    secondary = Color(0xFF80CBC4),
-    onSecondary = Color(0xFF004D40),
-    secondaryContainer = Color(0xFF1B3B38),
-    onSecondaryContainer = Color(0xFFB2DFDB),
-    tertiary = Color(0xFFFFB74D),
-    onTertiary = Color(0xFF4E342E),
-    error = Color(0xFFEF9A9A),
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    surfaceVariant = Color(0xFF2C2C2C),
-    onBackground = Color(0xFFE0E0E0),
-    onSurface = Color(0xFFE0E0E0),
-    onSurfaceVariant = Color(0xFFBDBDBD)
-)
+// Theme colors defined in ui/theme/Theme.kt (SeraLightColors, SeraDarkColors)
 
 // ── Department Colors ──
 fun getDepartmentColor(department: String): Color = when (department) {
@@ -117,6 +79,7 @@ fun getStatusBorderColor(status: String): Color = when (status) {
     "pending" -> Color(0xFFFFC107)
     "in_progress" -> Color(0xFF2196F3)
     "completed" -> Color(0xFF4CAF50)
+    "cancelled" -> Color(0xFF9E9E9E)
     else -> Color.Gray
 }
 
@@ -147,6 +110,13 @@ fun getRelativeTime(timestamp: String): String {
     } catch (_: Exception) {}
     return timestamp
 }
+
+// ── Confirmation state for Feature 3 ──
+data class PendingConfirmation(
+    val transcription: String,
+    val intentName: String,
+    val confidence: Float
+)
 
 class MainActivity : ComponentActivity() {
     private lateinit var voskService: VoskService
@@ -190,7 +160,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Load server config from SharedPreferences
         ServerConfig.load(this)
         _profiles.clear()
         _profiles.addAll(ServerConfig.profiles)
@@ -210,7 +179,6 @@ class MainActivity : ComponentActivity() {
                     tts.setSpeechRate(0.9f)
                     tts.setPitch(1.0f)
                     ttsReady = true
-                    Log.d(TAG, "TTS Initialized")
                 }
             }
         }
@@ -250,7 +218,9 @@ class MainActivity : ComponentActivity() {
                 onProfileSwitch = { index -> switchProfile(index) },
                 onProfileUpdate = { index, profile -> updateProfile(index, profile) },
                 onProfileAdd = { profile -> addProfile(profile) },
-                onProfileRemove = { index -> removeProfile(index) }
+                onProfileRemove = { index -> removeProfile(index) },
+                onCancelRequest = { requestId -> cancelRequest(requestId) },
+                onRateRequest = { requestId, rating -> rateRequest(requestId, rating) }
             )
         }
 
@@ -275,17 +245,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initializeServices() {
-        Log.d(TAG, "Initializing services...")
-        lifecycleScope.launch {
-            voskService.initialize()
-        }
+        lifecycleScope.launch { voskService.initialize() }
         nluService.initialize()
     }
 
     private fun refreshNetworkInfo() {
         _wifiSsid.value = NetworkUtils.getWifiSsid(this)
         _deviceIp.value = NetworkUtils.getDeviceIp(this)
-        Log.d(TAG, "Network: SSID=${_wifiSsid.value}, IP=${_deviceIp.value}")
     }
 
     private fun switchProfile(index: Int) {
@@ -299,9 +265,7 @@ class MainActivity : ComponentActivity() {
         ServerConfig.updateProfile(this, index, profile)
         _profiles.clear()
         _profiles.addAll(ServerConfig.profiles)
-        if (index == _activeProfileIndex.intValue) {
-            reconnectToServer()
-        }
+        if (index == _activeProfileIndex.intValue) reconnectToServer()
     }
 
     private fun addProfile(profile: NetworkProfile) {
@@ -316,6 +280,46 @@ class MainActivity : ComponentActivity() {
         _profiles.addAll(ServerConfig.profiles)
         _activeProfileIndex.intValue = ServerConfig.activeProfileIndex
         reconnectToServer()
+    }
+
+    // Feature 5: Cancel request
+    private fun cancelRequest(requestId: Int) {
+        apiService.cancelRequest(requestId, ROOM_NUMBER,
+            onSuccess = {
+                runOnUiThread {
+                    val index = _requestHistory.indexOfFirst { it.id == requestId }
+                    if (index != -1) {
+                        _requestHistory[index] = _requestHistory[index].copy(status = "cancelled")
+                    }
+                    speakFire("Your request number $requestId has been cancelled.")
+                }
+            },
+            onError = { error ->
+                runOnUiThread {
+                    Toast.makeText(this, "Cannot cancel: $error", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+
+    // Feature 10: Rate request
+    private fun rateRequest(requestId: Int, rating: Int) {
+        apiService.rateRequest(requestId, ROOM_NUMBER, rating,
+            onSuccess = {
+                runOnUiThread {
+                    val index = _requestHistory.indexOfFirst { it.id == requestId }
+                    if (index != -1) {
+                        _requestHistory[index] = _requestHistory[index].copy(rating = rating)
+                    }
+                    speakFire("Thank you for your feedback!")
+                }
+            },
+            onError = { error ->
+                runOnUiThread {
+                    Toast.makeText(this, "Rating failed: $error", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
     }
 
     private fun speakFire(message: String) {
@@ -343,9 +347,7 @@ class MainActivity : ComponentActivity() {
 
     private fun reconnectToServer() {
         apiService = ApiService(ServerConfig.baseUrl)
-        if (::webSocketService.isInitialized) {
-            webSocketService.disconnect()
-        }
+        if (::webSocketService.isInitialized) webSocketService.disconnect()
         connectWebSocket()
         apiService.getRequestHistory(ROOM_NUMBER,
             onSuccess = { history ->
@@ -355,13 +357,12 @@ class MainActivity : ComponentActivity() {
                     speakFire("Successfully connected to ${ServerConfig.activeProfile.name}. System is ready.")
                 }
             },
-            onError = { error ->
+            onError = {
                 runOnUiThread {
                     speakFire("Failed to connect to ${ServerConfig.activeProfile.name}. Please check the network connection or contact the help desk using the land line phone.")
                 }
             }
         )
-        Log.d(TAG, "Server config updated: ${ServerConfig.baseUrl}")
     }
 
     private fun connectWebSocket() {
@@ -374,17 +375,15 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 onStatusChange = { requestId, status ->
-                    Log.d(TAG, "WebSocket status change: request $requestId -> $status")
                     runOnUiThread {
                         val index = _requestHistory.indexOfFirst { it.id == requestId }
                         if (index != -1) {
-                            val oldRequest = _requestHistory[index]
-                            _requestHistory[index] = oldRequest.copy(status = status)
+                            _requestHistory[index] = _requestHistory[index].copy(status = status)
 
                             if (ttsReady) {
                                 val statusMessage = when (status) {
                                     "in_progress" -> "Your request No.$requestId is now being processed."
-                                    "completed" -> "Your request No.$requestId is completed. Thank you for your patience!"
+                                    "completed" -> "Your request No.$requestId is completed. Would you like to rate the service?"
                                     else -> "Your request No.$requestId is now $status."
                                 }
                                 val params = Bundle()
@@ -393,6 +392,17 @@ class MainActivity : ComponentActivity() {
                             }
                         } else {
                             refreshRequests()
+                        }
+                    }
+                },
+                // Feature 9: Staff message handler
+                onStaffMsg = { requestId, message, staffName ->
+                    runOnUiThread {
+                        if (ttsReady) {
+                            val ttsMessage = "Message from hotel staff regarding your request number $requestId: $message"
+                            val params = Bundle()
+                            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "StaffMsg_$requestId")
+                            tts.speak(ttsMessage, TextToSpeech.QUEUE_FLUSH, params, "StaffMsg_$requestId")
                         }
                     }
                 }
@@ -425,167 +435,61 @@ fun AnimatedMicButton(
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "mic")
 
-    // Pulse animation while recording
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = EaseInOut),
-            repeatMode = RepeatMode.Reverse
-        ),
+        initialValue = 1f, targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(tween(600, easing = EaseInOut), RepeatMode.Reverse),
         label = "pulse"
     )
-
-    // Spinner rotation while processing
     val spinAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing)
-        ),
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing)),
         label = "spin"
     )
-
-    // Glow alpha
     val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = EaseInOut),
-            repeatMode = RepeatMode.Reverse
-        ),
+        initialValue = 0.2f, targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(tween(800, easing = EaseInOut), RepeatMode.Reverse),
         label = "glow"
     )
 
-    val currentScale = when {
-        isRecording -> pulseScale
-        else -> 1f
-    }
-
+    val currentScale = if (isRecording) pulseScale else 1f
     val buttonColor = when {
-        isRecording -> Color(0xFFD32F2F)
-        isProcessing -> Color(0xFFFF8F00)
-        else -> Color(0xFF1565C0)
+        isRecording -> MaterialTheme.colorScheme.error
+        isProcessing -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.primary
     }
+    val glowColor = buttonColor
 
-    val glowColor = when {
-        isRecording -> Color(0xFFD32F2F)
-        isProcessing -> Color(0xFFFF8F00)
-        else -> Color(0xFF1565C0)
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.size(120.dp)
-    ) {
-        // Audio level rings (visible during recording)
+    Box(contentAlignment = Alignment.Center, modifier = modifier.size(120.dp)) {
         if (isRecording) {
             val normalizedLevel = (audioLevel * 8f).coerceIn(0f, 1f)
             Canvas(modifier = Modifier.size(120.dp)) {
                 val ringRadius = size.minDimension / 2f
-                drawCircle(
-                    color = glowColor.copy(alpha = glowAlpha * normalizedLevel),
-                    radius = ringRadius * (1f + normalizedLevel * 0.3f),
-                    style = Stroke(width = 3.dp.toPx())
-                )
-                drawCircle(
-                    color = glowColor.copy(alpha = glowAlpha * normalizedLevel * 0.5f),
-                    radius = ringRadius * (1f + normalizedLevel * 0.5f),
-                    style = Stroke(width = 2.dp.toPx())
-                )
+                drawCircle(glowColor.copy(alpha = glowAlpha * normalizedLevel), ringRadius * (1f + normalizedLevel * 0.3f), style = Stroke(3.dp.toPx()))
+                drawCircle(glowColor.copy(alpha = glowAlpha * normalizedLevel * 0.5f), ringRadius * (1f + normalizedLevel * 0.5f), style = Stroke(2.dp.toPx()))
             }
         }
-
-        // Processing spinner
         if (isProcessing) {
             Canvas(modifier = Modifier.size(100.dp)) {
-                drawArc(
-                    color = glowColor.copy(alpha = 0.7f),
-                    startAngle = spinAngle,
-                    sweepAngle = 120f,
-                    useCenter = false,
-                    topLeft = Offset.Zero,
-                    size = Size(size.width, size.height),
-                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
-                )
+                drawArc(glowColor.copy(alpha = 0.7f), spinAngle, 120f, false, Offset.Zero, Size(size.width, size.height), style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
             }
         }
-
-        // Main button
         Surface(
             onClick = { if (!isRecording && !isProcessing) onClick() },
-            modifier = Modifier
-                .size(88.dp)
-                .scale(currentScale)
-                .shadow(
-                    elevation = if (isRecording) 12.dp else 6.dp,
-                    shape = CircleShape,
-                    ambientColor = glowColor.copy(alpha = 0.3f),
-                    spotColor = glowColor.copy(alpha = 0.3f)
-                ),
-            shape = CircleShape,
-            color = buttonColor
+            modifier = Modifier.size(88.dp).scale(currentScale).shadow(if (isRecording) 12.dp else 6.dp, CircleShape),
+            shape = CircleShape, color = buttonColor
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                // Mic icon drawn with Canvas
                 Canvas(modifier = Modifier.size(36.dp)) {
-                    val w = size.width
-                    val h = size.height
-                    val iconColor = Color.White
-                    val strokeW = 2.5.dp.toPx()
-
+                    val w = size.width; val h = size.height; val iconColor = Color.White; val strokeW = 2.5.dp.toPx()
                     if (isRecording) {
-                        // Recording: filled circle (stop indicator)
-                        drawRoundRect(
-                            color = iconColor,
-                            topLeft = Offset(w * 0.25f, h * 0.25f),
-                            size = Size(w * 0.5f, h * 0.5f),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
-                        )
+                        drawRoundRect(iconColor, Offset(w * 0.25f, h * 0.25f), Size(w * 0.5f, h * 0.5f), androidx.compose.ui.geometry.CornerRadius(4.dp.toPx()))
                     } else if (isProcessing) {
-                        // Processing: gear-like dots
-                        for (i in 0 until 3) {
-                            drawCircle(
-                                color = iconColor,
-                                radius = 3.dp.toPx(),
-                                center = Offset(w * (0.25f + i * 0.25f), h * 0.5f)
-                            )
-                        }
+                        for (i in 0 until 3) drawCircle(iconColor, 3.dp.toPx(), Offset(w * (0.25f + i * 0.25f), h * 0.5f))
                     } else {
-                        // Mic icon
-                        // Mic body
-                        drawRoundRect(
-                            color = iconColor,
-                            topLeft = Offset(w * 0.35f, h * 0.1f),
-                            size = Size(w * 0.3f, h * 0.45f),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * 0.15f)
-                        )
-                        // Mic arc
-                        drawArc(
-                            color = iconColor,
-                            startAngle = 0f,
-                            sweepAngle = 180f,
-                            useCenter = false,
-                            topLeft = Offset(w * 0.22f, h * 0.2f),
-                            size = Size(w * 0.56f, h * 0.55f),
-                            style = Stroke(width = strokeW, cap = StrokeCap.Round)
-                        )
-                        // Stem
-                        drawLine(
-                            color = iconColor,
-                            start = Offset(w * 0.5f, h * 0.75f),
-                            end = Offset(w * 0.5f, h * 0.88f),
-                            strokeWidth = strokeW,
-                            cap = StrokeCap.Round
-                        )
-                        // Base
-                        drawLine(
-                            color = iconColor,
-                            start = Offset(w * 0.35f, h * 0.88f),
-                            end = Offset(w * 0.65f, h * 0.88f),
-                            strokeWidth = strokeW,
-                            cap = StrokeCap.Round
-                        )
+                        drawRoundRect(iconColor, Offset(w * 0.35f, h * 0.1f), Size(w * 0.3f, h * 0.45f), androidx.compose.ui.geometry.CornerRadius(w * 0.15f))
+                        drawArc(iconColor, 0f, 180f, false, Offset(w * 0.22f, h * 0.2f), Size(w * 0.56f, h * 0.55f), style = Stroke(strokeW, cap = StrokeCap.Round))
+                        drawLine(iconColor, Offset(w * 0.5f, h * 0.75f), Offset(w * 0.5f, h * 0.88f), strokeW, StrokeCap.Round)
+                        drawLine(iconColor, Offset(w * 0.35f, h * 0.88f), Offset(w * 0.65f, h * 0.88f), strokeW, StrokeCap.Round)
                     }
                 }
             }
@@ -598,33 +502,14 @@ fun AnimatedMicButton(
 fun AudioLevelIndicator(audioLevel: Float, isRecording: Boolean, modifier: Modifier = Modifier) {
     if (!isRecording) return
     val normalizedLevel = (audioLevel * 10f).coerceIn(0f, 1f)
-
-    Row(
-        modifier = modifier.height(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier = modifier.height(24.dp), horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
         val barCount = 20
         for (i in 0 until barCount) {
             val threshold = i.toFloat() / barCount
             val isActive = normalizedLevel > threshold
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(if (isActive) 0.3f + (normalizedLevel - threshold).coerceIn(0f, 0.7f) else 0.2f)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(
-                        if (isActive) {
-                            when {
-                                i < barCount * 0.6 -> Color(0xFF4CAF50)
-                                i < barCount * 0.8 -> Color(0xFFFFC107)
-                                else -> Color(0xFFD32F2F)
-                            }
-                        } else {
-                            Color(0xFF424242)
-                        }
-                    )
-            )
+            Box(modifier = Modifier.weight(1f).fillMaxHeight(if (isActive) 0.3f + (normalizedLevel - threshold).coerceIn(0f, 0.7f) else 0.2f).clip(RoundedCornerShape(2.dp)).background(
+                if (isActive) when { i < barCount * 0.6 -> Color(0xFF4CAF50); i < barCount * 0.8 -> Color(0xFFFFC107); else -> Color(0xFFD32F2F) } else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+            ))
         }
     }
 }
@@ -650,7 +535,9 @@ fun VoiceAssistantScreen(
     onProfileSwitch: (Int) -> Unit,
     onProfileUpdate: (Int, NetworkProfile) -> Unit,
     onProfileAdd: (NetworkProfile) -> Unit,
-    onProfileRemove: (Int) -> Unit
+    onProfileRemove: (Int) -> Unit,
+    onCancelRequest: (Int) -> Unit,
+    onRateRequest: (Int, Int) -> Unit
 ) {
     val context = LocalContext.current
     var isRecording by remember { mutableStateOf(false) }
@@ -664,22 +551,25 @@ fun VoiceAssistantScreen(
     var settingsExpanded by remember { mutableStateOf(false) }
     var audioLevel by remember { mutableFloatStateOf(0f) }
 
-    // Sort requests: in_progress first, then pending, then completed
-    val sortedRequests = remember(requestHistory) {
-        requestHistory.sortedWith(compareBy {
-            when (it.status) {
-                "in_progress" -> 0
-                "pending" -> 1
-                "completed" -> 2
-                else -> 3
-            }
-        })
-    }
+    // Feature 3: Confirmation state
+    var pendingConfirmation by remember { mutableStateOf<PendingConfirmation?>(null) }
+
+    // Feature 10: Rating dialog state
+    var ratingRequestId by remember { mutableIntStateOf(-1) }
+
+    val sortedRequests = requestHistory.sortedWith(compareBy {
+        when (it.status) {
+            "in_progress" -> 0
+            "pending" -> 1
+            "completed" -> 2
+            "cancelled" -> 3
+            else -> 4
+        }
+    })
 
     val isDark = isSystemInDarkTheme()
-    val colorScheme = if (isDark) SeraDarkColors else SeraLightColors
 
-    MaterialTheme(colorScheme = colorScheme) {
+    VoiceAssistantTheme(darkTheme = isDark) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
@@ -697,79 +587,34 @@ fun VoiceAssistantScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column {
-                                    Text(
-                                        text = "Sera - Voice Assistant",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                    Text(
-                                        text = "Room $roomNumber",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                    )
+                                    Text("Sera - Voice Assistant", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                    Text("Room $roomNumber", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
                                 }
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(onClick = { settingsExpanded = !settingsExpanded }, modifier = Modifier.size(32.dp)) {
-                                        Icon(
-                                            if (settingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                            contentDescription = "Toggle Settings",
-                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
+                                        Icon(if (settingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, "Toggle Settings", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                                     }
                                     IconButton(onClick = onCloseApp, modifier = Modifier.size(32.dp)) {
-                                        Icon(Icons.Default.Close, contentDescription = "Close App", tint = MaterialTheme.colorScheme.error)
+                                        Icon(Icons.Default.Close, "Close App", tint = MaterialTheme.colorScheme.error)
                                     }
                                 }
                             }
-
                             AnimatedVisibility(visible = settingsExpanded) {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = if (isDark) Color(0xFF1B3B2F) else Color(0xFFE8F5E9)
-                                    ),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
+                                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), colors = CardDefaults.cardColors(containerColor = if (isDark) Color(0xFF1B3B2F) else Color(0xFFE8F5E9)), shape = RoundedCornerShape(8.dp)) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
                                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                            Text(
-                                                text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Medium
-                                            )
-                                            Text(
-                                                text = "IP: ${deviceIp.value ?: "N/A"}",
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
+                                            Text("WiFi: ${wifiSsid.value ?: "Not connected"}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                                            Text("IP: ${deviceIp.value ?: "N/A"}", style = MaterialTheme.typography.bodySmall)
                                         }
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
+                                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                             profiles.forEachIndexed { index, profile ->
-                                                val isActive = index == activeProfileIndex.intValue
-                                                FilterChip(
-                                                    selected = isActive,
-                                                    onClick = { if (!isActive) onProfileSwitch(index) },
-                                                    label = { Text(profile.name, fontSize = 11.sp) },
-                                                    modifier = Modifier.weight(1f)
-                                                )
+                                                FilterChip(selected = index == activeProfileIndex.intValue, onClick = { if (index != activeProfileIndex.intValue) onProfileSwitch(index) }, label = { Text(profile.name, fontSize = 11.sp) }, modifier = Modifier.weight(1f))
                                             }
-                                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) {
-                                                Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(16.dp))
-                                            }
+                                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) { Icon(Icons.Default.Edit, "Edit Profiles", modifier = Modifier.size(16.dp)) }
                                         }
                                         val active = profiles.getOrNull(activeProfileIndex.intValue)
-                                        if (active != null) {
-                                            Text(
-                                                text = "Server: ${active.serverIp}:${active.serverPort}",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
-                                            )
-                                        }
+                                        if (active != null) { Text("Server: ${active.serverIp}:${active.serverPort}", style = MaterialTheme.typography.bodySmall, color = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)) }
                                     }
                                 }
                             }
@@ -777,17 +622,7 @@ fun VoiceAssistantScreen(
                     }
 
                     if (showServerDialog) {
-                        ProfileEditDialog(
-                            profiles = profiles,
-                            activeIndex = activeProfileIndex.intValue,
-                            onDismiss = { showServerDialog = false },
-                            onUpdateProfile = { index, profile -> onProfileUpdate(index, profile) },
-                            onAddProfile = { profile -> onProfileAdd(profile) },
-                            onRemoveProfile = { index ->
-                                onProfileRemove(index)
-                                if (profiles.size <= 1) showServerDialog = false
-                            }
-                        )
+                        ProfileEditDialog(profiles, activeProfileIndex.intValue, { showServerDialog = false }, { i, p -> onProfileUpdate(i, p) }, { p -> onProfileAdd(p) }, { i -> onProfileRemove(i); if (profiles.size <= 1) showServerDialog = false })
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -798,81 +633,94 @@ fun VoiceAssistantScreen(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            AnimatedMicButton(
-                                isRecording = isRecording,
-                                isProcessing = isProcessing,
-                                audioLevel = audioLevel,
-                                onClick = {
+                        Column(modifier = Modifier.fillMaxSize().padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+
+                            // Feature 3: Show confirmation buttons when awaiting confirmation
+                            if (pendingConfirmation != null) {
+                                val pc = pendingConfirmation!!
+                                Text("\"${pc.transcription}\"", fontWeight = FontWeight.Medium, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text("Intent: ${pc.intentName} (${(pc.confidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Should I submit this request?", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Button(
+                                        onClick = {
+                                            val confirmation = pendingConfirmation!!
+                                            pendingConfirmation = null
+                                            statusMessage = "Submitting..."
+                                            isProcessing = true
+                                            val handler = android.os.Handler(android.os.Looper.getMainLooper())
+                                            apiService.submitRequest(
+                                                roomNumber = roomNumber, requestText = confirmation.transcription, intent = confirmation.intentName,
+                                                onSuccess = { response ->
+                                                    handler.post {
+                                                        val request = RequestItem(response.requestId, confirmation.transcription, confirmation.intentName, confirmation.confidence, "Routing...", "pending", getCurrentTime())
+                                                        lastDepartment = request.department
+                                                        onAddRequest(request)
+                                                        onSpeakResponse("Your request No.${response.requestId} has been received.")
+                                                        isProcessing = false; statusMessage = "Tap microphone to start"
+                                                        onRefreshRequests()
+                                                    }
+                                                },
+                                                onError = {
+                                                    handler.post {
+                                                        onSpeakResponse("Sorry, I could not send your request due to a network issue. Please contact the help desk using the land line phone.")
+                                                        isProcessing = false; statusMessage = "Submission failed"
+                                                    }
+                                                }
+                                            )
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                                    ) { Text("Yes, Submit") }
+                                    OutlinedButton(
+                                        onClick = {
+                                            pendingConfirmation = null
+                                            statusMessage = "Request cancelled"
+                                            onSpeakResponse("Okay, I've cancelled that request.")
+                                        }
+                                    ) { Text("No, Cancel") }
+                                }
+                            } else {
+                                AnimatedMicButton(isRecording = isRecording, isProcessing = isProcessing, audioLevel = audioLevel, onClick = {
                                     if (!isRecording && !isProcessing) {
                                         lifecycleScope.launch {
                                             statusMessage = "Hello! I'm Sera. How can I help you?"
                                             onSpeakAndWait("Hello! I'm Sera. How can I help you?")
                                             processVoiceRequest(
                                                 audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
-                                                { isRecording = true }, { isRecording = false },
-                                                { isProcessing = true }, { isProcessing = false },
-                                                { statusMessage = it }, { lastTranscription = it },
-                                                { i, c -> lastIntent = i; lastConfidence = c },
+                                                { isRecording = true }, { isRecording = false }, { isProcessing = true }, { isProcessing = false },
+                                                { statusMessage = it }, { lastTranscription = it }, { i, c -> lastIntent = i; lastConfidence = c },
                                                 { level -> audioLevel = level },
                                                 onSpeakResponse,
+                                                onSpeakAndWait,
                                                 { request -> lastDepartment = request.department; onAddRequest(request) },
-                                                { statusMessage = "Tap microphone to start"; audioLevel = 0f }
+                                                onRefreshRequests,
+                                                { statusMessage = "Tap microphone to start"; audioLevel = 0f },
+                                                // Voice confirmation fallback to buttons
+                                                { transcription, intentName, confidence ->
+                                                    pendingConfirmation = PendingConfirmation(transcription, intentName, confidence)
+                                                    lastTranscription = transcription; lastIntent = intentName; lastConfidence = confidence
+                                                    statusMessage = "Tap Yes or No"
+                                                    isProcessing = false
+                                                },
+                                                // Voice cancel request
+                                                onCancelRequest
                                             )
                                         }
                                     }
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            // Audio level bar
-                            AudioLevelIndicator(
-                                audioLevel = audioLevel,
-                                isRecording = isRecording,
-                                modifier = Modifier.fillMaxWidth(0.7f)
-                            )
-
-                            Text(
-                                text = when {
-                                    isRecording -> "Listening..."
-                                    isProcessing -> "Processing..."
-                                    else -> "Tap to speak"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                            )
-
-                            if (lastTranscription.isNotEmpty()) {
+                                })
                                 Spacer(modifier = Modifier.height(4.dp))
-                                HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f))
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "\"$lastTranscription\"",
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 13.sp,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                if (lastIntent.isNotEmpty()) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                                        )
-                                    }
-                                }
-                                if (lastDepartment.isNotEmpty()) {
-                                    DepartmentBadge(department = lastDepartment)
+                                AudioLevelIndicator(audioLevel, isRecording, Modifier.fillMaxWidth(0.7f))
+                                Text(when { isRecording -> "Listening..."; isProcessing -> "Processing..."; else -> "Tap to speak" }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
+                                if (lastTranscription.isNotEmpty() && pendingConfirmation == null) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f))
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text("\"$lastTranscription\"", fontWeight = FontWeight.Medium, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                    if (lastIntent.isNotEmpty()) { Text("Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)) }
+                                    if (lastDepartment.isNotEmpty()) { DepartmentBadge(lastDepartment) }
                                 }
                             }
                         }
@@ -881,81 +729,56 @@ fun VoiceAssistantScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     // ── Recent Requests Header ──
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Recent Requests",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        IconButton(onClick = onRefreshRequests, modifier = Modifier.size(28.dp)) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = "Refresh",
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Recent Requests", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                        IconButton(onClick = onRefreshRequests, modifier = Modifier.size(28.dp)) { Icon(Icons.Default.Refresh, "Refresh", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onBackground) }
                     }
-
                     Spacer(modifier = Modifier.height(4.dp))
 
                     // ── Requests List (2/3) ──
                     Box(modifier = Modifier.fillMaxWidth().weight(2f)) {
                         if (sortedRequests.isEmpty()) {
-                            // Better empty state
-                            Card(
-                                modifier = Modifier.fillMaxSize(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
+                            Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), shape = RoundedCornerShape(12.dp)) {
                                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        // Mic icon as empty state illustration
+                                        val emptyIconColor = MaterialTheme.colorScheme.onSurfaceVariant
                                         Canvas(modifier = Modifier.size(56.dp)) {
-                                            val w = size.width
-                                            val h = size.height
-                                            val col = Color(0xFFBDBDBD)
-                                            val sw = 3.dp.toPx()
+                                            val w = size.width; val h = size.height; val col = emptyIconColor; val sw = 3.dp.toPx()
                                             drawRoundRect(col, Offset(w*0.35f,h*0.1f), Size(w*0.3f,h*0.45f), androidx.compose.ui.geometry.CornerRadius(w*0.15f))
                                             drawArc(col, 0f, 180f, false, Offset(w*0.2f,h*0.15f), Size(w*0.6f,h*0.55f), style = Stroke(sw, cap = StrokeCap.Round))
                                             drawLine(col, Offset(w*0.5f,h*0.7f), Offset(w*0.5f,h*0.85f), sw, StrokeCap.Round)
                                             drawLine(col, Offset(w*0.32f,h*0.85f), Offset(w*0.68f,h*0.85f), sw, StrokeCap.Round)
                                         }
                                         Spacer(modifier = Modifier.height(12.dp))
-                                        Text(
-                                            text = "No requests yet",
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                        Text("No requests yet", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = "Tap the microphone button above\nto make your first request",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                            lineHeight = 18.sp
-                                        )
+                                        Text("Tap the microphone button above\nto make your first request", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), lineHeight = 18.sp)
                                     }
                                 }
                             }
                         } else {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                verticalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
+                            LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 items(sortedRequests) { request ->
-                                    RequestCard(request = request)
+                                    RequestCard(
+                                        request = request,
+                                        onCancel = { onCancelRequest(request.id) },
+                                        onRate = { ratingRequestId = request.id }
+                                    )
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        // Feature 10: Rating dialog
+        if (ratingRequestId > 0) {
+            RatingDialog(
+                requestId = ratingRequestId,
+                onRate = { rating -> onRateRequest(ratingRequestId, rating); ratingRequestId = -1 },
+                onDismiss = { ratingRequestId = -1 }
+            )
         }
     }
 }
@@ -976,21 +799,24 @@ suspend fun processVoiceRequest(
     onIntentUpdate: (String, Float) -> Unit,
     onAudioLevel: (Float) -> Unit,
     onSpeakResponse: (String) -> Unit,
+    onSpeakAndWait: suspend (String) -> Unit,
     onAddRequest: (RequestItem) -> Unit,
-    onComplete: () -> Unit
+    onRefreshRequests: () -> Unit,
+    onComplete: () -> Unit,
+    // Feature 3: Confirmation callback - fallback when voice confirmation is unclear
+    onConfirmationNeeded: (String, String, Float) -> Unit,
+    // Voice cancel: callback to cancel a request by ID
+    onCancelRequest: (Int) -> Unit
 ) {
     if (ContextCompat.checkSelfPermission(audioRecorder.getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-        onStatusUpdate("Permission denied")
-        onComplete()
-        return
+        onStatusUpdate("Permission denied"); onComplete(); return
     }
 
     try {
         onRecordingStart(); onStatusUpdate("Listening... (speak now)")
 
         val audioData = audioRecorder.recordWithVAD(
-            silenceTimeoutMs = 1500L,
-            maxDurationMs = 10000L,
+            silenceTimeoutMs = 1500L, maxDurationMs = 10000L,
             onStateChange = { state -> onStatusUpdate(state) },
             onAudioLevel = { level -> onAudioLevel(level) }
         )
@@ -1010,6 +836,49 @@ suspend fun processVoiceRequest(
 
                 onStatusUpdate("Understanding...")
                 val cleanedTranscription = cleanTranscription(transcription)
+
+                // Voice cancel: check if user wants to cancel a request by ID
+                // Matches both digit IDs ("cancel order 146") and spoken numbers ("cancel order hundred and forty six")
+                val cancelPattern = Regex("""cancel\s+(?:my\s+)?(?:order|request|booking)\s*(?:number|no|#)?\s*(.+)""", RegexOption.IGNORE_CASE)
+                val cancelDigitPattern = Regex("""cancel\s+(?:my\s+)?(?:order|request|booking)?\s*(?:number|no|#)?\s*(\d+)""", RegexOption.IGNORE_CASE)
+                val cancelDigitMatch = cancelDigitPattern.find(cleanedTranscription)
+                val cancelWordMatch = if (cancelDigitMatch == null) cancelPattern.find(cleanedTranscription) else null
+
+                val requestId = cancelDigitMatch?.groupValues?.get(1)?.toIntOrNull()
+                    ?: cancelWordMatch?.groupValues?.get(1)?.let { wordsToNumber(it.trim()) }
+
+                if (requestId != null) {
+                    onIntentUpdate("cancel_request", 0.99f)
+                    val confirmMsg = "You want to cancel request number $requestId. Should I proceed?"
+                    onSpeakAndWait(confirmMsg)
+
+                    // Listen for voice confirmation
+                    onStatusUpdate("Say Yes or No...")
+                    onProcessingStop(); onRecordingStart()
+                    val confirmAudio = audioRecorder.recordWithVAD(
+                        silenceTimeoutMs = 2000L, maxDurationMs = 5000L,
+                        onAudioLevel = { level -> onAudioLevel(level) }
+                    )
+                    onAudioLevel(0f); onRecordingStop(); onProcessingStart()
+
+                    val confirmText = voskService.transcribeAudio(confirmAudio).lowercase().trim()
+                    onStatusUpdate("You said: \"$confirmText\"")
+
+                    val yesWords = listOf("yes", "yeah", "yep", "sure", "ok", "okay", "go ahead", "do it", "proceed")
+
+                    when {
+                        yesWords.any { confirmText.contains(it) } -> {
+                            onCancelRequest(requestId)
+                            onProcessingStop(); onComplete()
+                        }
+                        else -> {
+                            onSpeakResponse("Okay, I'll keep your request.")
+                            onProcessingStop(); onComplete()
+                        }
+                    }
+                    return@launch
+                }
+
                 val intentResult = nluService.classifyIntent(cleanedTranscription)
                 onIntentUpdate(intentResult.name, intentResult.confidence)
 
@@ -1021,21 +890,62 @@ suspend fun processVoiceRequest(
                     onProcessingStop(); onComplete(); return@launch
                 }
 
-                onStatusUpdate("Submitting...")
-                apiService.submitRequest(
-                    roomNumber = roomNumber, requestText = transcription, intent = intentResult.name,
-                    onSuccess = { response ->
-                        onAddRequest(RequestItem(response.requestId, transcription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime()))
-                        val speechText = "Your request No.${response.requestId} has been received."
-                        onSpeakResponse(speechText)
-                        onProcessingStop(); onComplete()
-                    },
-                    onError = {
-                        onStatusUpdate("Submission failed")
-                        onSpeakResponse("Sorry, I could not send your request due to a network issue. Please contact the help desk using the land line phone.")
+                // Voice confirmation: TTS asks, then listens for yes/no
+                val confirmMsg = "I understood your request as ${intentResult.name.replace("_", " ")}. Should I submit this?"
+                onSpeakAndWait(confirmMsg)
+
+                // Listen for voice confirmation
+                onStatusUpdate("Say Yes or No...")
+                onProcessingStop()
+                onRecordingStart()
+                val confirmAudio = audioRecorder.recordWithVAD(
+                    silenceTimeoutMs = 2000L, maxDurationMs = 5000L,
+                    onAudioLevel = { level -> onAudioLevel(level) }
+                )
+                onAudioLevel(0f)
+                onRecordingStop()
+                onProcessingStart()
+
+                val confirmText = voskService.transcribeAudio(confirmAudio).lowercase().trim()
+                onStatusUpdate("You said: \"$confirmText\"")
+
+                val yesWords = listOf("yes", "yeah", "yep", "sure", "ok", "okay", "confirm", "submit", "please", "go ahead", "do it", "send")
+                val noWords = listOf("no", "nope", "cancel", "don't", "stop", "never mind", "nevermind")
+
+                when {
+                    yesWords.any { confirmText.contains(it) } -> {
+                        onStatusUpdate("Submitting...")
+                        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+                        apiService.submitRequest(
+                            roomNumber, transcription, intentResult.name,
+                            onSuccess = { response ->
+                                handler.post {
+                                    val request = RequestItem(response.requestId, transcription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime())
+                                    onAddRequest(request)
+                                    onSpeakResponse("Your request No.${response.requestId} has been received.")
+                                    onProcessingStop(); onComplete()
+                                    onRefreshRequests()
+                                }
+                            },
+                            onError = {
+                                handler.post {
+                                    onSpeakResponse("Sorry, I could not send your request due to a network issue. Please contact the help desk using the land line phone.")
+                                    onProcessingStop(); onComplete()
+                                }
+                            }
+                        )
+                    }
+                    noWords.any { confirmText.contains(it) } -> {
+                        onSpeakResponse("Okay, I've cancelled that request.")
                         onProcessingStop(); onComplete()
                     }
-                )
+                    else -> {
+                        // Unclear voice response — fall back to on-screen buttons
+                        onProcessingStop()
+                        onConfirmationNeeded(transcription, intentResult.name, intentResult.confidence)
+                    }
+                }
+
             } catch (e: Exception) { onStatusUpdate("Error occurred"); onProcessingStop(); onComplete() }
         }
     } catch (e: Exception) { onRecordingStop(); onProcessingStop(); onComplete() }
@@ -1045,115 +955,151 @@ suspend fun processVoiceRequest(
 @Composable
 fun DepartmentBadge(department: String) {
     val color = getDepartmentColor(department)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 2.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = department,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = color
-        )
+        Text(department, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = color)
     }
 }
 
-// ── Request Card with colored left border ──
+// ── Request Card ──
 @Composable
-fun RequestCard(request: RequestItem) {
+fun RequestCard(request: RequestItem, onCancel: () -> Unit, onRate: () -> Unit) {
     val borderColor = getStatusBorderColor(request.status)
     val deptColor = getDepartmentColor(request.department)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            // Status color bar on the left
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .fillMaxHeight()
-                    .background(borderColor)
-            )
+    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp), shape = RoundedCornerShape(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Box(modifier = Modifier.width(4.dp).fillMaxHeight().background(borderColor))
             Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "#${request.id}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    StatusBadge(status = request.status)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("#${request.id}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    StatusBadge(request.status)
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = request.requestText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Text(request.requestText, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Department badge
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(deptColor)
-                        )
+                        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(deptColor))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = request.department,
-                            fontSize = 11.sp,
-                            color = deptColor,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Text(request.department, fontSize = 11.sp, color = deptColor, fontWeight = FontWeight.Medium)
                     }
-                    Text(
-                        text = getRelativeTime(request.timestamp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(getRelativeTime(request.timestamp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+
+                // Feature 5: Cancel button for pending/in_progress requests
+                // Feature 10: Rate button for completed requests + star display
+                if (request.status == "pending" || request.status == "in_progress" || (request.status == "completed" && request.rating == 0)) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (request.status == "pending" || request.status == "in_progress") {
+                            OutlinedButton(
+                                onClick = onCancel,
+                                modifier = Modifier.height(28.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) { Text("Cancel", fontSize = 11.sp) }
+                        }
+                        if (request.status == "completed" && request.rating == 0) {
+                            Button(
+                                onClick = onRate,
+                                modifier = Modifier.height(28.dp),
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Icon(Icons.Default.Star, "Rate", modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Rate Service", fontSize = 11.sp)
+                            }
+                        }
+                    }
+                }
+
+                // Show rating stars if rated
+                if (request.rating > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        for (i in 1..5) {
+                            Icon(
+                                Icons.Default.Star, "Star $i",
+                                modifier = Modifier.size(14.dp),
+                                tint = if (i <= request.rating) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("${request.rating}/5", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
         }
     }
 }
 
+// ── Feature 10: Rating Dialog ──
+@Composable
+fun RatingDialog(requestId: Int, onRate: (Int) -> Unit, onDismiss: () -> Unit) {
+    var selectedRating by remember { mutableIntStateOf(0) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Rate Service") },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text("How was the service for request #$requestId?", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (i in 1..5) {
+                        IconButton(onClick = { selectedRating = i }, modifier = Modifier.size(40.dp)) {
+                            Icon(
+                                Icons.Default.Star, "Star $i",
+                                modifier = Modifier.size(32.dp),
+                                tint = if (i <= selectedRating) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+                }
+                if (selectedRating > 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        when (selectedRating) { 1 -> "Poor"; 2 -> "Fair"; 3 -> "Good"; 4 -> "Very Good"; else -> "Excellent" },
+                        fontWeight = FontWeight.Medium, color = Color(0xFFFFB300)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { if (selectedRating > 0) onRate(selectedRating) }, enabled = selectedRating > 0) { Text("Submit") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Later") }
+        }
+    )
+}
+
 @Composable
 fun StatusBadge(status: String) {
+    val isDark = isSystemInDarkTheme()
     val (backgroundColor, textColor, text) = when (status) {
-        "pending" -> Triple(Color(0xFFFFF3CD), Color(0xFF856404), "Pending")
-        "in_progress" -> Triple(Color(0xFFD1ECF1), Color(0xFF0C5460), "In Progress")
-        "completed" -> Triple(Color(0xFFD4EDDA), Color(0xFF155724), "Completed")
+        "pending" -> if (isDark) Triple(Color(0xFF4E3A00), Color(0xFFFFD54F), "Pending")
+                     else Triple(Color(0xFFFFF3CD), Color(0xFF856404), "Pending")
+        "in_progress" -> if (isDark) Triple(Color(0xFF0A3D47), Color(0xFF4DD0E1), "In Progress")
+                         else Triple(Color(0xFFD1ECF1), Color(0xFF0C5460), "In Progress")
+        "completed" -> if (isDark) Triple(Color(0xFF1B3D20), Color(0xFF81C784), "Completed")
+                       else Triple(Color(0xFFD4EDDA), Color(0xFF155724), "Completed")
+        "cancelled" -> if (isDark) Triple(Color(0xFF3A3A3A), Color(0xFFBDBDBD), "Cancelled")
+                       else Triple(Color(0xFFE0E0E0), Color(0xFF616161), "Cancelled")
         else -> Triple(Color.Gray, Color.White, status)
     }
     Box(modifier = Modifier.background(backgroundColor, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 2.dp)) {
-        Text(text = text, color = textColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(text, color = textColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
 fun ProfileEditDialog(
-    profiles: List<NetworkProfile>,
-    activeIndex: Int,
-    onDismiss: () -> Unit,
-    onUpdateProfile: (Int, NetworkProfile) -> Unit,
-    onAddProfile: (NetworkProfile) -> Unit,
-    onRemoveProfile: (Int) -> Unit
+    profiles: List<NetworkProfile>, activeIndex: Int, onDismiss: () -> Unit,
+    onUpdateProfile: (Int, NetworkProfile) -> Unit, onAddProfile: (NetworkProfile) -> Unit, onRemoveProfile: (Int) -> Unit
 ) {
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var editName by remember { mutableStateOf("") }
@@ -1167,98 +1113,72 @@ fun ProfileEditDialog(
             Column {
                 profiles.forEachIndexed { index, profile ->
                     if (editingIndex == index) {
-                        OutlinedTextField(
-                            value = editName,
-                            onValueChange = { editName = it },
-                            label = { Text("Name") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        OutlinedTextField(editName, { editName = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = editIp,
-                            onValueChange = { editIp = it },
-                            label = { Text("Server IP") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        OutlinedTextField(editIp, { editIp = it }, label = { Text("Server IP") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = editPort,
-                            onValueChange = { editPort = it },
-                            label = { Text("Port") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        OutlinedTextField(editPort, { editPort = it }, label = { Text("Port") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = {
-                                onUpdateProfile(index, NetworkProfile(editName.trim(), editIp.trim(), editPort.toIntOrNull() ?: 8000))
-                                editingIndex = null
-                            }) { Text("Save") }
+                            TextButton(onClick = { onUpdateProfile(index, NetworkProfile(editName.trim(), editIp.trim(), editPort.toIntOrNull() ?: 8000)); editingIndex = null }) { Text("Save") }
                             TextButton(onClick = { editingIndex = null }) { Text("Cancel") }
                         }
                     } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = profile.name + if (index == activeIndex) " (Active)" else "",
-                                    fontWeight = if (index == activeIndex) FontWeight.Bold else FontWeight.Normal,
-                                    fontSize = 14.sp
-                                )
-                                Text(
-                                    text = "${profile.serverIp}:${profile.serverPort}",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
-                                )
+                                Text(profile.name + if (index == activeIndex) " (Active)" else "", fontWeight = if (index == activeIndex) FontWeight.Bold else FontWeight.Normal, fontSize = 14.sp)
+                                Text("${profile.serverIp}:${profile.serverPort}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            IconButton(onClick = {
-                                editingIndex = index
-                                editName = profile.name
-                                editIp = profile.serverIp
-                                editPort = profile.serverPort.toString()
-                            }, modifier = Modifier.size(32.dp)) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
-                            }
-                            if (profiles.size > 1) {
-                                IconButton(onClick = { onRemoveProfile(index) }, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.Close, contentDescription = "Remove", modifier = Modifier.size(16.dp), tint = Color.Red)
-                                }
-                            }
+                            IconButton(onClick = { editingIndex = index; editName = profile.name; editIp = profile.serverIp; editPort = profile.serverPort.toString() }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp)) }
+                            if (profiles.size > 1) { IconButton(onClick = { onRemoveProfile(index) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Close, "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error) } }
                         }
                     }
                     if (index < profiles.lastIndex) HorizontalDivider()
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = {
-                onAddProfile(NetworkProfile("New Network", "192.168.1.100", 8000))
-            }) { Text("Add Profile") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        }
+        confirmButton = { TextButton(onClick = { onAddProfile(NetworkProfile("New Network", "192.168.1.100", 8000)) }) { Text("Add Profile") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } }
     )
 }
 
+// Convert spoken number words to integer, e.g. "hundred and forty six" → 146
+fun wordsToNumber(text: String): Int? {
+    val ones = mapOf("zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
+        "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
+        "eleven" to 11, "twelve" to 12, "thirteen" to 13, "fourteen" to 14, "fifteen" to 15,
+        "sixteen" to 16, "seventeen" to 17, "eighteen" to 18, "nineteen" to 19)
+    val tens = mapOf("twenty" to 20, "thirty" to 30, "forty" to 40, "fifty" to 50,
+        "sixty" to 60, "seventy" to 70, "eighty" to 80, "ninety" to 90)
+
+    val words = text.lowercase().replace("-", " ").split("\\s+".toRegex())
+        .filter { it != "and" && it.isNotBlank() }
+
+    if (words.isEmpty()) return null
+
+    // If it's already a numeric string
+    words.singleOrNull()?.toIntOrNull()?.let { return it }
+
+    var result = 0
+    var current = 0
+
+    for (word in words) {
+        when {
+            ones.containsKey(word) -> current += ones[word]!!
+            tens.containsKey(word) -> current += tens[word]!!
+            word == "hundred" -> current = if (current == 0) 100 else current * 100
+            word == "thousand" -> { current = if (current == 0) 1000 else current * 1000; result += current; current = 0 }
+            else -> return null // unrecognized word
+        }
+    }
+    result += current
+    return if (result > 0) result else null
+}
+
 fun cleanTranscription(text: String): String {
-    val prefixPatterns = listOf(
-        "hi sera", "hey sera", "hello sera", "sera",
-        "hi there", "hey there", "hello there",
-        "hi", "hey", "hello",
-        "excuse me", "please", "can you", "could you", "i need you to"
-    )
+    val prefixPatterns = listOf("hi sera", "hey sera", "hello sera", "sera", "hi there", "hey there", "hello there", "hi", "hey", "hello", "excuse me", "please", "can you", "could you", "i need you to")
     var cleaned = text.lowercase().trim()
     for (pattern in prefixPatterns) {
-        if (cleaned.startsWith(pattern)) {
-            cleaned = cleaned.removePrefix(pattern).trim()
-            cleaned = cleaned.removePrefix(",").removePrefix(".").trim()
-            break
-        }
+        if (cleaned.startsWith(pattern)) { cleaned = cleaned.removePrefix(pattern).trim().removePrefix(",").removePrefix(".").trim(); break }
     }
     return cleaned.ifEmpty { text.trim() }
 }

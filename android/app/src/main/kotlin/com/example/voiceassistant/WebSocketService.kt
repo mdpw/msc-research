@@ -13,6 +13,7 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
     private var webSocket: WebSocket? = null
     private var onMessageReceived: ((String) -> Unit)? = null
     private var onStatusUpdate: ((Int, String) -> Unit)? = null
+    private var onStaffMessage: ((Int, String, String) -> Unit)? = null
 
     private var isConnected = false
     private val reconnectHandler = Handler(Looper.getMainLooper())
@@ -25,10 +26,12 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
 
     fun connect(
         onMessage: (String) -> Unit,
-        onStatusChange: ((Int, String) -> Unit)? = null
+        onStatusChange: ((Int, String) -> Unit)? = null,
+        onStaffMsg: ((Int, String, String) -> Unit)? = null
     ) {
         onMessageReceived = onMessage
         onStatusUpdate = onStatusChange
+        onStaffMessage = onStaffMsg
         internalConnect()
     }
 
@@ -70,8 +73,23 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
                                 Log.d(TAG, "✅ Status callback invoked for request $requestId")
                             }
                         }
+                        "staff_message" -> {
+                            val requestId = json.optInt("request_id", -1)
+                            val message = json.optString("message", "")
+                            val staffName = json.optString("staff_name", "Staff")
+
+                            Log.d(TAG, "Staff message for #$requestId from $staffName: $message")
+
+                            if (message.isNotEmpty()) {
+                                onMessageReceived?.invoke("Message from $staffName: $message")
+                            }
+
+                            if (requestId != -1 && message.isNotEmpty()) {
+                                onStaffMessage?.invoke(requestId, message, staffName)
+                            }
+                        }
                         else -> {
-                            Log.d(TAG, "⚠️ Unknown message type: $type")
+                            Log.d(TAG, "Unknown message type: $type")
                         }
                     }
                 } catch (e: Exception) {

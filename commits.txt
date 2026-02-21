@@ -1,0 +1,21 @@
+Changes after commit id - 9d839a1a497de7501c435a78127fc56f820101af
+
+Android App:
+
+ApiService.kt — Added cancelRequest(), rateRequest() APIs; fixed null-safe JSON parsing (getString → optString)
+MainActivity.kt — Major changes:
+Feature 3: Voice confirmation (say "yes/no" instead of tapping buttons, with button fallback)
+Feature 5: Cancel request (button + voice command "Sera cancel my order number 146")
+Feature 6: Dark/Light theme (auto-switches with system setting, all UI elements themed)
+Feature 9: Staff message display via WebSocket
+Feature 10: Rate completed requests with star rating dialog
+Fixes: Shadow modifier error, remember() stale state bug, thread safety on callbacks, wordsToNumber() for spoken numbers
+NLUService.kt — Refined keyword dictionary to prevent false positives (removed ambiguous single words like "water", "ice", "pool"; added contextual phrases)
+WebSocketService.kt — Added onStaffMessage callback handler
+Theme.kt — Custom SeraLightColors/SeraDarkColors with VoiceAssistantTheme() composable
+Backend:
+
+database.py — Added rating column, staff_messages table, cancel/rate/message CRUD functions
+main.py — Added /api/cancel-request, /api/send-message, /api/rate-request endpoints
+models.py — Added CancelRequest, StaffMessage, RatingSubmit Pydantic models
+dashboard.html — Cancel status display, staff message input, rating stars, WebSocket handlers for real-time updates

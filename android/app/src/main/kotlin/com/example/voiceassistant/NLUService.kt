@@ -27,65 +27,77 @@ class NLUService(private val context: Context) {
     private val SEP_TOKEN = "[SEP]"
     private val UNK_TOKEN = "[UNK]"
 
-    // Comprehensive keyword dictionary for hotel requests
+    // Refined keyword dictionary — ambiguous single words removed to prevent false positives
+    // (e.g. "water" matched "water polo" as food_order). Ambiguous cases fall to ML model.
     private val intentDictionary = mapOf(
         "food_order" to listOf(
-            "water", "bottle", "drink", "beverage", "sandwich", "food", "burger", "pizza", "coffee", "tea", 
-            "menu", "order", "eat", "hungry", "breakfast", "lunch", "dinner", "juice", "coke", "snack", 
-            "meal", "restaurant", "dining", "ice", "fruit", "wine", "beer", "champagne", "kitchen"
+            "bottled water", "glass of water", "drinking water", "bottle of water", "water bottle",
+            "drink", "beverage", "sandwich", "food", "burger", "pizza", "coffee", "tea",
+            "menu", "order food", "order room service", "place an order",
+            "eat", "hungry", "breakfast", "lunch", "dinner", "juice", "coke", "snack",
+            "meal", "restaurant", "dining", "ice bucket", "ice cubes", "fruit",
+            "wine", "beer", "champagne", "room service", "kitchen"
         ),
         "room_cleaning" to listOf(
-            "housekeeping", "clean", "cleaning", "tidy", "makeup", "sweep", "mop", "maid", "maid service",
-            "dust", "trash", "garbage", "bin", "vacuum", "turndown"
+            "housekeeping", "clean my room", "clean the room", "room cleaning",
+            "tidy", "tidy up", "sweep", "mop", "maid", "maid service",
+            "dust", "trash", "garbage", "bin", "vacuum", "turndown", "turndown service"
         ),
         "towel_request" to listOf(
             "towel", "towels", "bath towel", "hand towel", "face towel", "washcloth", "bath mat"
         ),
         "toiletries_request" to listOf(
-            "toiletries", "soap", "shampoo", "toothpaste", "toothbrush", "dental", "kit", "shaving", 
-            "razor", "comb", "lotion", "gel", "conditioner", "body wash", "tissues", "toilet paper", "toilet roll"
+            "toiletries", "soap", "shampoo", "toothpaste", "toothbrush", "dental",
+            "shaving", "razor", "comb", "lotion", "conditioner", "body wash",
+            "tissues", "toilet paper", "toilet roll"
         ),
         "maintenance" to listOf(
-            "maintenance", "broken", "fix", "repair", "light bulb", "leak", "drain", "clogged", 
-            "not working", "ac not working", "air conditioning", "shower", "faucet", "toilet", "tv", 
-            "remote", "outlet", "power", "switch", "door", "lock", "window"
+            "maintenance", "broken", "fix", "repair", "light bulb", "leak", "drain", "clogged",
+            "not working", "ac not working", "air conditioning broken",
+            "shower not working", "faucet", "toilet broken", "toilet not working",
+            "tv not working", "remote not working", "outlet",
+            "door lock", "lock not working", "window broken"
         ),
         "concierge_taxi" to listOf(
-            "taxi", "cab", "uber", "ride", "transport", "airport shuttle", "limo", "car", "driver"
+            "taxi", "cab", "uber", "transport", "airport shuttle", "limo",
+            "car service", "rental car", "driver", "book a taxi", "call a cab"
         ),
         "wake_up_call" to listOf(
             "wake up", "alarm", "morning call", "wake me up"
         ),
         "checkout_billing" to listOf(
-            "bill", "checkout", "check out", "leaving", "invoice", "receipt", "pay", "account", "folio"
+            "bill", "checkout", "check out", "leaving", "invoice", "receipt", "my bill", "folio"
         ),
         "pillow_request" to listOf(
             "pillow", "pillows", "extra pillow", "cushion"
         ),
         "blanket_request" to listOf(
-            "blanket", "blankets", "extra blanket", "duvet", "comforter", "sheet", "linen"
+            "blanket", "blankets", "extra blanket", "duvet", "comforter", "linen"
         ),
         "laundry_service" to listOf(
-            "laundry", "wash", "dry clean", "ironing", "pressing"
+            "laundry", "dry clean", "ironing", "wash clothes", "wash my clothes", "laundry service"
         ),
         "noise_complaint" to listOf(
-            "noise", "loud", "noisy", "quiet", "neighbor", "party", "barking"
+            "noise", "too loud", "noisy", "neighbor", "noise complaint", "barking", "keep it down"
         ),
         "concierge_general" to listOf(
-            "wifi", "internet", "password", "connection", "area", "map", "tour", "recommendation", 
-            "dinner booking", "reservation", "ticket", "event", "attraction", "gym", "pool", "spa"
+            "wifi", "internet", "wifi password", "swimming pool", "pool hours",
+            "map", "tour", "recommendation", "dinner booking", "reservation",
+            "ticket", "event", "attraction", "gym", "spa"
         ),
         "do_not_disturb" to listOf(
-            "disturb", "dnd", "privacy", "privacy sign", "do not disturb"
+            "do not disturb", "dnd", "privacy sign", "disturb"
         ),
         "emergency" to listOf(
-            "emergency", "help", "doctor", "medical", "police", "fire", "accident", "hurt", "sick", "ambulance"
+            "emergency", "need help", "help me", "doctor", "medical", "police",
+            "fire alarm", "accident", "hurt", "sick", "ambulance", "urgent"
         ),
         "lighting_control" to listOf(
-            "lights", "lamp", "dim", "brighten", "turn on lights", "turn off lights"
+            "lights", "lamp", "turn on lights", "turn off lights", "brighten", "dim the lights"
         ),
         "temperature_control" to listOf(
-            "temperature", "thermostat", "warmer", "cooler", "heat", "ac", "fan"
+            "temperature", "thermostat", "warmer", "cooler", "air conditioning", "ac",
+            "turn on ac", "turn off ac"
         )
     )
 

@@ -119,12 +119,13 @@ class ApiService(private val baseUrl: String) {
                         val obj = jsonArray.getJSONObject(i)
                         history.add(RequestItem(
                             id = obj.getInt("id"),
-                            requestText = obj.getString("request_text"),
-                            intent = obj.getString("intent"),
+                            requestText = obj.optString("request_text", ""),
+                            intent = obj.optString("intent", "unknown"),
                             confidence = obj.optDouble("confidence", 0.0).toFloat(),
                             department = obj.optString("department", "Pending"),
-                            status = obj.getString("status"),
-                            timestamp = obj.optString("created_at", "")
+                            status = obj.optString("status", "pending"),
+                            timestamp = obj.optString("created_at", ""),
+                            rating = obj.optInt("rating", 0)
                         ))
                     }
                     onSuccess(history)
@@ -133,7 +134,97 @@ class ApiService(private val baseUrl: String) {
                 }
                 connection.disconnect()
             } catch (e: Exception) {
-                Log.e(TAG, "❌ History Error: ${e.message}")
+                Log.e(TAG, "History Error: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun cancelRequest(
+        requestId: Int,
+        roomNumber: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        thread {
+            try {
+                val url = URL("$baseUrl/api/cancel-request")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                val json = JSONObject().apply {
+                    put("request_id", requestId)
+                    put("room_number", roomNumber)
+                }
+
+                val writer = OutputStreamWriter(connection.outputStream)
+                writer.write(json.toString())
+                writer.flush()
+                writer.close()
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val reader = BufferedReader(InputStreamReader(connection.inputStream))
+                    val response = reader.readText()
+                    reader.close()
+                    val jsonResponse = JSONObject(response)
+                    if (jsonResponse.getBoolean("success")) {
+                        onSuccess()
+                    } else {
+                        onError(jsonResponse.getString("message"))
+                    }
+                } else {
+                    onError("Server error: $responseCode")
+                }
+                connection.disconnect()
+            } catch (e: Exception) {
+                Log.e(TAG, "Cancel Error: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun rateRequest(
+        requestId: Int,
+        roomNumber: String,
+        rating: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        thread {
+            try {
+                val url = URL("$baseUrl/api/rate-request")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                val json = JSONObject().apply {
+                    put("request_id", requestId)
+                    put("rating", rating)
+                    put("room_number", roomNumber)
+                }
+
+                val writer = OutputStreamWriter(connection.outputStream)
+                writer.write(json.toString())
+                writer.flush()
+                writer.close()
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    onSuccess()
+                } else {
+                    onError("Server error: $responseCode")
+                }
+                connection.disconnect()
+            } catch (e: Exception) {
+                Log.e(TAG, "Rating Error: ${e.message}")
                 onError(e.message ?: "Unknown error")
             }
         }
