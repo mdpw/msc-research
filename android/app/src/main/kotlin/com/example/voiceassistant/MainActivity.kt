@@ -10,25 +10,40 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -46,6 +61,92 @@ data class RequestItem(
     val status: String,
     val timestamp: String
 )
+
+// ── Theme Colors ──
+private val SeraLightColors = lightColorScheme(
+    primary = Color(0xFF1565C0),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFE3F2FD),
+    onPrimaryContainer = Color(0xFF0D47A1),
+    secondary = Color(0xFF00897B),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE0F2F1),
+    onSecondaryContainer = Color(0xFF004D40),
+    tertiary = Color(0xFFFF8F00),
+    onTertiary = Color.White,
+    error = Color(0xFFD32F2F),
+    background = Color(0xFFF5F5F5),
+    surface = Color.White,
+    surfaceVariant = Color(0xFFF0F0F0),
+    onBackground = Color(0xFF212121),
+    onSurface = Color(0xFF212121),
+    onSurfaceVariant = Color(0xFF757575)
+)
+
+private val SeraDarkColors = darkColorScheme(
+    primary = Color(0xFF64B5F6),
+    onPrimary = Color(0xFF0D47A1),
+    primaryContainer = Color(0xFF1A237E),
+    onPrimaryContainer = Color(0xFFBBDEFB),
+    secondary = Color(0xFF80CBC4),
+    onSecondary = Color(0xFF004D40),
+    secondaryContainer = Color(0xFF1B3B38),
+    onSecondaryContainer = Color(0xFFB2DFDB),
+    tertiary = Color(0xFFFFB74D),
+    onTertiary = Color(0xFF4E342E),
+    error = Color(0xFFEF9A9A),
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    surfaceVariant = Color(0xFF2C2C2C),
+    onBackground = Color(0xFFE0E0E0),
+    onSurface = Color(0xFFE0E0E0),
+    onSurfaceVariant = Color(0xFFBDBDBD)
+)
+
+// ── Department Colors ──
+fun getDepartmentColor(department: String): Color = when (department) {
+    "Housekeeping" -> Color(0xFF4CAF50)
+    "Room Service" -> Color(0xFFFF9800)
+    "Maintenance" -> Color(0xFF2196F3)
+    "Front Desk" -> Color(0xFF9C27B0)
+    "Concierge" -> Color(0xFF00BCD4)
+    else -> Color(0xFF757575)
+}
+
+fun getStatusBorderColor(status: String): Color = when (status) {
+    "pending" -> Color(0xFFFFC107)
+    "in_progress" -> Color(0xFF2196F3)
+    "completed" -> Color(0xFF4CAF50)
+    else -> Color.Gray
+}
+
+// ── Relative Time Helper ──
+fun getRelativeTime(timestamp: String): String {
+    try {
+        if (timestamp.contains("T") || timestamp.contains("-")) {
+            val parts = timestamp.replace("T", " ").split(" ")
+            if (parts.size >= 2) {
+                val dateParts = parts[0].split("-")
+                val timeParts = parts[1].split(":")
+                if (dateParts.size == 3 && timeParts.size >= 2) {
+                    val cal = Calendar.getInstance()
+                    cal.set(dateParts[0].toInt(), dateParts[1].toInt() - 1, dateParts[2].toInt(),
+                        timeParts[0].toInt(), timeParts[1].toInt(),
+                        if (timeParts.size > 2) timeParts[2].split(".")[0].toInt() else 0)
+                    val diffMs = System.currentTimeMillis() - cal.timeInMillis
+                    val diffMin = diffMs / 60000
+                    return when {
+                        diffMin < 1 -> "Just now"
+                        diffMin < 60 -> "${diffMin}m ago"
+                        diffMin < 1440 -> "${diffMin / 60}h ago"
+                        else -> "${diffMin / 1440}d ago"
+                    }
+                }
+            }
+        }
+    } catch (_: Exception) {}
+    return timestamp
+}
 
 class MainActivity : ComponentActivity() {
     private lateinit var voskService: VoskService
@@ -109,7 +210,7 @@ class MainActivity : ComponentActivity() {
                     tts.setSpeechRate(0.9f)
                     tts.setPitch(1.0f)
                     ttsReady = true
-                    Log.d(TAG, "✅ TTS Initialized")
+                    Log.d(TAG, "TTS Initialized")
                 }
             }
         }
@@ -120,7 +221,6 @@ class MainActivity : ComponentActivity() {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
-        // Request location permission for WiFi SSID detection
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             refreshNetworkInfo()
         } else {
@@ -175,7 +275,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun initializeServices() {
-        Log.d(TAG, "🚀 Initializing services...")
+        Log.d(TAG, "Initializing services...")
         lifecycleScope.launch {
             voskService.initialize()
         }
@@ -247,7 +347,6 @@ class MainActivity : ComponentActivity() {
             webSocketService.disconnect()
         }
         connectWebSocket()
-        // Check connectivity by fetching history
         apiService.getRequestHistory(ROOM_NUMBER,
             onSuccess = { history ->
                 runOnUiThread {
@@ -275,7 +374,7 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 onStatusChange = { requestId, status ->
-                    Log.d(TAG, "🔌 WebSocket status change: request $requestId -> $status")
+                    Log.d(TAG, "WebSocket status change: request $requestId -> $status")
                     runOnUiThread {
                         val index = _requestHistory.indexOfFirst { it.id == requestId }
                         if (index != -1) {
@@ -315,6 +414,221 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ── Animated Mic Button ──
+@Composable
+fun AnimatedMicButton(
+    isRecording: Boolean,
+    isProcessing: Boolean,
+    audioLevel: Float,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "mic")
+
+    // Pulse animation while recording
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, easing = EaseInOut),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+
+    // Spinner rotation while processing
+    val spinAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing)
+        ),
+        label = "spin"
+    )
+
+    // Glow alpha
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = EaseInOut),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+
+    val currentScale = when {
+        isRecording -> pulseScale
+        else -> 1f
+    }
+
+    val buttonColor = when {
+        isRecording -> Color(0xFFD32F2F)
+        isProcessing -> Color(0xFFFF8F00)
+        else -> Color(0xFF1565C0)
+    }
+
+    val glowColor = when {
+        isRecording -> Color(0xFFD32F2F)
+        isProcessing -> Color(0xFFFF8F00)
+        else -> Color(0xFF1565C0)
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.size(120.dp)
+    ) {
+        // Audio level rings (visible during recording)
+        if (isRecording) {
+            val normalizedLevel = (audioLevel * 8f).coerceIn(0f, 1f)
+            Canvas(modifier = Modifier.size(120.dp)) {
+                val ringRadius = size.minDimension / 2f
+                drawCircle(
+                    color = glowColor.copy(alpha = glowAlpha * normalizedLevel),
+                    radius = ringRadius * (1f + normalizedLevel * 0.3f),
+                    style = Stroke(width = 3.dp.toPx())
+                )
+                drawCircle(
+                    color = glowColor.copy(alpha = glowAlpha * normalizedLevel * 0.5f),
+                    radius = ringRadius * (1f + normalizedLevel * 0.5f),
+                    style = Stroke(width = 2.dp.toPx())
+                )
+            }
+        }
+
+        // Processing spinner
+        if (isProcessing) {
+            Canvas(modifier = Modifier.size(100.dp)) {
+                drawArc(
+                    color = glowColor.copy(alpha = 0.7f),
+                    startAngle = spinAngle,
+                    sweepAngle = 120f,
+                    useCenter = false,
+                    topLeft = Offset.Zero,
+                    size = Size(size.width, size.height),
+                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+                )
+            }
+        }
+
+        // Main button
+        Surface(
+            onClick = { if (!isRecording && !isProcessing) onClick() },
+            modifier = Modifier
+                .size(88.dp)
+                .scale(currentScale)
+                .shadow(
+                    elevation = if (isRecording) 12.dp else 6.dp,
+                    shape = CircleShape,
+                    ambientColor = glowColor.copy(alpha = 0.3f),
+                    spotColor = glowColor.copy(alpha = 0.3f)
+                ),
+            shape = CircleShape,
+            color = buttonColor
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                // Mic icon drawn with Canvas
+                Canvas(modifier = Modifier.size(36.dp)) {
+                    val w = size.width
+                    val h = size.height
+                    val iconColor = Color.White
+                    val strokeW = 2.5.dp.toPx()
+
+                    if (isRecording) {
+                        // Recording: filled circle (stop indicator)
+                        drawRoundRect(
+                            color = iconColor,
+                            topLeft = Offset(w * 0.25f, h * 0.25f),
+                            size = Size(w * 0.5f, h * 0.5f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(4.dp.toPx())
+                        )
+                    } else if (isProcessing) {
+                        // Processing: gear-like dots
+                        for (i in 0 until 3) {
+                            drawCircle(
+                                color = iconColor,
+                                radius = 3.dp.toPx(),
+                                center = Offset(w * (0.25f + i * 0.25f), h * 0.5f)
+                            )
+                        }
+                    } else {
+                        // Mic icon
+                        // Mic body
+                        drawRoundRect(
+                            color = iconColor,
+                            topLeft = Offset(w * 0.35f, h * 0.1f),
+                            size = Size(w * 0.3f, h * 0.45f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * 0.15f)
+                        )
+                        // Mic arc
+                        drawArc(
+                            color = iconColor,
+                            startAngle = 0f,
+                            sweepAngle = 180f,
+                            useCenter = false,
+                            topLeft = Offset(w * 0.22f, h * 0.2f),
+                            size = Size(w * 0.56f, h * 0.55f),
+                            style = Stroke(width = strokeW, cap = StrokeCap.Round)
+                        )
+                        // Stem
+                        drawLine(
+                            color = iconColor,
+                            start = Offset(w * 0.5f, h * 0.75f),
+                            end = Offset(w * 0.5f, h * 0.88f),
+                            strokeWidth = strokeW,
+                            cap = StrokeCap.Round
+                        )
+                        // Base
+                        drawLine(
+                            color = iconColor,
+                            start = Offset(w * 0.35f, h * 0.88f),
+                            end = Offset(w * 0.65f, h * 0.88f),
+                            strokeWidth = strokeW,
+                            cap = StrokeCap.Round
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── Audio Level Indicator ──
+@Composable
+fun AudioLevelIndicator(audioLevel: Float, isRecording: Boolean, modifier: Modifier = Modifier) {
+    if (!isRecording) return
+    val normalizedLevel = (audioLevel * 10f).coerceIn(0f, 1f)
+
+    Row(
+        modifier = modifier.height(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val barCount = 20
+        for (i in 0 until barCount) {
+            val threshold = i.toFloat() / barCount
+            val isActive = normalizedLevel > threshold
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(if (isActive) 0.3f + (normalizedLevel - threshold).coerceIn(0f, 0.7f) else 0.2f)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(
+                        if (isActive) {
+                            when {
+                                i < barCount * 0.6 -> Color(0xFF4CAF50)
+                                i < barCount * 0.8 -> Color(0xFFFFC107)
+                                else -> Color(0xFFD32F2F)
+                            }
+                        } else {
+                            Color(0xFF424242)
+                        }
+                    )
+            )
+        }
+    }
+}
+
 @Composable
 fun VoiceAssistantScreen(
     roomNumber: String,
@@ -348,207 +662,296 @@ fun VoiceAssistantScreen(
     var lastDepartment by remember { mutableStateOf("") }
     var showServerDialog by remember { mutableStateOf(false) }
     var settingsExpanded by remember { mutableStateOf(false) }
+    var audioLevel by remember { mutableFloatStateOf(0f) }
 
-    MaterialTheme {
+    // Sort requests: in_progress first, then pending, then completed
+    val sortedRequests = remember(requestHistory) {
+        requestHistory.sortedWith(compareBy {
+            when (it.status) {
+                "in_progress" -> 0
+                "pending" -> 1
+                "completed" -> 2
+                else -> 3
+            }
+        })
+    }
+
+    val isDark = isSystemInDarkTheme()
+    val colorScheme = if (isDark) SeraDarkColors else SeraLightColors
+
+    MaterialTheme(colorScheme = colorScheme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
 
-                // ── Collapsible Settings Panel (About + Network) ──
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        // Always-visible header row
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(text = "Sera - Voice Assistant", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                                Text(text = "Room $roomNumber", style = MaterialTheme.typography.bodySmall)
-                            }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { settingsExpanded = !settingsExpanded }, modifier = Modifier.size(32.dp)) {
-                                    Icon(
-                                        if (settingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                        contentDescription = "Toggle Settings"
+                    // ── Collapsible Settings Panel ──
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "Sera - Voice Assistant",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                    Text(
+                                        text = "Room $roomNumber",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                                     )
                                 }
-                                IconButton(onClick = onCloseApp, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.Close, contentDescription = "Close App", tint = MaterialTheme.colorScheme.error)
-                                }
-                            }
-                        }
-
-                        // Collapsible content: Network info + Profile selector
-                        AnimatedVisibility(visible = settingsExpanded) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        Text(
-                                            text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Text(
-                                            text = "IP: ${deviceIp.value ?: "N/A"}",
-                                            style = MaterialTheme.typography.bodySmall
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(onClick = { settingsExpanded = !settingsExpanded }, modifier = Modifier.size(32.dp)) {
+                                        Icon(
+                                            if (settingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                            contentDescription = "Toggle Settings",
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        profiles.forEachIndexed { index, profile ->
-                                            val isActive = index == activeProfileIndex.intValue
-                                            FilterChip(
-                                                selected = isActive,
-                                                onClick = { if (!isActive) onProfileSwitch(index) },
-                                                label = { Text(profile.name, fontSize = 11.sp) },
-                                                modifier = Modifier.weight(1f)
+                                    IconButton(onClick = onCloseApp, modifier = Modifier.size(32.dp)) {
+                                        Icon(Icons.Default.Close, contentDescription = "Close App", tint = MaterialTheme.colorScheme.error)
+                                    }
+                                }
+                            }
+
+                            AnimatedVisibility(visible = settingsExpanded) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (isDark) Color(0xFF1B3B2F) else Color(0xFFE8F5E9)
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+                                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                            Text(
+                                                text = "WiFi: ${wifiSsid.value ?: "Not connected"}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                text = "IP: ${deviceIp.value ?: "N/A"}",
+                                                style = MaterialTheme.typography.bodySmall
                                             )
                                         }
-                                        IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) {
-                                            Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            profiles.forEachIndexed { index, profile ->
+                                                val isActive = index == activeProfileIndex.intValue
+                                                FilterChip(
+                                                    selected = isActive,
+                                                    onClick = { if (!isActive) onProfileSwitch(index) },
+                                                    label = { Text(profile.name, fontSize = 11.sp) },
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) {
+                                                Icon(Icons.Default.Edit, contentDescription = "Edit Profiles", modifier = Modifier.size(16.dp))
+                                            }
+                                        }
+                                        val active = profiles.getOrNull(activeProfileIndex.intValue)
+                                        if (active != null) {
+                                            Text(
+                                                text = "Server: ${active.serverIp}:${active.serverPort}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
+                                            )
                                         }
                                     }
-                                    val active = profiles.getOrNull(activeProfileIndex.intValue)
-                                    if (active != null) {
-                                        Text(
-                                            text = "Server: ${active.serverIp}:${active.serverPort}",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color(0xFF2E7D32)
-                                        )
-                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Profile edit dialog
-                if (showServerDialog) {
-                    ProfileEditDialog(
-                        profiles = profiles,
-                        activeIndex = activeProfileIndex.intValue,
-                        onDismiss = { showServerDialog = false },
-                        onUpdateProfile = { index, profile -> onProfileUpdate(index, profile) },
-                        onAddProfile = { profile -> onProfileAdd(profile) },
-                        onRemoveProfile = { index ->
-                            onProfileRemove(index)
-                            if (profiles.size <= 1) showServerDialog = false
-                        }
-                    )
-                }
+                    if (showServerDialog) {
+                        ProfileEditDialog(
+                            profiles = profiles,
+                            activeIndex = activeProfileIndex.intValue,
+                            onDismiss = { showServerDialog = false },
+                            onUpdateProfile = { index, profile -> onProfileUpdate(index, profile) },
+                            onAddProfile = { profile -> onProfileAdd(profile) },
+                            onRemoveProfile = { index ->
+                                onProfileRemove(index)
+                                if (profiles.size <= 1) showServerDialog = false
+                            }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                // ── Mic Section (1/3 of remaining space) ──
-                Card(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    // ── Mic Section (1/3) ──
+                    Card(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                if (!isRecording && !isProcessing) {
-                                    lifecycleScope.launch {
-                                        statusMessage = "Hello! I'm Sera. How can I help you?"
-                                        onSpeakAndWait("Hello! I'm Sera. How can I help you?")
-                                        processVoiceRequest(
-                                            audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
-                                            { isRecording = true }, { isRecording = false }, { isProcessing = true }, { isProcessing = false },
-                                            { statusMessage = it }, { lastTranscription = it },
-                                            { i, c -> lastIntent = i; lastConfidence = c },
-                                            onSpeakResponse,
-                                            { request -> lastDepartment = request.department; onAddRequest(request) },
-                                            { statusMessage = "Tap microphone to start" }
-                                        )
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            AnimatedMicButton(
+                                isRecording = isRecording,
+                                isProcessing = isProcessing,
+                                audioLevel = audioLevel,
+                                onClick = {
+                                    if (!isRecording && !isProcessing) {
+                                        lifecycleScope.launch {
+                                            statusMessage = "Hello! I'm Sera. How can I help you?"
+                                            onSpeakAndWait("Hello! I'm Sera. How can I help you?")
+                                            processVoiceRequest(
+                                                audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
+                                                { isRecording = true }, { isRecording = false },
+                                                { isProcessing = true }, { isProcessing = false },
+                                                { statusMessage = it }, { lastTranscription = it },
+                                                { i, c -> lastIntent = i; lastConfidence = c },
+                                                { level -> audioLevel = level },
+                                                onSpeakResponse,
+                                                { request -> lastDepartment = request.department; onAddRequest(request) },
+                                                { statusMessage = "Tap microphone to start"; audioLevel = 0f }
+                                            )
+                                        }
                                     }
-                                }
-                            },
-                            enabled = !isRecording && !isProcessing,
-                            modifier = Modifier.size(80.dp), shape = RoundedCornerShape(50),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = when {
-                                    isRecording -> MaterialTheme.colorScheme.error
-                                    isProcessing -> MaterialTheme.colorScheme.tertiary
-                                    else -> MaterialTheme.colorScheme.primary
                                 }
                             )
-                        ) {
-                            val buttonIcon = if (isRecording) "⏺️" else if (isProcessing) "⚙️" else "🎤"
-                            Text(text = buttonIcon, fontSize = 32.sp)
-                        }
 
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = when {
-                                isRecording -> "Recording..."
-                                isProcessing -> "Processing..."
-                                else -> "Tap to speak"
-                            },
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                            Spacer(modifier = Modifier.height(4.dp))
 
-                        if (lastTranscription.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            HorizontalDivider()
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = "Transcription:", style = MaterialTheme.typography.bodySmall)
-                            Text(text = "\"$lastTranscription\"", fontWeight = FontWeight.Medium, fontSize = 13.sp)
-                            if (lastIntent.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall)
-                            }
-                            if (lastDepartment.isNotEmpty()) {
-                                Text(text = "Department: $lastDepartment", style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                }
+                            // Audio level bar
+                            AudioLevelIndicator(
+                                audioLevel = audioLevel,
+                                isRecording = isRecording,
+                                modifier = Modifier.fillMaxWidth(0.7f)
+                            )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = when {
+                                    isRecording -> "Listening..."
+                                    isProcessing -> "Processing..."
+                                    else -> "Tap to speak"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                            )
 
-                // ── Recent Requests Section (2/3 of remaining space) ──
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = "Recent Requests", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = onRefreshRequests, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", modifier = Modifier.size(18.dp))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Box(modifier = Modifier.fillMaxWidth().weight(2f)) {
-                    if (requestHistory.isEmpty()) {
-                        Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = "📝", fontSize = 40.sp)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(text = "No requests yet", style = MaterialTheme.typography.bodySmall)
+                            if (lastTranscription.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f))
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "\"$lastTranscription\"",
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 13.sp,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                if (lastIntent.isNotEmpty()) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
+                                if (lastDepartment.isNotEmpty()) {
+                                    DepartmentBadge(department = lastDepartment)
                                 }
                             }
                         }
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            items(requestHistory) { request -> RequestCard(request = request) }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // ── Recent Requests Header ──
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Recent Requests",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        IconButton(onClick = onRefreshRequests, modifier = Modifier.size(28.dp)) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "Refresh",
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // ── Requests List (2/3) ──
+                    Box(modifier = Modifier.fillMaxWidth().weight(2f)) {
+                        if (sortedRequests.isEmpty()) {
+                            // Better empty state
+                            Card(
+                                modifier = Modifier.fillMaxSize(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        // Mic icon as empty state illustration
+                                        Canvas(modifier = Modifier.size(56.dp)) {
+                                            val w = size.width
+                                            val h = size.height
+                                            val col = Color(0xFFBDBDBD)
+                                            val sw = 3.dp.toPx()
+                                            drawRoundRect(col, Offset(w*0.35f,h*0.1f), Size(w*0.3f,h*0.45f), androidx.compose.ui.geometry.CornerRadius(w*0.15f))
+                                            drawArc(col, 0f, 180f, false, Offset(w*0.2f,h*0.15f), Size(w*0.6f,h*0.55f), style = Stroke(sw, cap = StrokeCap.Round))
+                                            drawLine(col, Offset(w*0.5f,h*0.7f), Offset(w*0.5f,h*0.85f), sw, StrokeCap.Round)
+                                            drawLine(col, Offset(w*0.32f,h*0.85f), Offset(w*0.68f,h*0.85f), sw, StrokeCap.Round)
+                                        }
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            text = "No requests yet",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = "Tap the microphone button above\nto make your first request",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            lineHeight = 18.sp
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                items(sortedRequests) { request ->
+                                    RequestCard(request = request)
+                                }
+                            }
                         }
                     }
                 }
@@ -571,6 +974,7 @@ suspend fun processVoiceRequest(
     onStatusUpdate: (String) -> Unit,
     onTranscriptionUpdate: (String) -> Unit,
     onIntentUpdate: (String, Float) -> Unit,
+    onAudioLevel: (Float) -> Unit,
     onSpeakResponse: (String) -> Unit,
     onAddRequest: (RequestItem) -> Unit,
     onComplete: () -> Unit
@@ -587,9 +991,11 @@ suspend fun processVoiceRequest(
         val audioData = audioRecorder.recordWithVAD(
             silenceTimeoutMs = 1500L,
             maxDurationMs = 10000L,
-            onStateChange = { state -> onStatusUpdate(state) }
+            onStateChange = { state -> onStatusUpdate(state) },
+            onAudioLevel = { level -> onAudioLevel(level) }
         )
 
+        onAudioLevel(0f)
         onRecordingStop(); onProcessingStart(); onStatusUpdate("Processing...")
 
         lifecycleScope.launch {
@@ -606,6 +1012,14 @@ suspend fun processVoiceRequest(
                 val cleanedTranscription = cleanTranscription(transcription)
                 val intentResult = nluService.classifyIntent(cleanedTranscription)
                 onIntentUpdate(intentResult.name, intentResult.confidence)
+
+                // Reject low-confidence or irrelevant requests
+                val MIN_CONFIDENCE = 0.60f
+                if (intentResult.confidence < MIN_CONFIDENCE) {
+                    onStatusUpdate("Request not understood")
+                    onSpeakResponse("I'm sorry, I couldn't understand your request. Could you please try again with a specific hotel service request, such as requesting towels, room cleaning, or room service?")
+                    onProcessingStop(); onComplete(); return@launch
+                }
 
                 onStatusUpdate("Submitting...")
                 apiService.submitRequest(
@@ -627,18 +1041,93 @@ suspend fun processVoiceRequest(
     } catch (e: Exception) { onRecordingStop(); onProcessingStop(); onComplete() }
 }
 
+// ── Department Badge ──
+@Composable
+fun DepartmentBadge(department: String) {
+    val color = getDepartmentColor(department)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 2.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = department,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+            color = color
+        )
+    }
+}
+
+// ── Request Card with colored left border ──
 @Composable
 fun RequestCard(request: RequestItem) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Request No.${request.id}", fontWeight = FontWeight.Bold)
-                StatusBadge(status = request.status)
-            }
-            Spacer(modifier = Modifier.height(8.dp)); Text(text = request.requestText); Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "${request.intent} | ${request.department}", style = MaterialTheme.typography.bodySmall)
-                Text(text = request.timestamp, style = MaterialTheme.typography.bodySmall)
+    val borderColor = getStatusBorderColor(request.status)
+    val deptColor = getDepartmentColor(request.department)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            // Status color bar on the left
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(borderColor)
+            )
+            Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "#${request.id}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    StatusBadge(status = request.status)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = request.requestText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Department badge
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(deptColor)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = request.department,
+                            fontSize = 11.sp,
+                            color = deptColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Text(
+                        text = getRelativeTime(request.timestamp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -652,8 +1141,8 @@ fun StatusBadge(status: String) {
         "completed" -> Triple(Color(0xFFD4EDDA), Color(0xFF155724), "Completed")
         else -> Triple(Color.Gray, Color.White, status)
     }
-    Box(modifier = Modifier.background(backgroundColor, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 4.dp)) {
-        Text(text = text, color = textColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+    Box(modifier = Modifier.background(backgroundColor, RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 2.dp)) {
+        Text(text = text, color = textColor, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }
 

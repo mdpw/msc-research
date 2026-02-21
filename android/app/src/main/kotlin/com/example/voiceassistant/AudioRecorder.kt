@@ -127,7 +127,8 @@ class AudioRecorder(private val context: Context) {
         silenceTimeoutMs: Long = 1500L,
         maxDurationMs: Long = 10000L,
         speechEnergyThreshold: Float = 0.02f,
-        onStateChange: ((String) -> Unit)? = null
+        onStateChange: ((String) -> Unit)? = null,
+        onAudioLevel: ((Float) -> Unit)? = null
     ): FloatArray = withContext(Dispatchers.IO) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED
@@ -175,6 +176,7 @@ class AudioRecorder(private val context: Context) {
                     sum += sample * sample
                 }
                 val rmsEnergy = sqrt(sum / read).toFloat()
+                onAudioLevel?.invoke(rmsEnergy.coerceIn(0f, 1f))
 
                 val elapsed = System.currentTimeMillis() - startTime
 
