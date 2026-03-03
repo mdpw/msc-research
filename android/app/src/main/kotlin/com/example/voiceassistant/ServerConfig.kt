@@ -17,7 +17,7 @@ object ServerConfig {
     // Default profiles
     private val DEFAULT_PROFILES = listOf(
         NetworkProfile("Slt Fiber", "192.168.1.158", 8000),
-        NetworkProfile("Prolink_AA5B", "192.168.1.100", 8000)
+        NetworkProfile("Prolink_AA5B", "192.168.1.101", 8000)
     )
 
     var profiles: MutableList<NetworkProfile> = DEFAULT_PROFILES.toMutableList()
