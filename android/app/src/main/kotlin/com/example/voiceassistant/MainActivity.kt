@@ -14,7 +14,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -136,8 +135,8 @@ class MainActivity : ComponentActivity() {
     // Network & server config state
     private val _wifiSsid = mutableStateOf<String?>(null)
     private val _deviceIp = mutableStateOf<String?>(null)
-    private val _activeProfileIndex = mutableIntStateOf(0)
-    private val _profiles = mutableStateListOf<NetworkProfile>()
+    private val _serverIp = mutableStateOf("192.168.1.100")
+    private val _serverPort = mutableIntStateOf(8000)
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -161,9 +160,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         ServerConfig.load(this)
-        _profiles.clear()
-        _profiles.addAll(ServerConfig.profiles)
-        _activeProfileIndex.intValue = ServerConfig.activeProfileIndex
+        _serverIp.value = ServerConfig.serverIp
+        _serverPort.intValue = ServerConfig.serverPort
 
         voskService = VoskService(this)
         audioRecorder = AudioRecorder(this)
@@ -171,15 +169,25 @@ class MainActivity : ComponentActivity() {
         apiService = ApiService(ServerConfig.baseUrl)
 
         tts = TextToSpeech(this) { status ->
+            Log.d(TAG, "TTS init status: $status (SUCCESS=${TextToSpeech.SUCCESS})")
             if (status == TextToSpeech.SUCCESS) {
                 val result = tts.setLanguage(Locale.US)
+                Log.d(TAG, "TTS setLanguage(US) result: $result")
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e(TAG, "TTS: Language not supported")
-                } else {
-                    tts.setSpeechRate(0.9f)
-                    tts.setPitch(1.0f)
-                    ttsReady = true
+                    Log.e(TAG, "TTS: US English not available, trying UK")
+                    val resultUK = tts.setLanguage(Locale.UK)
+                    if (resultUK == TextToSpeech.LANG_MISSING_DATA || resultUK == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "TTS: UK English not available, trying ENGLISH")
+                        tts.setLanguage(Locale.ENGLISH)
+                    }
                 }
+                // Set ready regardless — some devices return LANG_MISSING_DATA but still speak
+                tts.setSpeechRate(0.9f)
+                tts.setPitch(1.0f)
+                ttsReady = true
+                Log.d(TAG, "TTS ready = true, engine: ${tts.defaultEngine}")
+            } else {
+                Log.e(TAG, "TTS init FAILED with status: $status")
             }
         }
 
@@ -208,17 +216,14 @@ class MainActivity : ComponentActivity() {
                 requestHistory = _requestHistory,
                 wifiSsid = _wifiSsid,
                 deviceIp = _deviceIp,
-                profiles = _profiles,
-                activeProfileIndex = _activeProfileIndex,
+                serverIp = _serverIp.value,
+                serverPort = _serverPort.intValue,
                 onSpeakAndWait = { message -> speakAndWait(message) },
                 onSpeakResponse = { message -> speakFire(message) },
                 onAddRequest = { request -> _requestHistory.add(0, request) },
                 onCloseApp = { finish() },
                 onRefreshRequests = { refreshRequests() },
-                onProfileSwitch = { index -> switchProfile(index) },
-                onProfileUpdate = { index, profile -> updateProfile(index, profile) },
-                onProfileAdd = { profile -> addProfile(profile) },
-                onProfileRemove = { index -> removeProfile(index) },
+                onServerUpdate = { ip, port -> updateServer(ip, port) },
                 onCancelRequest = { requestId -> cancelRequest(requestId) },
                 onRateRequest = { requestId, rating -> rateRequest(requestId, rating) }
             )
@@ -254,31 +259,10 @@ class MainActivity : ComponentActivity() {
         _deviceIp.value = NetworkUtils.getDeviceIp(this)
     }
 
-    private fun switchProfile(index: Int) {
-        ServerConfig.switchProfile(this, index)
-        _activeProfileIndex.intValue = index
-        reconnectToServer()
-        Toast.makeText(this, "Switched to: ${ServerConfig.activeProfile.name}", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun updateProfile(index: Int, profile: NetworkProfile) {
-        ServerConfig.updateProfile(this, index, profile)
-        _profiles.clear()
-        _profiles.addAll(ServerConfig.profiles)
-        if (index == _activeProfileIndex.intValue) reconnectToServer()
-    }
-
-    private fun addProfile(profile: NetworkProfile) {
-        ServerConfig.addProfile(this, profile)
-        _profiles.clear()
-        _profiles.addAll(ServerConfig.profiles)
-    }
-
-    private fun removeProfile(index: Int) {
-        ServerConfig.removeProfile(this, index)
-        _profiles.clear()
-        _profiles.addAll(ServerConfig.profiles)
-        _activeProfileIndex.intValue = ServerConfig.activeProfileIndex
+    private fun updateServer(ip: String, port: Int) {
+        ServerConfig.saveServer(this, ip, port)
+        _serverIp.value = ip
+        _serverPort.intValue = port
         reconnectToServer()
     }
 
@@ -354,12 +338,12 @@ class MainActivity : ComponentActivity() {
                 runOnUiThread {
                     _requestHistory.clear()
                     _requestHistory.addAll(history)
-                    speakFire("Successfully connected to ${ServerConfig.activeProfile.name}. System is ready.")
+                    speakFire("Successfully connected to server. System is ready.")
                 }
             },
             onError = {
                 runOnUiThread {
-                    speakFire("Failed to connect to ${ServerConfig.activeProfile.name}. Please check the network connection or contact the help desk using the land line phone.")
+                    speakFire("Failed to connect to server at ${ServerConfig.serverIp}. Please check the network connection or contact the help desk using the land line phone.")
                 }
             }
         )
@@ -525,17 +509,14 @@ fun VoiceAssistantScreen(
     requestHistory: List<RequestItem>,
     wifiSsid: State<String?>,
     deviceIp: State<String?>,
-    profiles: List<NetworkProfile>,
-    activeProfileIndex: MutableIntState,
+    serverIp: String,
+    serverPort: Int,
     onSpeakAndWait: suspend (String) -> Unit,
     onSpeakResponse: (String) -> Unit,
     onAddRequest: (RequestItem) -> Unit,
     onCloseApp: () -> Unit,
     onRefreshRequests: () -> Unit,
-    onProfileSwitch: (Int) -> Unit,
-    onProfileUpdate: (Int, NetworkProfile) -> Unit,
-    onProfileAdd: (NetworkProfile) -> Unit,
-    onProfileRemove: (Int) -> Unit,
+    onServerUpdate: (String, Int) -> Unit,
     onCancelRequest: (Int) -> Unit,
     onRateRequest: (Int, Int) -> Unit
 ) {
@@ -604,17 +585,13 @@ fun VoiceAssistantScreen(
                                     Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
                                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                             Text("WiFi: ${wifiSsid.value ?: "Not connected"}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
-                                            Text("IP: ${deviceIp.value ?: "N/A"}", style = MaterialTheme.typography.bodySmall)
+                                            Text("Device IP: ${deviceIp.value ?: "N/A"}", style = MaterialTheme.typography.bodySmall)
                                         }
                                         Spacer(modifier = Modifier.height(4.dp))
-                                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                            profiles.forEachIndexed { index, profile ->
-                                                FilterChip(selected = index == activeProfileIndex.intValue, onClick = { if (index != activeProfileIndex.intValue) onProfileSwitch(index) }, label = { Text(profile.name, fontSize = 11.sp) }, modifier = Modifier.weight(1f))
-                                            }
-                                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) { Icon(Icons.Default.Edit, "Edit Profiles", modifier = Modifier.size(16.dp)) }
+                                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                            Text("Server: $serverIp:$serverPort", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium, color = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32))
+                                            IconButton(onClick = { showServerDialog = true }, modifier = Modifier.size(28.dp)) { Icon(Icons.Default.Edit, "Edit Server", modifier = Modifier.size(16.dp)) }
                                         }
-                                        val active = profiles.getOrNull(activeProfileIndex.intValue)
-                                        if (active != null) { Text("Server: ${active.serverIp}:${active.serverPort}", style = MaterialTheme.typography.bodySmall, color = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)) }
                                     }
                                 }
                             }
@@ -622,7 +599,12 @@ fun VoiceAssistantScreen(
                     }
 
                     if (showServerDialog) {
-                        ProfileEditDialog(profiles, activeProfileIndex.intValue, { showServerDialog = false }, { i, p -> onProfileUpdate(i, p) }, { p -> onProfileAdd(p) }, { i -> onProfileRemove(i); if (profiles.size <= 1) showServerDialog = false })
+                        ServerEditDialog(
+                            currentIp = serverIp,
+                            currentPort = serverPort,
+                            onDismiss = { showServerDialog = false },
+                            onSave = { ip, port -> onServerUpdate(ip, port); showServerDialog = false }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -1097,47 +1079,42 @@ fun StatusBadge(status: String) {
 }
 
 @Composable
-fun ProfileEditDialog(
-    profiles: List<NetworkProfile>, activeIndex: Int, onDismiss: () -> Unit,
-    onUpdateProfile: (Int, NetworkProfile) -> Unit, onAddProfile: (NetworkProfile) -> Unit, onRemoveProfile: (Int) -> Unit
+fun ServerEditDialog(
+    currentIp: String, currentPort: Int,
+    onDismiss: () -> Unit, onSave: (String, Int) -> Unit
 ) {
-    var editingIndex by remember { mutableStateOf<Int?>(null) }
-    var editName by remember { mutableStateOf("") }
-    var editIp by remember { mutableStateOf("") }
-    var editPort by remember { mutableStateOf("") }
+    var editIp by remember { mutableStateOf(currentIp) }
+    var editPort by remember { mutableStateOf(currentPort.toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Network Profiles") },
+        title = { Text("Server Settings") },
         text = {
             Column {
-                profiles.forEachIndexed { index, profile ->
-                    if (editingIndex == index) {
-                        OutlinedTextField(editName, { editName = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(editIp, { editIp = it }, label = { Text("Server IP") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(editPort, { editPort = it }, label = { Text("Port") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = { onUpdateProfile(index, NetworkProfile(editName.trim(), editIp.trim(), editPort.toIntOrNull() ?: 8000)); editingIndex = null }) { Text("Save") }
-                            TextButton(onClick = { editingIndex = null }) { Text("Cancel") }
-                        }
-                    } else {
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(profile.name + if (index == activeIndex) " (Active)" else "", fontWeight = if (index == activeIndex) FontWeight.Bold else FontWeight.Normal, fontSize = 14.sp)
-                                Text("${profile.serverIp}:${profile.serverPort}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                            IconButton(onClick = { editingIndex = index; editName = profile.name; editIp = profile.serverIp; editPort = profile.serverPort.toString() }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(16.dp)) }
-                            if (profiles.size > 1) { IconButton(onClick = { onRemoveProfile(index) }, modifier = Modifier.size(32.dp)) { Icon(Icons.Default.Close, "Remove", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error) } }
-                        }
-                    }
-                    if (index < profiles.lastIndex) HorizontalDivider()
-                }
+                OutlinedTextField(
+                    value = editIp,
+                    onValueChange = { editIp = it },
+                    label = { Text("Server IP") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = editPort,
+                    onValueChange = { editPort = it },
+                    label = { Text("Port") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
-        confirmButton = { TextButton(onClick = { onAddProfile(NetworkProfile("New Network", "192.168.1.100", 8000)) }) { Text("Add Profile") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Close") } }
+        confirmButton = {
+            Button(onClick = {
+                val port = editPort.toIntOrNull() ?: 8000
+                onSave(editIp.trim(), port)
+            }) { Text("Save") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
 

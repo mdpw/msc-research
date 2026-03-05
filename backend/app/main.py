@@ -1,12 +1,19 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from app.models import RequestSubmit, RequestResponse, StatusUpdate, DepartmentUpdate, CancelRequest, StaffMessage, RatingSubmit
 from app.database import (init_db, add_request, get_all_requests, update_request_status,
                            get_request_by_id, update_request_department, get_requests_by_room,
-                           update_request_rating, add_staff_message)
+                           update_request_rating, add_staff_message,
+                           get_all_departments, get_departments_detail, get_all_rooms,
+                           get_intent_department_map, get_all_intent_mappings)
+from pathlib import Path
 import json
 
 app = FastAPI(title="Hotel Voice Assistant API")
+
+# Serve dashboard UI at /dashboard
+FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend"
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,73 +26,50 @@ app.add_middleware(
 dashboard_connections = []
 guest_connections = {}
 
-# COMPLETE INTENT-TO-DEPARTMENT MAPPING (All 18 intents from your NLU model)
-INTENT_TO_DEPARTMENT = {
-    # Housekeeping Department (7 intents)
-    "room_cleaning": "Housekeeping",
-    "towel_request": "Housekeeping",
-    "toiletries_request": "Housekeeping",
-    "blanket_request": "Housekeeping",
-    "pillow_request": "Housekeeping",
-    "laundry_service": "Housekeeping",
-    "do_not_disturb": "Housekeeping",
-
-    # Room Service / F&B (1 intent)
-    "food_order": "Room Service",
-
-    # Maintenance / Engineering (3 intents)
-    "maintenance": "Maintenance",
-    "temperature_control": "Maintenance",
-    "lighting_control": "Maintenance",
-
-    # Front Desk (4 intents)
-    "wake_up_call": "Front Desk",
-    "checkout_billing": "Front Desk",
-    "noise_complaint": "Front Desk",
-    "emergency": "Front Desk",
-
-    # Concierge (2 intents)
-    "concierge_general": "Concierge",
-    "concierge_taxi": "Concierge",
-
-    # Misc (1 intent)
-    "misc_request": "Front Desk"
-}
-
-# Department display names (for consistency)
-DEPARTMENTS = [
-    "Housekeeping",
-    "Room Service",
-    "Maintenance",
-    "Front Desk",
-    "Concierge"
-]
-
 @app.on_event("startup")
 async def startup():
     init_db()
+    intent_map = get_intent_department_map()
+    departments = get_all_departments()
     print("Server started")
-    print(f"Loaded {len(INTENT_TO_DEPARTMENT)} intent mappings")
-    print(f"Available departments: {', '.join(DEPARTMENTS)}")
+    print(f"Loaded {len(intent_map)} intent mappings from database")
+    print(f"Available departments: {', '.join(departments)}")
 
 @app.get("/")
 async def root():
+    intent_map = get_intent_department_map()
+    departments = get_all_departments()
     return {
         "message": "Hotel Voice Assistant API",
         "status": "running",
-        "intents_mapped": len(INTENT_TO_DEPARTMENT),
-        "departments": DEPARTMENTS
+        "intents_mapped": len(intent_map),
+        "departments": departments
     }
 
 @app.get("/api/departments")
-async def get_departments():
+async def get_departments_endpoint():
     """Get list of all departments"""
-    return {"departments": DEPARTMENTS}
+    return {"departments": get_all_departments()}
+
+@app.get("/api/departments/detail")
+async def get_departments_detail_endpoint():
+    """Get all departments with descriptions"""
+    return {"departments": get_departments_detail()}
+
+@app.get("/api/rooms")
+async def get_rooms():
+    """Get list of all rooms"""
+    return {"rooms": get_all_rooms()}
 
 @app.get("/api/intent-mapping")
 async def get_intent_mapping():
     """Get complete intent-to-department mapping (for debugging)"""
-    return {"mappings": INTENT_TO_DEPARTMENT}
+    return {"mappings": get_intent_department_map()}
+
+@app.get("/api/intent-mapping/detail")
+async def get_intent_mapping_detail():
+    """Get all intent mappings with details"""
+    return {"mappings": get_all_intent_mappings()}
 
 @app.post("/api/submit-request", response_model=RequestResponse)
 async def submit_request(request: RequestSubmit):
@@ -356,13 +340,14 @@ async def notify_guest(room_number: str, data):
 def route_to_department(text: str, intent: str = None) -> str:
     """
     Route requests to departments based on intent or text analysis
-    Priority: intent > text keywords > default
+    Priority: intent (from DB mapping) > text keywords > default
     """
 
-    # Priority 1: Use intent if available (most reliable)
+    # Priority 1: Use intent if available (most reliable) - lookup from DB
     if intent:
-        if intent in INTENT_TO_DEPARTMENT:
-            department = INTENT_TO_DEPARTMENT[intent]
+        intent_map = get_intent_department_map()
+        if intent in intent_map:
+            department = intent_map[intent]
             print(f"   Routed by intent: '{intent}' -> {department}")
             return department
         else:
@@ -411,6 +396,11 @@ def route_to_department(text: str, intent: str = None) -> str:
 
     print(f"   No match found, defaulting -> Front Desk")
     return "Front Desk"
+
+@app.get("/dashboard")
+async def serve_dashboard():
+    """Serve the staff dashboard UI"""
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 if __name__ == "__main__":
     import uvicorn

@@ -40,6 +40,7 @@ class NLUService(private val context: Context) {
         ),
         "room_cleaning" to listOf(
             "housekeeping", "clean my room", "clean the room", "room cleaning",
+            "clean my bathroom", "clean the bathroom", "bathroom cleaned", "bathroom clean",
             "tidy", "tidy up", "sweep", "mop", "maid", "maid service",
             "dust", "trash", "garbage", "bin", "vacuum", "turndown", "turndown service"
         ),

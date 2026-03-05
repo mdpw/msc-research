@@ -1,0 +1,25 @@
+Prototype. Your title itself says it — this is a research project, not a commercial product. Examiners expect a working prototype that proves the concept, not a production-ready deployment.
+
+Frame it this way throughout your report:
+
+The system is developed as a functional prototype to demonstrate the feasibility of a low-cost, offline voice assistant for hospitality services. Production deployment considerations are discussed where relevant and identified as future work.
+
+This actually strengthens your report because:
+
+Honest assessment scores marks — Critical Appraisal (Chapter 10) is where you discuss limitations like "SQLite is sufficient for prototype evaluation but a production deployment serving multiple hotels would require PostgreSQL for concurrent write support"
+Your scope stays manageable — you evaluate the concept, not build a market-ready product
+Future Work becomes richer — you demonstrate awareness of what production would require
+In your report, acknowledge prototype limitations where they naturally come up:
+
+Component	Prototype Choice	Production Consideration (mention in Ch.10/11)
+Database	SQLite	PostgreSQL for multi-hotel, concurrent access
+Authentication	Basic/none	Role-based access control, secure login
+Deployment	Local development server	Docker containerisation, proper hosting
+Error handling	Basic	Comprehensive logging, crash recovery
+Multi-language	English only	Sinhala, Tamil support
+Scale	Single hotel	Multi-property management
+Don't spend time building production features. Spend time proving your concept works and writing a strong report about it.
+
+
+
+------------------------------------------------
