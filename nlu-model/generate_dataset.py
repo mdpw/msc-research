@@ -6,18 +6,17 @@ Usage:
     pip install anthropic
     set ANTHROPIC_API_KEY=your-key-here
     python generate_dataset.py
+
+Cost estimate: ~$1-2 using Claude Haiku (cheapest, fast, good enough for data gen)
 """
 
 import anthropic
 import csv
-import json
 import time
 import random
+from collections import Counter
 
 # ── 18 Intents with seed examples ──
-# Write 30-50 unique seed sentences per intent
-# These should be genuinely different phrasings, not typo variants
-
 INTENT_SEEDS = {
     "room_cleaning": [
         "can someone come clean the room",
@@ -344,30 +343,6 @@ INTENT_SEEDS = {
 
 TARGET_PER_INTENT = 1100  # ~1100 x 18 = ~19,800 total
 
-PROMPT_TEMPLATE = """You are generating training data for a hotel voice assistant intent classifier.
-
-Intent: {intent}
-Description: {description}
-
-Here are example phrases for this intent:
-{examples}
-
-Generate {count} MORE unique, natural phrases that a hotel guest might say for this intent.
-
-Rules:
-- Each phrase should be a genuinely different way of expressing the same intent
-- Use varied sentence structures (questions, commands, statements, polite requests)
-- Include casual/informal phrasings ("hey can I get...", "yo I need...")
-- Include polite/formal phrasings ("I would appreciate if...", "would it be possible to...")
-- Include indirect phrasings ("the room smells bad" for cleaning, "I'm hungry" for food)
-- Include context-rich phrasings ("we just checked in and the room isn't clean")
-- Do NOT include typos, misspellings, or spacing errors
-- Do NOT repeat the example phrases
-- Keep each phrase under 15 words
-- One phrase per line, no numbering, no quotes
-
-Output ONLY the phrases, one per line."""
-
 INTENT_DESCRIPTIONS = {
     "room_cleaning": "Guest wants their room or bathroom cleaned, tidied, swept, mopped, or beds made",
     "towel_request": "Guest needs towels (bath, hand, face, pool towels, washcloths, bath mats)",
@@ -390,29 +365,45 @@ INTENT_DESCRIPTIONS = {
 }
 
 
-def generate_paraphrases(client, intent, seeds, count):
-    """Generate paraphrases using Claude API"""
-    examples_text = "\n".join(f"- {s}" for s in seeds)
+def generate_batch(client, intent, description, seed_examples, count):
+    """Generate a batch of paraphrases using Claude Haiku (cheapest model)"""
+    examples_text = "\n".join(f"- {s}" for s in seed_examples)
 
-    prompt = PROMPT_TEMPLATE.format(
-        intent=intent,
-        description=INTENT_DESCRIPTIONS[intent],
-        examples=examples_text,
-        count=count
-    )
+    prompt = f"""You are generating training data for a hotel voice assistant intent classifier.
+
+Intent: {intent}
+Description: {description}
+
+Here are example phrases for this intent:
+{examples_text}
+
+Generate exactly {count} MORE unique, natural phrases that a hotel guest might say for this intent.
+
+Rules:
+- Each phrase must be genuinely different from the examples and from each other
+- Use varied sentence structures: questions, commands, statements, polite requests, complaints
+- Include casual phrasings: "hey can I get...", "I need...", "gimme..."
+- Include polite phrasings: "I would appreciate...", "would it be possible..."
+- Include indirect phrasings that imply the intent without stating it directly
+- Include context-rich phrasings: "we just checked in and...", "it's been hours since..."
+- Do NOT include typos, misspellings, or spacing errors
+- Do NOT repeat any of the example phrases above
+- Keep each phrase between 3-15 words
+- One phrase per line, no numbering, no bullets, no quotes
+
+Output ONLY the phrases, one per line, nothing else."""
 
     message = client.messages.create(
-        model="claude-sonnet-4-5-20250929",
-        max_tokens=4096,
+        model="claude-haiku-4-5-20251001",
+        max_tokens=8192,
         messages=[{"role": "user", "content": prompt}]
     )
 
     lines = message.content[0].text.strip().split("\n")
-    # Clean up: remove numbering, bullets, quotes, empty lines
     phrases = []
     for line in lines:
-        line = line.strip().lstrip("0123456789.-) ").strip('"').strip("'").strip()
-        if line and len(line) > 3:
+        line = line.strip().lstrip("0123456789.-•) ").strip('"').strip("'").strip()
+        if line and len(line) > 3 and not line.startswith("Here") and not line.startswith("Note"):
             phrases.append(line.lower())
 
     return phrases
@@ -422,56 +413,77 @@ def main():
     client = anthropic.Anthropic()  # Uses ANTHROPIC_API_KEY env var
 
     all_data = []
+    total_api_calls = 0
 
-    for intent, seeds in INTENT_SEEDS.items():
-        print(f"\n{'='*60}")
-        print(f"Generating for: {intent}")
-        print(f"Seeds: {len(seeds)}")
+    print("=" * 60)
+    print("HOTEL INTENT DATASET GENERATOR")
+    print(f"Target: {TARGET_PER_INTENT} examples x {len(INTENT_SEEDS)} intents = {TARGET_PER_INTENT * len(INTENT_SEEDS)} total")
+    print(f"Model: claude-haiku-4-5-20251001 (cheapest, ~$0.05 per intent)")
+    print("=" * 60)
+
+    for intent_idx, (intent, seeds) in enumerate(INTENT_SEEDS.items(), 1):
+        print(f"\n[{intent_idx}/{len(INTENT_SEEDS)}] {intent}")
+        print(f"  Seeds: {len(seeds)}")
 
         # Start with seed examples
         for seed in seeds:
             all_data.append((seed.lower().strip(), intent))
 
-        # Generate remaining needed
+        # Track all generated for this intent (for dedup)
+        all_generated = set(s.lower().strip() for s in seeds)
+        generated_list = []
         needed = TARGET_PER_INTENT - len(seeds)
-        generated = []
+        description = INTENT_DESCRIPTIONS[intent]
 
-        # Generate in batches of ~200
-        batch_size = 200
-        while len(generated) < needed:
-            remaining = needed - len(generated)
+        # Generate in batches of 250 (Haiku handles this well)
+        batch_size = 250
+        retries = 0
+        max_retries = 3
+
+        while len(generated_list) < needed and retries < max_retries:
+            remaining = needed - len(generated_list)
             batch_count = min(batch_size, remaining)
 
-            print(f"  Generating batch of {batch_count}... (total so far: {len(generated)})")
+            # Vary the examples shown to get diverse output
+            example_pool = seeds.copy()
+            if generated_list:
+                sample_size = min(10, len(generated_list))
+                example_pool = random.sample(generated_list, sample_size) + random.sample(seeds, min(10, len(seeds)))
+            random.shuffle(example_pool)
 
             try:
-                # Mix seeds with some already-generated for diversity
-                example_pool = seeds.copy()
-                if generated:
-                    example_pool += random.sample(generated, min(10, len(generated)))
-                random.shuffle(example_pool)
+                phrases = generate_batch(client, intent, description, example_pool[:20], batch_count)
+                total_api_calls += 1
 
-                phrases = generate_paraphrases(client, intent, example_pool[:25], batch_count)
+                # Deduplicate against everything
+                new_phrases = [p for p in phrases if p not in all_generated]
+                for p in new_phrases:
+                    all_generated.add(p)
+                generated_list.extend(new_phrases)
 
-                # Deduplicate
-                existing = set(p for p, _ in all_data) | set(generated)
-                new_phrases = [p for p in phrases if p not in existing]
-                generated.extend(new_phrases)
+                print(f"  Batch: got {len(new_phrases)} unique ({len(generated_list)}/{needed})")
 
-                print(f"  Got {len(new_phrases)} unique phrases")
+                # Small delay to avoid rate limits
+                time.sleep(0.5)
+                retries = 0  # Reset retries on success
 
-                # Rate limiting
-                time.sleep(1)
+            except anthropic.RateLimitError:
+                retries += 1
+                wait = 15 * retries
+                print(f"  Rate limited, waiting {wait}s... (retry {retries}/{max_retries})")
+                time.sleep(wait)
 
             except Exception as e:
-                print(f"  Error: {e}")
+                retries += 1
+                print(f"  Error: {e} (retry {retries}/{max_retries})")
                 time.sleep(5)
 
-        # Add generated phrases
-        for phrase in generated[:needed]:
+        # Add generated phrases (cap at needed)
+        for phrase in generated_list[:needed]:
             all_data.append((phrase, intent))
 
-        print(f"  Total for {intent}: {len(seeds) + len(generated[:needed])}")
+        actual = len(seeds) + min(len(generated_list), needed)
+        print(f"  Done: {actual} total examples for {intent}")
 
     # Shuffle the dataset
     random.shuffle(all_data)
@@ -484,16 +496,23 @@ def main():
         for text, intent in all_data:
             writer.writerow([text, intent])
 
-    print(f"\n{'='*60}")
-    print(f"Dataset saved to {output_file}")
+    # Summary
+    print(f"\n{'=' * 60}")
+    print(f"DONE!")
+    print(f"Dataset saved to: {output_file}")
     print(f"Total examples: {len(all_data)}")
-
-    # Print distribution
-    from collections import Counter
+    print(f"Total API calls: {total_api_calls}")
+    print(f"\nDistribution:")
     dist = Counter(intent for _, intent in all_data)
-    print("\nDistribution:")
-    for intent, count in sorted(dist.items()):
-        print(f"  {intent}: {count}")
+    for intent, count in sorted(dist.items(), key=lambda x: x[1], reverse=True):
+        bar = "#" * (count // 20)
+        print(f"  {intent:25s} {count:5d}  {bar}")
+
+    # Quick quality check
+    print(f"\nSample phrases:")
+    samples = random.sample(all_data, 10)
+    for text, intent in samples:
+        print(f"  [{intent}] {text}")
 
 
 if __name__ == "__main__":

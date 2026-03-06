@@ -621,8 +621,6 @@ fun VoiceAssistantScreen(
                             if (pendingConfirmation != null) {
                                 val pc = pendingConfirmation!!
                                 Text("\"${pc.transcription}\"", fontWeight = FontWeight.Medium, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text("Intent: ${pc.intentName} (${(pc.confidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f))
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text("Should I submit this request?", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -673,7 +671,7 @@ fun VoiceAssistantScreen(
                                             processVoiceRequest(
                                                 audioRecorder, voskService, nluService, apiService, roomNumber, lifecycleScope,
                                                 { isRecording = true }, { isRecording = false }, { isProcessing = true }, { isProcessing = false },
-                                                { statusMessage = it }, { lastTranscription = it }, { i, c -> lastIntent = i; lastConfidence = c },
+                                                { statusMessage = it }, { lastTranscription = it }, { i, c -> lastIntent = i; lastConfidence = c; Toast.makeText(context, "Intent: $i (${(c * 100).toInt()}%)", Toast.LENGTH_SHORT).show() },
                                                 { level -> audioLevel = level },
                                                 onSpeakResponse,
                                                 onSpeakAndWait,
@@ -701,7 +699,6 @@ fun VoiceAssistantScreen(
                                     HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f))
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text("\"$lastTranscription\"", fontWeight = FontWeight.Medium, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                                    if (lastIntent.isNotEmpty()) { Text("Intent: $lastIntent (${(lastConfidence * 100).toInt()}%)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)) }
                                     if (lastDepartment.isNotEmpty()) { DepartmentBadge(lastDepartment) }
                                 }
                             }
@@ -820,14 +817,22 @@ suspend fun processVoiceRequest(
                 val cleanedTranscription = cleanTranscription(transcription)
 
                 // Voice cancel: check if user wants to cancel a request by ID
-                // Matches both digit IDs ("cancel order 146") and spoken numbers ("cancel order hundred and forty six")
-                val cancelPattern = Regex("""cancel\s+(?:my\s+)?(?:order|request|booking)\s*(?:number|no|#)?\s*(.+)""", RegexOption.IGNORE_CASE)
-                val cancelDigitPattern = Regex("""cancel\s+(?:my\s+)?(?:order|request|booking)?\s*(?:number|no|#)?\s*(\d+)""", RegexOption.IGNORE_CASE)
+                // Supports: cancel/remove/stop/drop/delete/withdraw + order/request/booking (optional) + number
+                // Also: "I don't need order 5 anymore", "never mind request 5", "forget about 5"
+                val cancelVerbs = """(?:please\s+)?(?:cancel|remove|stop|drop|delete|withdraw)"""
+                val cancelNouns = """(?:order|request|booking)"""
+                val cancelNumber = """(?:number|no|#)?"""
+                val cancelDigitPattern = Regex("""(?:$cancelVerbs\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+)|i\s+don'?t\s+need\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+)(?:\s+anymore)?|(?:never\s*mind|forget\s+about)\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+))""", RegexOption.IGNORE_CASE)
+                val cancelPattern = Regex("""(?:$cancelVerbs\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+)|i\s+don'?t\s+need\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+?)(?:\s+anymore)?$|(?:never\s*mind|forget\s+about)\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+))""", RegexOption.IGNORE_CASE)
                 val cancelDigitMatch = cancelDigitPattern.find(cleanedTranscription)
                 val cancelWordMatch = if (cancelDigitMatch == null) cancelPattern.find(cleanedTranscription) else null
 
-                val requestId = cancelDigitMatch?.groupValues?.get(1)?.toIntOrNull()
-                    ?: cancelWordMatch?.groupValues?.get(1)?.let { wordsToNumber(it.trim()) }
+                // Extract ID from whichever capture group matched (multiple alternatives in regex)
+                val requestId = cancelDigitMatch?.let { match ->
+                    match.groupValues.drop(1).firstOrNull { it.isNotEmpty() }?.toIntOrNull()
+                } ?: cancelWordMatch?.let { match ->
+                    match.groupValues.drop(1).firstOrNull { it.isNotEmpty() }?.let { wordsToNumber(it.trim()) }
+                }
 
                 if (requestId != null) {
                     onIntentUpdate("cancel_request", 0.99f)
@@ -861,19 +866,59 @@ suspend fun processVoiceRequest(
                     return@launch
                 }
 
-                val intentResult = nluService.classifyIntent(cleanedTranscription)
+                // Retry loop: give guest up to 2 more chances if not understood
+                var currentTranscription = cleanedTranscription
+                var intentResult = nluService.classifyIntent(currentTranscription)
                 onIntentUpdate(intentResult.name, intentResult.confidence)
 
-                // Reject low-confidence or irrelevant requests
+                val MAX_RETRIES = 2
                 val MIN_CONFIDENCE = 0.60f
+                var retryCount = 0
+
+                while (intentResult.confidence < MIN_CONFIDENCE && retryCount < MAX_RETRIES) {
+                    retryCount++
+                    onSpeakAndWait("I couldn't quite understand that. Could you please try again?")
+
+                    // Listen again
+                    onProcessingStop()
+                    onRecordingStart()
+                    onStatusUpdate("Listening... (speak now)")
+                    val retryAudio = audioRecorder.recordWithVAD(
+                        silenceTimeoutMs = 1500L, maxDurationMs = 10000L,
+                        onStateChange = { state -> onStatusUpdate(state) },
+                        onAudioLevel = { level -> onAudioLevel(level) }
+                    )
+                    onAudioLevel(0f)
+                    onRecordingStop()
+                    onProcessingStart()
+
+                    val retryTranscription = voskService.transcribeAudio(retryAudio)
+                    onTranscriptionUpdate(retryTranscription)
+
+                    if (retryTranscription.isEmpty()) {
+                        // Guest stayed silent — give up gracefully
+                        onStatusUpdate("No speech detected")
+                        onSpeakResponse("It seems like you don't need help right now. Feel free to tap the microphone whenever you need me.")
+                        onProcessingStop(); onComplete(); return@launch
+                    }
+
+                    currentTranscription = cleanTranscription(retryTranscription)
+                    intentResult = nluService.classifyIntent(currentTranscription)
+                    onIntentUpdate(intentResult.name, intentResult.confidence)
+                }
+
+                // After retries exhausted, still low confidence — give up
                 if (intentResult.confidence < MIN_CONFIDENCE) {
                     onStatusUpdate("Request not understood")
                     onSpeakResponse("I'm sorry, I couldn't understand your request. Could you please try again with a specific hotel service request, such as requesting towels, room cleaning, or room service?")
                     onProcessingStop(); onComplete(); return@launch
                 }
 
+                // Use the latest transcription if retries occurred
+                val finalTranscription = if (retryCount > 0) currentTranscription else transcription
+
                 // Voice confirmation: TTS asks, then listens for yes/no
-                val confirmMsg = "I understood your request as ${intentResult.name.replace("_", " ")}. Should I submit this?"
+                val confirmMsg = "You'd like to say: $finalTranscription. Should I submit this request?"
                 onSpeakAndWait(confirmMsg)
 
                 // Listen for voice confirmation
@@ -899,10 +944,10 @@ suspend fun processVoiceRequest(
                         onStatusUpdate("Submitting...")
                         val handler = android.os.Handler(android.os.Looper.getMainLooper())
                         apiService.submitRequest(
-                            roomNumber, transcription, intentResult.name,
+                            roomNumber, finalTranscription, intentResult.name,
                             onSuccess = { response ->
                                 handler.post {
-                                    val request = RequestItem(response.requestId, transcription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime())
+                                    val request = RequestItem(response.requestId, finalTranscription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime())
                                     onAddRequest(request)
                                     onSpeakResponse("Your request No.${response.requestId} has been received.")
                                     onProcessingStop(); onComplete()
@@ -924,7 +969,7 @@ suspend fun processVoiceRequest(
                     else -> {
                         // Unclear voice response — fall back to on-screen buttons
                         onProcessingStop()
-                        onConfirmationNeeded(transcription, intentResult.name, intentResult.confidence)
+                        onConfirmationNeeded(finalTranscription, intentResult.name, intentResult.confidence)
                     }
                 }
 
@@ -1154,8 +1199,17 @@ fun wordsToNumber(text: String): Int? {
 fun cleanTranscription(text: String): String {
     val prefixPatterns = listOf("hi sera", "hey sera", "hello sera", "sera", "hi there", "hey there", "hello there", "hi", "hey", "hello", "excuse me", "please", "can you", "could you", "i need you to")
     var cleaned = text.lowercase().trim()
-    for (pattern in prefixPatterns) {
-        if (cleaned.startsWith(pattern)) { cleaned = cleaned.removePrefix(pattern).trim().removePrefix(",").removePrefix(".").trim(); break }
+    // Strip multiple chained prefixes (e.g. "hi sera please can you cancel...")
+    var changed = true
+    while (changed) {
+        changed = false
+        for (pattern in prefixPatterns) {
+            if (cleaned.startsWith(pattern)) {
+                cleaned = cleaned.removePrefix(pattern).trim().removePrefix(",").removePrefix(".").trim()
+                changed = true
+                break
+            }
+        }
     }
     return cleaned.ifEmpty { text.trim() }
 }
