@@ -1,0 +1,42 @@
+flowchart TB
+    IN_WS[ ] <-->|"WebSocket ←\nFrom Hotel Server"| WSCLIENT
+    IN_HTML[ ] -->|"HTML ←\nFrom Hotel Server"| SPA
+
+    subgraph TIER3["Tier 3 — Staff Dashboard (any device with a web browser)"]
+        direction TB
+
+        SPA["🌐 Single-Page Application\nHTML / CSS / JavaScript\nNo frameworks or build tools\nServed by FastAPI"]
+
+        subgraph REALTIME["Real-Time Communication"]
+            WSCLIENT["🔌 WebSocket Client\nNative browser API\nAuto-reconnect\nConnection status indicator"]
+        end
+
+        subgraph FEATURES["Dashboard Features"]
+            LOGIN["🔐 Login\nDepartment selection\nStaff name entry"]
+            QUEUE["📋 Request Queue\nDepartment-filtered view\nSorted by status + time\nColour-coded by department"]
+            STATS["📊 Statistics Bar\nPending | In Progress\nCompleted | Cancelled"]
+            STATUS["🎛️ Status Controls\nMark In Progress (yellow)\nMark Completed (green)"]
+            TRANSFER["🔄 Department Transfer\nDropdown selector\nReal-time reassignment"]
+            MSG["✉️ Messaging Interface\nText input to guest\nConversation history\nTTS announcement on guest device"]
+            RATING["⭐ Rating Display\n1-5 star guest ratings\nPer-request visibility"]
+        end
+    end
+
+    WSCLIENT --> QUEUE
+    WSCLIENT --> STATS
+    SPA --> LOGIN
+    LOGIN --> QUEUE
+    QUEUE --> STATUS
+    QUEUE --> TRANSFER
+    QUEUE --> MSG
+    QUEUE --> RATING
+
+    S(("👤\nStaff")) -->|login + manage| LOGIN
+
+    style TIER3 fill:#ffeb3,stroke:#f57f17,stroke-width:2px
+    style REALTIME fill:#ffeb3,stroke:#f57f17
+    style FEATURES fill:#fff3e0,stroke:#f57f17
+    style SPA fill:#ffeb3,stroke:#f57f17
+    style QUEUE fill:#ffeb3,stroke:#f57f17
+    style IN_WS fill:none,stroke:none
+    style IN_HTML fill:none,stroke:none

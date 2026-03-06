@@ -1,0 +1,169 @@
+flowchart TD
+    Start(["Start: Guest presses\nmicrophone button"])
+    Greeting["TTS Greeting (speakAndWait):\n'Hello! I'm Sera.\nHow can I help you?'"]
+    Record["Record Audio\n16kHz PCM with VAD"]
+    SilenceCheck{"Silence detected?\n(1500ms timeout)"}
+    ContinueRec["Continue recording\n(max 10,000ms)"]
+    VoskSTT["Vosk STT Processing\nOn-device speech-to-text\ntranscription"]
+    EmptyCheck{"Transcription\nempty?"}
+    NoSpeech["No speech detected"]
+    CleanTranscript["Clean Transcription\nRemove greetings\ne.g. 'Hi Sera'"]
+    CancelCheck{"Cancellation pattern?\nRegex: 'cancel order\n[number]'"}
+    ExtractID["Extract request ID\n(digits or spoken numbers)"]
+    CancelTTS["TTS (speakAndWait):\n'You want to cancel request\nnumber [ID]. Should I proceed?'"]
+    CancelListen["Record confirmation\n(VAD: 2000ms silence,\n5000ms max)"]
+    CancelConfirm{"Guest confirms\ncancellation?"}
+    CancelExec["Cancel request\nvia API"]
+    CancelKeep["TTS: 'Okay, I'll keep\nyour request'"]
+
+    Classify["Classify Intent\nTier 1: Rule-based regex\n(confidence = 0.99 if match)\nTier 2: MobileBERT + softmax\n(if no rule match)"]
+    ShowToast["Toast popup:\n'Intent: [name] ([x]%)'"]
+    ConfidenceCheck{"Confidence\n≥ 0.60?"}
+    RetryCheck{"Retries remaining?\n(max 2)"}
+    RetryTTS["TTS (speakAndWait):\n'I couldn't quite understand\nthat. Could you please\ntry again?'"]
+    RetryRecord["Record Audio again\n(VAD: 1500ms silence,\n10,000ms max)"]
+    RetryTranscribe["Vosk STT\nRe-transcribe"]
+    RetrySilent{"Transcription\nempty?"}
+    SilentExit["TTS: 'It seems like you\ndon't need help right now.\nFeel free to tap the\nmicrophone whenever\nyou need me.'"]
+    RetryClean["Clean transcription\nRe-classify intent"]
+    GiveUp["TTS: 'I'm sorry, I couldn't\nunderstand your request.\nPlease try again with a\nspecific hotel service request...'"]
+
+    TTSReadBack["TTS (speakAndWait):\n'You'd like to say:\n[transcription]. Should I\nsubmit this request?'"]
+    RecordConfirm["Record confirmation\n(VAD: 2000ms silence,\n5000ms max)"]
+    GuestConfirms{"Guest confirms?"}
+    Cancelled["TTS: 'Okay, I've\ncancelled that request'"]
+    FallbackUI["Unclear response:\nFall back to on-screen\nYes / No buttons"]
+    SubmitHTTP["Submit via HTTP POST\nto server"]
+    ServerProcess["Server Processes:\nStore in SQLite\nRoute to department\nBroadcast via WebSocket"]
+    StaffDashboard["Staff Dashboard Updated\nNew request appears\nin real time"]
+    TTSConfirm["TTS: 'Your request\nNo.[ID] has been received'"]
+
+    End1(["End"])
+    End2(["End"])
+    End3(["End"])
+    End4(["End"])
+    End5(["End"])
+    End6(["End"])
+    End7(["End"])
+    End8(["End"])
+
+    Start --> Greeting
+    Greeting --> Record
+    Record --> SilenceCheck
+    SilenceCheck -- "No" --> ContinueRec
+    ContinueRec --> SilenceCheck
+    SilenceCheck -- "Yes" --> VoskSTT
+    VoskSTT --> EmptyCheck
+    EmptyCheck -- "Yes" --> NoSpeech
+    NoSpeech --> End1
+    EmptyCheck -- "No" --> CleanTranscript
+    CleanTranscript --> CancelCheck
+
+    %% Cancellation flow
+    CancelCheck -- "Yes" --> ExtractID
+    ExtractID --> CancelTTS
+    CancelTTS --> CancelListen
+    CancelListen --> CancelConfirm
+    CancelConfirm -- "Yes" --> CancelExec
+    CancelExec --> End2
+    CancelConfirm -- "No / Other" --> CancelKeep
+    CancelKeep --> End3
+
+    %% Classification flow
+    CancelCheck -- "No" --> Classify
+    Classify --> ShowToast
+    ShowToast --> ConfidenceCheck
+
+    %% Retry loop
+    ConfidenceCheck -- "No (< 0.60)" --> RetryCheck
+    RetryCheck -- "Yes\n(retries < 2)" --> RetryTTS
+    RetryTTS --> RetryRecord
+    RetryRecord --> RetryTranscribe
+    RetryTranscribe --> RetrySilent
+    RetrySilent -- "Yes\n(guest silent)" --> SilentExit
+    SilentExit --> End4
+    RetrySilent -- "No" --> RetryClean
+    RetryClean --> ShowToast
+
+    RetryCheck -- "No\n(retries = 2)" --> GiveUp
+    GiveUp --> End5
+
+    %% Confirmation flow
+    ConfidenceCheck -- "Yes (≥ 0.60)" --> TTSReadBack
+    TTSReadBack --> RecordConfirm
+    RecordConfirm --> GuestConfirms
+    GuestConfirms -- "Yes" --> SubmitHTTP
+    GuestConfirms -- "No" --> Cancelled
+    Cancelled --> End6
+    GuestConfirms -- "Unclear" --> FallbackUI
+    FallbackUI --> End7
+
+    %% Submission flow
+    SubmitHTTP --> ServerProcess
+    ServerProcess --> StaffDashboard
+    StaffDashboard --> TTSConfirm
+    TTSConfirm --> End8
+
+    %% Styling - Start/End
+    style Start fill:#4caf50,stroke:#388e3c,color:#fff,stroke-width:2px
+    style End1 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End2 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End3 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End4 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End5 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End6 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End7 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+    style End8 fill:#f44336,stroke:#d32f2f,color:#fff,stroke-width:2px
+
+    %% TTS nodes (purple)
+    style Greeting fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style TTSReadBack fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style CancelTTS fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style CancelKeep fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style RetryTTS fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style SilentExit fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#333
+    style GiveUp fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#333
+    style Cancelled fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#333
+    style TTSConfirm fill:#e8f5e9,stroke:#4caf50,stroke-width:2px,color:#333
+    style NoSpeech fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#333
+
+    %% Decision nodes (yellow)
+    style SilenceCheck fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style EmptyCheck fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style CancelCheck fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style ConfidenceCheck fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style GuestConfirms fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style CancelConfirm fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style RetryCheck fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+    style RetrySilent fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#333
+
+    %% Audio/Recording nodes (blue)
+    style Record fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#333
+    style ContinueRec fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#333
+    style RecordConfirm fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#333
+    style CancelListen fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#333
+    style RetryRecord fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#333
+
+    %% Processing nodes (indigo)
+    style VoskSTT fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#333
+    style CleanTranscript fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#333
+    style RetryTranscribe fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#333
+    style RetryClean fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#333
+
+    %% ML/Classification (pink)
+    style Classify fill:#fce4ec,stroke:#e91e63,stroke-width:2px,color:#333
+
+    %% Toast (amber)
+    style ShowToast fill:#fff8e1,stroke:#ff8f00,stroke-width:2px,color:#333
+
+    %% Cancel flow (orange)
+    style ExtractID fill:#fff8e1,stroke:#ff8f00,stroke-width:2px,color:#333
+    style CancelExec fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#333
+
+    %% Server nodes (teal)
+    style SubmitHTTP fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#333
+    style ServerProcess fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#333
+    style StaffDashboard fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#333
+
+    %% Fallback UI (orange)
+    style FallbackUI fill:#fff8e1,stroke:#ff8f00,stroke-width:2px,color:#333

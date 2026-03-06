@@ -1,0 +1,40 @@
+flowchart TB
+    IN_REST[ ] -->|"HTTP REST ←\nFrom Guest Device"| FASTAPI
+    IN_WS[ ] <-->|"WebSocket ←\nFrom Guest Device"| WS_GUEST
+
+    subgraph TIER2["Tier 2 — Hotel Server (any low-cost PC/laptop)"]
+        direction TB
+
+        FASTAPI["⚡ FastAPI Application Server\n15 REST API endpoints\nAsync request handling\nPydantic data validation"]
+
+        subgraph WSMANAGER["WebSocket Connection Manager"]
+            WS_GUEST["📱 /ws/guest/{room_number}\nOne connection per room\nRoom-specific notifications"]
+            WS_DASH["📋 /ws/dashboard\nOne connection per staff browser\nBroadcast all events"]
+        end
+
+        ROUTING["🔀 Department Routing Engine\n18 intents → 5 departments\nAutomatic request classification\nManual transfer support"]
+
+        SQLITE[("🗄️ SQLite Database\nSingle file storage\nTables: requests, staff_messages\nZero configuration")]
+
+        SERVE["📄 Static File Server\nGET /dashboard\nServes dashboard.html"]
+    end
+
+    FASTAPI --> SQLITE
+    FASTAPI --> ROUTING
+    ROUTING --> WS_GUEST
+    ROUTING --> WS_DASH
+    FASTAPI <--> WSMANAGER
+    SQLITE <-.->|read/write| FASTAPI
+
+    WS_DASH <-->|"WebSocket →\nTo Staff Dashboard"| OUT_DASH[ ]
+    SERVE -->|"HTML →\nTo Staff Dashboard"| OUT_HTML[ ]
+
+    style TIER2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style WSMANAGER fill:#c8e6c9,stroke:#2e7d32
+    style SQLITE fill:#fff3e0,stroke:#e65100
+    style FASTAPI fill:#a5da7,stroke:#2e7d32
+    style ROUTING fill:#a5da7,stroke:#2e7d32
+    style IN_REST fill:none,stroke:none
+    style IN_WS fill:none,stroke:none
+    style OUT_DASH fill:none,stroke:none
+    style OUT_HTML fill:none,stroke:none
