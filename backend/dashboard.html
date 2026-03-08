@@ -467,6 +467,7 @@
             <h1 id="dashboardTitle">Department Dashboard</h1>
             <div class="user-info">
                 <span class="badge" id="staffNameDisplay"></span>
+                <button class="btn-logout" style="background:#28a745;margin-right:8px;" onclick="playAlertTone()">🔔 Test Sound</button>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -508,6 +509,44 @@
         let currentStaff = '';
         let allRequests = [];
         let requestIds = new Set();
+
+        // ── Alert Sound (Web Audio API — no files, works offline) ──
+        let audioCtx = null;
+
+        // Create/resume AudioContext on first user interaction (browser requirement)
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } else if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Two-tone "ding-dong" alert
+        function playAlertTone() {
+            ensureAudioContext();
+            if (!audioCtx) return;
+
+            function beep(freq, startTime, duration, volume = 0.35) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, startTime);
+                gain.gain.setValueAtTime(volume, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+
+            const t = audioCtx.currentTime;
+            beep(880, t,        0.25);   // high note
+            beep(660, t + 0.28, 0.35);   // low note
+        }
+
+        // Unlock audio on any click (satisfies browser autoplay policy, re-resumes if tab was backgrounded)
+        document.addEventListener('click', ensureAudioContext);
 
         // ── Server URL derived from page origin ──
         const API_URL = window.location.origin;
@@ -591,6 +630,7 @@
                         allRequests.unshift(data);
                         renderRequests();
                         if (data.department === currentDepartment) {
+                            playAlertTone();
                             showNotification(`New request #${data.id} from Room ${data.room_number}`);
                         }
                     }
