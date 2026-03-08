@@ -13,7 +13,8 @@ import kotlin.concurrent.thread
 data class RequestResponse(
     val success: Boolean,
     val message: String,
-    val requestId: Int
+    val requestId: Int,
+    val department: String = "our team"
 )
 
 class ApiService(private val baseUrl: String) {
@@ -72,7 +73,8 @@ class ApiService(private val baseUrl: String) {
                     val result = RequestResponse(
                         success = jsonResponse.getBoolean("success"),
                         message = jsonResponse.getString("message"),
-                        requestId = jsonResponse.getInt("request_id")
+                        requestId = jsonResponse.getInt("request_id"),
+                        department = jsonResponse.optString("department", "our team")
                     )
 
                     onSuccess(result)

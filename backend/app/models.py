@@ -12,6 +12,7 @@ class RequestResponse(BaseModel):
     success: bool
     message: str
     request_id: int
+    department: str
 
 class StatusUpdate(BaseModel):
     """Model for updating request status from dashboard"""

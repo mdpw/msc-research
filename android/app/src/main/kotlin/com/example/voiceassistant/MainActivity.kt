@@ -639,7 +639,7 @@ fun VoiceAssistantScreen(
                                                         val request = RequestItem(response.requestId, confirmation.transcription, confirmation.intentName, confirmation.confidence, "Routing...", "pending", getCurrentTime())
                                                         lastDepartment = request.department
                                                         onAddRequest(request)
-                                                        onSpeakResponse("Your request No.${response.requestId} has been received.")
+                                                        onSpeakResponse("Done! Your request number ${response.requestId} has been sent to the ${response.department} team.")
                                                         isProcessing = false; statusMessage = "Tap microphone to start"
                                                         onRefreshRequests()
                                                     }
@@ -686,7 +686,9 @@ fun VoiceAssistantScreen(
                                                     isProcessing = false
                                                 },
                                                 // Voice cancel request
-                                                onCancelRequest
+                                                onCancelRequest,
+                                                // Pass currently cancellable orders for context-aware resolution
+                                                requestHistory.filter { it.status in listOf("pending", "in_progress") }
                                             )
                                         }
                                     }
@@ -785,7 +787,9 @@ suspend fun processVoiceRequest(
     // Feature 3: Confirmation callback - fallback when voice confirmation is unclear
     onConfirmationNeeded: (String, String, Float) -> Unit,
     // Voice cancel: callback to cancel a request by ID
-    onCancelRequest: (Int) -> Unit
+    onCancelRequest: (Int) -> Unit,
+    // Active orders available for cancellation
+    activeOrders: List<RequestItem>
 ) {
     if (ContextCompat.checkSelfPermission(audioRecorder.getContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
         onStatusUpdate("Permission denied"); onComplete(); return
@@ -816,30 +820,75 @@ suspend fun processVoiceRequest(
                 onStatusUpdate("Understanding...")
                 val cleanedTranscription = cleanTranscription(transcription)
 
-                // Voice cancel: check if user wants to cancel a request by ID
-                // Supports: cancel/remove/stop/drop/delete/withdraw + order/request/booking (optional) + number
-                // Also: "I don't need order 5 anymore", "never mind request 5", "forget about 5"
-                val cancelVerbs = """(?:please\s+)?(?:cancel|remove|stop|drop|delete|withdraw)"""
-                val cancelNouns = """(?:order|request|booking)"""
-                val cancelNumber = """(?:number|no|#)?"""
-                val cancelDigitPattern = Regex("""(?:$cancelVerbs\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+)|i\s+don'?t\s+need\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+)(?:\s+anymore)?|(?:never\s*mind|forget\s+about)\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(\d+))""", RegexOption.IGNORE_CASE)
-                val cancelPattern = Regex("""(?:$cancelVerbs\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+)|i\s+don'?t\s+need\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+?)(?:\s+anymore)?$|(?:never\s*mind|forget\s+about)\s+(?:my\s+)?$cancelNouns?\s*$cancelNumber\s*(.+))""", RegexOption.IGNORE_CASE)
-                val cancelDigitMatch = cancelDigitPattern.find(cleanedTranscription)
-                val cancelWordMatch = if (cancelDigitMatch == null) cancelPattern.find(cleanedTranscription) else null
+                // ── Phase 1: Detect cancel intent with a simple keyword check ──
+                val wantsCancelPattern = Regex(
+                    """(?:cancel|remove|stop|drop|delete|withdraw|don'?t\s+need|never\s*mind|forget\s+about)""",
+                    RegexOption.IGNORE_CASE
+                )
 
-                // Extract ID from whichever capture group matched (multiple alternatives in regex)
-                val requestId = cancelDigitMatch?.let { match ->
-                    match.groupValues.drop(1).firstOrNull { it.isNotEmpty() }?.toIntOrNull()
-                } ?: cancelWordMatch?.let { match ->
-                    match.groupValues.drop(1).firstOrNull { it.isNotEmpty() }?.let { wordsToNumber(it.trim()) }
-                }
-
-                if (requestId != null) {
+                if (wantsCancelPattern.containsMatchIn(cleanedTranscription)) {
                     onIntentUpdate("cancel_request", 0.99f)
-                    val confirmMsg = "You want to cancel request number $requestId. Should I proceed?"
+
+                    val cancellableOrders = activeOrders.filter { it.status in listOf("pending", "in_progress") }
+
+                    if (cancellableOrders.isEmpty()) {
+                        onSpeakResponse("You have no active requests that can be cancelled.")
+                        onProcessingStop(); onComplete(); return@launch
+                    }
+
+                    // ── Phase 2: Try to resolve the target order ──
+                    // First attempt: resolve directly from the original utterance
+                    var resolved = resolveOrderFromReply(cleanedTranscription, cancellableOrders)
+
+                    if (resolved == null) {
+                        // Ask the user to clarify which order
+                        val orderSummary = if (cancellableOrders.size == 1) {
+                            "You have one active request: ${cancellableOrders[0].department}. Should I cancel it?"
+                        } else {
+                            val list = cancellableOrders.mapIndexed { i, o ->
+                                "${ordinalWord(i + 1)}: number ${o.id}, ${o.department}"
+                            }.joinToString("; ")
+                            "You have ${cancellableOrders.size} active requests: $list. Which one should I cancel? Say the number, or say first, second, or last."
+                        }
+                        onSpeakAndWait(orderSummary)
+
+                        // Listen for the user's choice
+                        onStatusUpdate("Say the order number or describe it...")
+                        onProcessingStop(); onRecordingStart()
+                        val replyAudio = audioRecorder.recordWithVAD(
+                            silenceTimeoutMs = 2000L, maxDurationMs = 6000L,
+                            onAudioLevel = { level -> onAudioLevel(level) }
+                        )
+                        onAudioLevel(0f); onRecordingStop(); onProcessingStart()
+
+                        val replyText = voskService.transcribeAudio(replyAudio).lowercase().trim()
+                        onTranscriptionUpdate(replyText)
+                        resolved = resolveOrderFromReply(replyText, cancellableOrders)
+
+                        // One re-prompt if still unresolved
+                        if (resolved == null && replyText.isNotEmpty()) {
+                            onSpeakAndWait("Sorry, I didn't catch that. Please say the order number, or say first or last.")
+                            onProcessingStop(); onRecordingStart()
+                            val retryAudio = audioRecorder.recordWithVAD(
+                                silenceTimeoutMs = 2000L, maxDurationMs = 6000L,
+                                onAudioLevel = { level -> onAudioLevel(level) }
+                            )
+                            onAudioLevel(0f); onRecordingStop(); onProcessingStart()
+                            val retryText = voskService.transcribeAudio(retryAudio).lowercase().trim()
+                            onTranscriptionUpdate(retryText)
+                            resolved = resolveOrderFromReply(retryText, cancellableOrders)
+                        }
+                    }
+
+                    if (resolved == null) {
+                        onSpeakResponse("I'm sorry, I couldn't identify which request to cancel. Please try again or use the cancel button in your request history.")
+                        onProcessingStop(); onComplete(); return@launch
+                    }
+
+                    // Confirm before cancelling
+                    val confirmMsg = "You want to cancel request ${resolved.id}, ${resolved.department}. Should I proceed?"
                     onSpeakAndWait(confirmMsg)
 
-                    // Listen for voice confirmation
                     onStatusUpdate("Say Yes or No...")
                     onProcessingStop(); onRecordingStart()
                     val confirmAudio = audioRecorder.recordWithVAD(
@@ -855,7 +904,7 @@ suspend fun processVoiceRequest(
 
                     when {
                         yesWords.any { confirmText.contains(it) } -> {
-                            onCancelRequest(requestId)
+                            onCancelRequest(resolved.id)
                             onProcessingStop(); onComplete()
                         }
                         else -> {
@@ -949,7 +998,7 @@ suspend fun processVoiceRequest(
                                 handler.post {
                                     val request = RequestItem(response.requestId, finalTranscription, intentResult.name, intentResult.confidence, "Routing...", "pending", getCurrentTime())
                                     onAddRequest(request)
-                                    onSpeakResponse("Your request No.${response.requestId} has been received.")
+                                    onSpeakResponse("Done! Your request number ${response.requestId} has been sent to the ${response.department} team.")
                                     onProcessingStop(); onComplete()
                                     onRefreshRequests()
                                 }
@@ -1163,6 +1212,51 @@ fun ServerEditDialog(
     )
 }
 
+// Return a spoken ordinal for small position numbers (1 → "first", etc.)
+fun ordinalWord(n: Int): String = when (n) {
+    1 -> "first"; 2 -> "second"; 3 -> "third"; 4 -> "fourth"; 5 -> "fifth"
+    else -> "${n}th"
+}
+
+// Resolve which active order the user is referring to from a short reply.
+// Tries: digit → word-number → ordinal → department/description keyword match.
+fun resolveOrderFromReply(reply: String, activeOrders: List<RequestItem>): RequestItem? {
+    val normalized = reply.lowercase().trim()
+
+    // 1. Digit literal (e.g. "13", "order 13")
+    val digit = Regex("""\d+""").find(normalized)?.value?.toIntOrNull()
+    if (digit != null) return activeOrders.firstOrNull { it.id == digit }
+
+    // 2. Word-to-number after stripping fillers (handles "thirteen", "the order number thirteen")
+    val fromWords = wordsToNumber(normalized)
+    if (fromWords != null) return activeOrders.firstOrNull { it.id == fromWords }
+
+    // 3. Ordinals — map to position in the active orders list
+    val ordinals = mapOf(
+        "first" to 0, "second" to 1, "third" to 2, "fourth" to 3, "fifth" to 4,
+        "last" to -1, "latest" to -1, "recent" to -1
+    )
+    for ((word, idx) in ordinals) {
+        if (normalized.contains(word)) {
+            val i = if (idx == -1) activeOrders.lastIndex else idx
+            return activeOrders.getOrNull(i)
+        }
+    }
+
+    // 4. Keyword match on department or request description (e.g. "the food one", "room service")
+    return activeOrders.firstOrNull { order ->
+        val haystack = "${order.requestText} ${order.department}".lowercase()
+        normalized.split(Regex("\\s+"))
+            .filter { it.length > 3 }
+            .any { word -> haystack.contains(word) }
+    }
+}
+
+// Filler words that are meaningless to wordsToNumber and should be ignored
+private val NUMBER_FILLER_WORDS = setOf(
+    "the", "my", "order", "request", "number", "booking", "no", "about", "please", "a", "it"
+)
+
 // Convert spoken number words to integer, e.g. "hundred and forty six" → 146
 fun wordsToNumber(text: String): Int? {
     val ones = mapOf("zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
@@ -1173,7 +1267,7 @@ fun wordsToNumber(text: String): Int? {
         "sixty" to 60, "seventy" to 70, "eighty" to 80, "ninety" to 90)
 
     val words = text.lowercase().replace("-", " ").split("\\s+".toRegex())
-        .filter { it != "and" && it.isNotBlank() }
+        .filter { it != "and" && it.isNotBlank() && it !in NUMBER_FILLER_WORDS }
 
     if (words.isEmpty()) return null
 

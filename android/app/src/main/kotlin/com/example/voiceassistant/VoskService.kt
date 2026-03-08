@@ -26,11 +26,11 @@ class VoskService(private val context: Context) {
             
             try {
                 Log.d(TAG, "🔧 Starting Vosk initialization...")
-                val modelDir = File(context.filesDir, "vosk-model-en-us-0.22")
+                val modelDir = File(context.filesDir, "vosk-model-small-en-in-0.4")
 
                 if (!modelDir.exists()) {
-                    Log.d(TAG, "📥 Copying model from assets (this may take a while)...")
-                    copyAssetFolder("models", modelDir.absolutePath)
+                    Log.d(TAG, "📥 Copying Vosk model from assets (this may take a while)...")
+                    copyAssetFolder("models/vosk-model-small-en-in-0.4", modelDir.absolutePath)
                 }
 
                 Log.d(TAG, "🔍 Loading Vosk model into memory...")

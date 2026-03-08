@@ -112,7 +112,8 @@ async def submit_request(request: RequestSubmit):
     return RequestResponse(
         success=True,
         message=message,
-        request_id=request_id
+        request_id=request_id,
+        department=department
     )
 
 @app.get("/api/requests")
