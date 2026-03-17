@@ -2,16 +2,27 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
 *.pyc
+*.so
 
-# Virtual Environments
+# Virtual environment
 nlu-model-env/
+venv/
 *.venv
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Trained model weights (too large for git)
+models/
+
+# Vosk STT model (download separately)
+vosk-model-small-en-in-0.4/
+vosk-model*/
+
+# Intermediate pipeline files
+step2_checkpoint.csv
+new_hotel_dataset_checkpoint.csv
+
+# Duplicate/copy files
+*- Copy.csv
 
 # IDE
 .vscode/
@@ -19,4 +30,12 @@ nlu-model-env/
 *.swp
 *.swo
 
-data/
+# Jupyter
+.ipynb_checkpoints/
+
+# TensorBoard logs
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
