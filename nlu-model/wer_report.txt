@@ -1,0 +1,46 @@
+============================================================
+VOSK STT WORD ERROR RATE (WER) ANALYSIS
+Dataset: vosk_transcriptions.csv (hospitality domain)
+============================================================
+
+OVERALL RESULTS
+----------------------------------------
+Total utterance pairs   : 10,080
+Total reference words   : 72,133
+Avg words per utterance : 7.2
+
+Word Error Rate (WER)   : 11.43%
+Char Error Rate (CER)   : 4.61%
+
+Sentences changed by Vosk    : 4,819 (47.8%)
+Sentences unchanged by Vosk  : 5,261 (52.2%)
+WER on changed sentences only: 23.84%
+
+PER-INTENT WER (highest to lowest)
+----------------------------------------
+Intent                     Count  Changed%    WER%
+----------------------------------------------------
+temperature_control          560     63.0%  16.83%
+do_not_disturb               560     52.7%  16.77%
+towel_request                560     66.2%  16.33%
+room_cleaning                560     55.0%  15.15%
+toiletries_request           560     52.5%  13.76%
+concierge_taxi               560     46.1%  12.39%
+blanket_request              560     54.5%  11.69%
+concierge_general            560     43.0%  11.13%
+lighting_control             560     39.8%  10.98%
+wake_up_call                 560     57.9%  10.68%
+maintenance                  560     46.4%  10.40%
+laundry_service              560     42.9%  10.16%
+misc_request                 560     43.8%   9.97%
+checkout_billing             560     42.9%   9.85%
+pillow_request               560     44.1%   9.07%
+food_order                   560     35.5%   8.75%
+noise_complaint              560     47.7%   8.39%
+emergency                    560     26.6%   6.78%
+
+NOTE: WER is computed from TTS-synthesised speech passed through
+Vosk (vosk-model-small-en-in-0.4). This reflects controlled STT
+noise rather than real human speech. Actual WER on real speech
+may differ. See thesis limitations section for discussion.
+============================================================

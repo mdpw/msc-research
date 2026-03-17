@@ -1,0 +1,162 @@
+{
+  "dataset": "vosk_transcriptions.csv",
+  "total_pairs": 10080,
+  "total_words_reference": 72133,
+  "avg_words_per_utterance": 7.16,
+  "overall": {
+    "wer": 0.1143,
+    "wer_pct": 11.43,
+    "cer": 0.0461,
+    "cer_pct": 4.61,
+    "changed_sentences": 4819,
+    "changed_pct": 47.8,
+    "unchanged_sentences": 5261,
+    "wer_on_changed_only": 23.84
+  },
+  "per_intent": [
+    {
+      "intent": "temperature_control",
+      "count": 560,
+      "changed_count": 353,
+      "changed_pct": 63.0,
+      "wer": 0.1683,
+      "wer_pct": 16.83
+    },
+    {
+      "intent": "do_not_disturb",
+      "count": 560,
+      "changed_count": 295,
+      "changed_pct": 52.7,
+      "wer": 0.1677,
+      "wer_pct": 16.77
+    },
+    {
+      "intent": "towel_request",
+      "count": 560,
+      "changed_count": 371,
+      "changed_pct": 66.2,
+      "wer": 0.1633,
+      "wer_pct": 16.33
+    },
+    {
+      "intent": "room_cleaning",
+      "count": 560,
+      "changed_count": 308,
+      "changed_pct": 55.0,
+      "wer": 0.1515,
+      "wer_pct": 15.15
+    },
+    {
+      "intent": "toiletries_request",
+      "count": 560,
+      "changed_count": 294,
+      "changed_pct": 52.5,
+      "wer": 0.1376,
+      "wer_pct": 13.76
+    },
+    {
+      "intent": "concierge_taxi",
+      "count": 560,
+      "changed_count": 258,
+      "changed_pct": 46.1,
+      "wer": 0.1239,
+      "wer_pct": 12.39
+    },
+    {
+      "intent": "blanket_request",
+      "count": 560,
+      "changed_count": 305,
+      "changed_pct": 54.5,
+      "wer": 0.1169,
+      "wer_pct": 11.69
+    },
+    {
+      "intent": "concierge_general",
+      "count": 560,
+      "changed_count": 241,
+      "changed_pct": 43.0,
+      "wer": 0.1113,
+      "wer_pct": 11.13
+    },
+    {
+      "intent": "lighting_control",
+      "count": 560,
+      "changed_count": 223,
+      "changed_pct": 39.8,
+      "wer": 0.1098,
+      "wer_pct": 10.98
+    },
+    {
+      "intent": "wake_up_call",
+      "count": 560,
+      "changed_count": 324,
+      "changed_pct": 57.9,
+      "wer": 0.1068,
+      "wer_pct": 10.68
+    },
+    {
+      "intent": "maintenance",
+      "count": 560,
+      "changed_count": 260,
+      "changed_pct": 46.4,
+      "wer": 0.104,
+      "wer_pct": 10.4
+    },
+    {
+      "intent": "laundry_service",
+      "count": 560,
+      "changed_count": 240,
+      "changed_pct": 42.9,
+      "wer": 0.1016,
+      "wer_pct": 10.16
+    },
+    {
+      "intent": "misc_request",
+      "count": 560,
+      "changed_count": 245,
+      "changed_pct": 43.8,
+      "wer": 0.0997,
+      "wer_pct": 9.97
+    },
+    {
+      "intent": "checkout_billing",
+      "count": 560,
+      "changed_count": 240,
+      "changed_pct": 42.9,
+      "wer": 0.0985,
+      "wer_pct": 9.85
+    },
+    {
+      "intent": "pillow_request",
+      "count": 560,
+      "changed_count": 247,
+      "changed_pct": 44.1,
+      "wer": 0.0907,
+      "wer_pct": 9.07
+    },
+    {
+      "intent": "food_order",
+      "count": 560,
+      "changed_count": 199,
+      "changed_pct": 35.5,
+      "wer": 0.0875,
+      "wer_pct": 8.75
+    },
+    {
+      "intent": "noise_complaint",
+      "count": 560,
+      "changed_count": 267,
+      "changed_pct": 47.7,
+      "wer": 0.0839,
+      "wer_pct": 8.39
+    },
+    {
+      "intent": "emergency",
+      "count": 560,
+      "changed_count": 149,
+      "changed_pct": 26.6,
+      "wer": 0.0678,
+      "wer_pct": 6.78
+    }
+  ]
+}

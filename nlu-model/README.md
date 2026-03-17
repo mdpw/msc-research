@@ -22,14 +22,14 @@ Standard NLU benchmarks evaluate models on clean text, but real offline deployme
 ```
 nlu-model/
 ├── research/                        # 5-step pipeline scripts
-│   ├── create_dataset.py            # Step 1: generate clean dataset via Claude API
+│   ├── step1_create_dataset.py            # Step 1: generate clean dataset via Claude API
 │   ├── step2_generate_vosk_noise.py # Step 2: transcribe with Vosk to add STT noise
 │   ├── step3_train_three_models.py  # Step 3: train Model A, B, C
 │   ├── step4_evaluate.py            # Step 4: evaluate and measure the gap
 │   ├── step5_convert_best_model.py  # Step 5: convert Model C to TFLite for Android
-│   └── README.md
+│   └── step6_wer_analysis.py        # Step 6: measure Vosk WER on paired dataset
 ├── confusion_matrices/              # Thesis figures (PNG heatmaps)
-├── new_hotel_dataset.csv            # Clean dataset (~10k sentences, 17 intents)
+├── new_hotel_dataset.csv            # Clean dataset (~10k sentences, 18 intents)
 ├── paired_dataset.csv               # Clean + Vosk paired records (14,863 rows)
 ├── vosk_transcriptions.csv          # Vosk-transcribed paired dataset (10,080 rows)
 ├── vosk_only_dataset.csv            # Vosk-only dataset (10,080 rows)
@@ -68,7 +68,7 @@ All commands run from the `nlu-model/` directory:
 
 ```bash
 # Step 1 — Generate clean dataset (requires Claude API key)
-nlu-model-env\Scripts\python.exe research/create_dataset.py
+nlu-model-env\Scripts\python.exe research/step1_create_dataset.py
 
 # Step 2 — Add Vosk transcription noise (requires Vosk model)
 nlu-model-env\Scripts\python.exe research/step2_generate_vosk_noise.py
