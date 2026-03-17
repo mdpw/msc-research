@@ -1,0 +1,20 @@
+{
+  "0": "blanket_request",
+  "1": "checkout_billing",
+  "2": "concierge_general",
+  "3": "concierge_taxi",
+  "4": "do_not_disturb",
+  "5": "emergency",
+  "6": "food_order",
+  "7": "laundry_service",
+  "8": "lighting_control",
+  "9": "maintenance",
+  "10": "misc_request",
+  "11": "noise_complaint",
+  "12": "pillow_request",
+  "13": "room_cleaning",
+  "14": "temperature_control",
+  "15": "toiletries_request",
+  "16": "towel_request",
+  "17": "wake_up_call"
+}

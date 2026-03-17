@@ -178,13 +178,33 @@ class NLUService(private val context: Context) {
         try {
             // 2. Fallback to TFLite Model (Slow Path)
             val tokens = tokenize(lowerText)
-            val inputArray = Array(1) { IntArray(MAX_SEQ_LENGTH) }
+
+            val inputIds      = Array(1) { IntArray(MAX_SEQ_LENGTH) }
+            val attentionMask = Array(1) { IntArray(MAX_SEQ_LENGTH) }
+            val tokenTypeIds  = Array(1) { IntArray(MAX_SEQ_LENGTH) } // all zeros — single sentence
+
             tokens.forEachIndexed { index, token ->
-                if (index < MAX_SEQ_LENGTH) inputArray[0][index] = token
+                if (index < MAX_SEQ_LENGTH) {
+                    inputIds[0][index]      = token
+                    attentionMask[0][index] = 1  // 1 = real token, 0 = padding
+                }
+            }
+
+            // Build inputs array ordered by TFLite tensor index (name-based mapping)
+            val inputCount = interpreter.inputTensorCount
+            val inputsArray = Array<Any>(inputCount) { i ->
+                val name = interpreter.getInputTensor(i).name()
+                when {
+                    "input_ids"      in name -> inputIds
+                    "attention_mask" in name -> attentionMask
+                    "token_type_ids" in name -> tokenTypeIds
+                    else -> inputIds
+                }
             }
 
             val outputArray = Array(1) { FloatArray(labelMap.size) }
-            interpreter.run(inputArray, outputArray)
+            val outputs = mapOf(0 to outputArray as Any)
+            interpreter.runForMultipleInputsOutputs(inputsArray, outputs)
 
             val scores = outputArray[0]
             val probabilities = softmax(scores)

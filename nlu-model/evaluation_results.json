@@ -1,0 +1,38 @@
+{
+  "test_set_size": 2016,
+  "summary": [
+    {
+      "model": "Model A (clean-trained)",
+      "test_type": "Clean Text",
+      "accuracy": 0.9807,
+      "f1_macro": 0.9805,
+      "f1_weighted": 0.9805
+    },
+    {
+      "model": "Model A (clean-trained)",
+      "test_type": "Vosk Output",
+      "accuracy": 0.8934,
+      "f1_macro": 0.8908,
+      "f1_weighted": 0.8908
+    },
+    {
+      "model": "Model B (vosk-trained)",
+      "test_type": "Vosk Output",
+      "accuracy": 0.9638,
+      "f1_macro": 0.9636,
+      "f1_weighted": 0.9636
+    },
+    {
+      "model": "Model C (mixed-trained)",
+      "test_type": "Vosk Output",
+      "accuracy": 0.9906,
+      "f1_macro": 0.9905,
+      "f1_weighted": 0.9905
+    }
+  ],
+  "research_finding": {
+    "accuracy_drop_clean_to_vosk": 0.0873,
+    "accuracy_gain_noise_aware_training": 0.0972,
+    "gap_recovery_percent": 111.3
+  }
+}
