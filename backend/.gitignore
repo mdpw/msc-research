@@ -3,16 +3,18 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 *.pyc
 
-# Virtual Environments
-hotel_env/
+# Virtual environment
 hotel-backend-env/
+hotel_env/
+venv/
 *.venv
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Database (runtime data, not for git)
+database.db
+*.db
+*.sqlite3
 
 # IDE
 .vscode/
@@ -20,4 +22,9 @@ hotel-backend-env/
 *.swp
 *.swo
 
-data/
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
