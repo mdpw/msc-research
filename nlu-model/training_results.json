@@ -1,0 +1,41 @@
+[
+  {
+    "model": "model_a",
+    "dataset": "new_hotel_dataset.csv",
+    "train_size": 8568,
+    "val_size": 1512,
+    "test_size": 2016,
+    "val_accuracy": 0.9761904761904762,
+    "val_f1_macro": 0.9760105656919118,
+    "val_f1_weighted": 0.9760105656919117,
+    "test_accuracy": 0.8933531746031746,
+    "test_f1_macro": 0.8907962748367897,
+    "test_f1_weighted": 0.8907962748367897
+  },
+  {
+    "model": "model_b",
+    "dataset": "vosk_only_dataset.csv",
+    "train_size": 8568,
+    "val_size": 1512,
+    "test_size": 2016,
+    "val_accuracy": 0.9543650793650794,
+    "val_f1_macro": 0.9542087998506307,
+    "val_f1_weighted": 0.9542087998506306,
+    "test_accuracy": 0.9637896825396826,
+    "test_f1_macro": 0.9636247578779034,
+    "test_f1_weighted": 0.9636247578779034
+  },
+  {
+    "model": "model_c",
+    "dataset": "paired_dataset.csv",
+    "train_size": 12633,
+    "val_size": 2230,
+    "test_size": 2016,
+    "val_accuracy": 0.9762331838565023,
+    "val_f1_macro": 0.9758313188849521,
+    "val_f1_weighted": 0.976154950792071,
+    "test_accuracy": 0.9905753968253969,
+    "test_f1_macro": 0.990517866710142,
+    "test_f1_weighted": 0.990517866710142
+  }
+]

@@ -49,8 +49,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.os.Build
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
 
 data class RequestItem(
@@ -308,16 +313,35 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun speakFire(message: String) {
-        if (ttsReady) {
-            val params = Bundle()
-            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "fire")
-            tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "fire")
+    private fun requestAudioFocus() {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                )
+                .build()
+            audioManager.requestAudioFocus(focusRequest)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
         }
+    }
+
+    private fun speakFire(message: String) {
+        if (!ttsReady) return
+        requestAudioFocus()
+        val params = Bundle()
+        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "fire")
+        tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "fire")
     }
 
     private suspend fun speakAndWait(message: String) {
         if (!ttsReady) return
+        requestAudioFocus()
         val deferred = CompletableDeferred<Unit>()
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {}
@@ -328,7 +352,7 @@ class MainActivity : ComponentActivity() {
         val params = Bundle()
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "greeting")
         tts.speak(message, TextToSpeech.QUEUE_FLUSH, params, "greeting")
-        deferred.await()
+        withTimeoutOrNull(10_000L) { deferred.await() }
     }
 
     private fun reconnectToServer() {
@@ -365,17 +389,12 @@ class MainActivity : ComponentActivity() {
                         val index = _requestHistory.indexOfFirst { it.id == requestId }
                         if (index != -1) {
                             _requestHistory[index] = _requestHistory[index].copy(status = status)
-
-                            if (ttsReady) {
-                                val statusMessage = when (status) {
-                                    "in_progress" -> "Your request No.$requestId is now being processed."
-                                    "completed" -> "Your request No.$requestId is completed. Would you like to rate the service?"
-                                    else -> "Your request No.$requestId is now $status."
-                                }
-                                val params = Bundle()
-                                params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "StatusUpdate_$requestId")
-                                tts.speak(statusMessage, TextToSpeech.QUEUE_FLUSH, params, "StatusUpdate_$requestId")
+                            val statusMessage = when (status) {
+                                "in_progress" -> "Your request No.$requestId is now being processed."
+                                "completed" -> "Your request No.$requestId is completed. Would you like to rate the service?"
+                                else -> "Your request No.$requestId is now $status."
                             }
+                            speakFire(statusMessage)
                         } else {
                             refreshRequests()
                         }
@@ -384,12 +403,7 @@ class MainActivity : ComponentActivity() {
                 // Feature 9: Staff message handler
                 onStaffMsg = { requestId, message, staffName ->
                     runOnUiThread {
-                        if (ttsReady) {
-                            val ttsMessage = "Message from hotel staff regarding your request number $requestId: $message"
-                            val params = Bundle()
-                            params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "StaffMsg_$requestId")
-                            tts.speak(ttsMessage, TextToSpeech.QUEUE_FLUSH, params, "StaffMsg_$requestId")
-                        }
+                        speakFire("Message from hotel staff regarding your request number $requestId: $message")
                     }
                 }
             )

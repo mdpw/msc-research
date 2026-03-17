@@ -29,3 +29,18 @@ results/
 build/
 vosk-model-en-us-0.22-lgraph/
 whisper/
+
+# Trained model weights — too large for git (1.2GB+)
+nlu-model/models/
+nlu-model/vosk-model-small-en-in-0.4/
+
+# Checkpoint/intermediate files
+nlu-model/step2_checkpoint.csv
+nlu-model/new_hotel_dataset_checkpoint.csv
+nlu-model/nlu-model-env/
+
+# Duplicate/copy files
+*- Copy.csv
+
+# Database binary
+backend/database.db
