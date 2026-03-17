@@ -1,15 +1,31 @@
+# Android build outputs
 *.iml
-.gradle
+.gradle/
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/build/
+app/build/
+/captures/
+
+# Android Studio / IntelliJ IDEA
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/shelf/
+
+# NDK / CMake
+.externalNativeBuild/
+.cxx/
+
+# Vosk STT model (large binary, deploy manually)
+app/src/main/assets/models/vosk-model-small-en-in-0.4/
+
+# Keystore (never commit signing keys)
+*.jks
+*.keystore
+
+# OS
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+Thumbs.db
