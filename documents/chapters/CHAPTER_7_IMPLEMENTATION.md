@@ -23,6 +23,11 @@ The system spans three technology stacks corresponding to its three-tier archite
 | Build System | Gradle (Kotlin DSL) | |
 | TFLite Runtime | TensorFlow Lite | 2.17.0 |
 | WebSocket Client | OkHttp | 4.11.0 |
+| STT Model | vosk-model-small-en-in-0.4 | ~36 MB |
+| NLU Model | hotel_mobilebert_v2.tflite | 26 MB |
+| Audio Format | 16 kHz, 16-bit PCM, mono | — |
+| Audio Chunk Size | 4,096 bytes | — |
+| TTS Engine | Android native TextToSpeech | Pre-installed |
 | **NLU Training Pipeline** | | |
 | Language | Python | 3.10+ |
 | ML Framework | PyTorch + HuggingFace Transformers | 4.57.3 |
@@ -187,24 +192,7 @@ The training and deployment pipeline is implemented as six sequential Python scr
 
 **Training configuration (all three models share identical settings):**
 
-**Table 7.5: Training Configuration**
-
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| Base model | google/mobilebert-uncased | Smallest BERT variant designed for mobile |
-| Task | Multi-class classification (18 intents) | |
-| Epochs | 5 (with early stopping, patience = 2) | Stops if F1 macro does not improve for 2 consecutive epochs |
-| Learning rate | 3e-5 | Standard for BERT fine-tuning (Devlin et al., 2019) |
-| Batch size | 16 | Suitable for CPU training |
-| Optimiser | AdamW | Standard for transformer fine-tuning |
-| Warmup ratio | 10% of training steps | Stabilises early training |
-| Weight decay | 0.01 | L2 regularisation |
-| Max gradient norm | 1.0 | Gradient clipping |
-| Max sequence length | 32 tokens | > 98% of hotel requests are under 10 words |
-| Best model metric | F1 macro | Balanced across all 18 intent classes |
-| Seed | 42 | Reproducibility |
-
-The only difference between models is training data. The training, validation, and test splits are:
+All three models were trained with the same hyperparameters — the full configuration with rationale for each choice is documented in Chapter 3 (Table 3.9). The only difference between models is training data. The training, validation, and test splits are:
 - **Train/val split:** 85%/15% stratified split of each model's training dataset
 - **Test set:** 20% held-out from `vosk_transcriptions.csv` (2,016 samples), shared across all three models for fair comparison
 

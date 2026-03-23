@@ -115,6 +115,10 @@ In a real hotel, the voice assistant would need to connect with existing operati
 
 The prototype stores all service requests in SQLite but does not surface analytical insights from that data. A reporting dashboard showing request volumes by department, average response times, peak service hours, and guest satisfaction trends would give hotel management a concrete operational return on investment from the system — not just improved guest experience, but data-driven insight into service delivery patterns.
 
+### 11.2.13 Offline Request Queuing
+
+The current prototype performs speech recognition and intent classification entirely on-device, but request submission still requires an active connection to the hotel server. If the server is temporarily unreachable — due to a Wi-Fi dropout or server restart — the classified request is lost and the guest receives no confirmation. Future work should implement a local request queue on the Android device: when submission fails, the request is stored in a local SQLite database with a pending-sync status, and the guest is notified that their request has been saved and will be sent shortly. A background sync service would retry submission automatically once connectivity is restored, then clear the local queue and deliver a confirmation. This would complete the resilience benefit already present in the on-device processing architecture and directly improve guest satisfaction by ensuring no request is silently dropped due to a transient network issue.
+
 ---
 
 ## 11.3 Summary

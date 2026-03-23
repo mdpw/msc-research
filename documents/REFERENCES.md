@@ -24,6 +24,8 @@ Radford, A. et al. (2023) 'Robust Speech Recognition via Large-Scale Weak Superv
 
 Sanh, V. et al. (2019) 'DistilBERT, a Distilled Version of BERT: Smaller, Faster, Cheaper and Lighter', *NeurIPS 2019 Workshop on Energy Efficient Machine Learning and Cognitive Computing*. Available at: https://arxiv.org/abs/1910.01108
 
+Sri Lanka Tourism Development Authority (SLTDA) (2024) *Year in Review 2024*. Colombo: Sri Lanka Tourism Development Authority. Available at: https://www.sltda.gov.lk/storage/common_media/Year_In_Review_2024_Final_2024_Jan-Dec1.pdf (Accessed: 21 March 2026).
+
 Shi, W. et al. (2016) 'Edge Computing: Vision and Challenges', *IEEE Internet of Things Journal*, 3(5), pp. 637-646. Available at: https://doi.org/10.1109/JIOT.2016.2579198
 
 Sun, Z. et al. (2020) 'MobileBERT: a Compact Task-Agnostic BERT for Resource-Limited Devices', in *Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL 2020)*. Online: ACL, pp. 2158-2170. Available at: https://doi.org/10.18653/v1/2020.acl-main.195

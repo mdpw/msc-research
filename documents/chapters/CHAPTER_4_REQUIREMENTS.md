@@ -79,6 +79,31 @@ The following functional requirements were derived from the combined findings of
 | FR-12 | The system shall allow staff to transfer a request to a different department via the dashboard | Should | Management interviews |
 | FR-13 | The system shall maintain a record of all requests for operational review | Could | Management interviews |
 
+The 18 intent categories referenced in FR-03 were identified through analysis of room service menus from Sri Lankan hotels, use cases from Buhalis and Moldavska (2021, 2022), and the service categories supported by Alexa for Hospitality.
+
+**Table 4.1a: Predefined Intent Categories (FR-03)**
+
+| Intent Category | Description |
+|----------------|-------------|
+| towel_request | Requests for towels |
+| room_cleaning | Housekeeping and cleaning requests |
+| food_order | Food, beverage, and room service orders |
+| toiletries_request | Bathroom amenity requests |
+| pillow_request | Pillow and bedding requests |
+| temperature_control | Heating and cooling requests |
+| blanket_request | Blanket and comforter requests |
+| maintenance | Technical and repair requests |
+| laundry_service | Laundry and dry cleaning requests |
+| concierge_general | General information and service queries |
+| wake_up_call | Alarm and wake-up requests |
+| concierge_taxi | Transportation and taxi requests |
+| do_not_disturb | Privacy and do-not-disturb requests |
+| lighting_control | Light adjustment requests |
+| noise_complaint | Noise and disturbance complaints |
+| emergency | Emergency and urgent assistance |
+| checkout_billing | Checkout and billing inquiries |
+| misc_request | Uncategorised or general requests |
+
 ---
 
 ## 4.4 Non-Functional Requirements
