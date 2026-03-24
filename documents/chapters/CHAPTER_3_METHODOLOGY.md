@@ -2,41 +2,41 @@
 
 ## 3.1 Introduction
 
-This chapter explains how the system was designed, built, and evaluated. It covers the research approach, development process, system architecture, technology choices, dataset preparation, model training, and evaluation strategy. Every major decision is tied back to the core constraint: building an affordable, offline voice assistant that actually works on budget hardware in a Sri Lankan hotel.
+This chapter explains how the system was designed, built, and evaluated. It covers the research approach, development process, architecture, technology choices, dataset preparation, model training, and evaluation strategy. Every major decision connects back to the core constraint: building an affordable, offline voice assistant that actually works on budget hardware in a Sri Lankan hotel.
 
 ---
 
 ## 3.2 Research Approach
 
-This project follows a **Design Science Research (DSR)** methodology, as described by Hevner et al. (2004). DSR is centred on building and evaluating IT artefacts that solve real, practical problems. It was the right fit here for three reasons:
+This project follows **Design Science Research (DSR)**, as described by Hevner et al. (2004). DSR is about building and evaluating IT artefacts that solve real, practical problems. It was the right fit here for three reasons:
 
-1. **The research requires a working system.** You cannot measure whether an offline voice assistant performs acceptably on budget hardware without actually building one. Approaches like surveys or case studies cannot produce that kind of evidence.
+1. **The research needs a working system.** You cannot measure whether an offline voice assistant performs well on budget hardware without actually building one. Surveys or case studies cannot produce that kind of evidence.
 
-2. **The research gaps are practical.** As identified in Chapter 2, no existing system has combined offline on-device NLU — using open-source edge STT and compressed mobile transformers — for hospitality use. Closing that gap means building a real implementation, not writing a theoretical proposal.
+2. **The research gap is practical.** As identified in Chapter 2, no existing system has combined offline on-device NLU — using open-source edge STT and compressed mobile transformers — specifically for hospitality. Closing that gap means building a real implementation, not a theoretical proposal.
 
-3. **Evaluation is built into the methodology.** DSR requires the artefact to be tested against defined criteria. This maps directly onto the research objectives: measuring NLU accuracy across clean and transcribed inputs, speech recognition WER, system latency, and deployment cost.
+3. **Evaluation is part of the process.** DSR requires the artefact to be tested against defined criteria, which maps directly onto the research objectives: measuring NLU accuracy across clean and transcribed inputs, speech recognition WER, system latency, and deployment cost.
 
 The DSR process for this project followed five phases:
 
 1. **Problem Identification** — Identifying operational and technical gaps through the literature review (Chapter 2).
-2. **Solution Design** — Defining system requirements, architecture, and the experimental design for comparing NLU training strategies (Chapter 3).
-3. **Artefact Development** — Building the Android application, backend server, staff dashboard, and three NLU model variants (Chapter 4).
-4. **Evaluation** — Measuring NLU accuracy across training conditions, speech recognition WER, system latency, and cost against cloud alternatives (Chapter 5).
-5. **Communication** — Reporting findings, limitations, and contributions (Chapters 6 and 7).
+2. **Solution Design** — Defining system requirements, architecture, and the experimental design for comparing NLU training strategies (Chapters 3–6).
+3. **Artefact Development** — Building the Android application, backend server, staff dashboard, and three NLU model variants (Chapter 7).
+4. **Evaluation** — Measuring NLU accuracy across training conditions, speech recognition WER, and deployment cost (Chapter 8).
+5. **Communication** — Reporting findings, limitations, and contributions (Chapters 10 and 11).
 
 ---
 
 ## 3.3 Development Approach
 
-The system was built using **iterative prototyping** rather than a sequential approach. This was not a methodology preference — it was a necessity given how much was unknown before any code was written.
+The system was built using **iterative prototyping** rather than a sequential process. This was not just a preference — it was necessary given how much was unknown before any code was written.
 
-The system combines on-device speech recognition, neural intent classification, and real-time local network communication. None of these could be fully designed upfront, because their real-world behaviour on budget hardware was unknown:
+The system combines on-device speech recognition, neural intent classification, and real-time local network communication. None of these could be fully designed upfront because their real-world behaviour on budget hardware was unknown:
 
-- Speech recognition accuracy could only be measured by running Vosk on an actual Android device with real voice input. No design document could predict how well the model would handle Sri Lankan English in a hotel room environment.
-- Intent classification performance depended heavily on how well the model handled imperfect speech-to-text output — something that only became visible after running the full pipeline end-to-end.
+- Speech recognition accuracy could only be measured by running Vosk on an actual Android device. No design document could predict how well it would handle Sri Lankan English in a hotel room.
+- Intent classification performance depended heavily on how the model dealt with imperfect speech-to-text output — something that only became visible after running the full pipeline end-to-end.
 - End-to-end latency could only be measured with all components integrated and running together.
 
-A sequential approach would have delayed these discoveries until it was too late to act on them. For example, the first prototype immediately revealed that the larger Vosk model caused load times exceeding 15 seconds on a budget tablet — a critical finding that directly shaped model selection.
+A sequential approach would have delayed these discoveries until it was too late to act on them. The first prototype alone revealed that the larger Vosk model caused load times exceeding 15 seconds on a budget tablet — a finding that directly shaped the final model selection.
 
 The system was built across four iterations:
 
@@ -45,9 +45,9 @@ The system was built across four iterations:
 | 1 | On-device speech recognition | Vosk integrated into Android app with live transcription | `vosk-model-small-en-in-0.4` selected; Indian English acoustic model matches Sri Lankan accents better than US English variants |
 | 2 | Intent classification pipeline | MobileBERT fine-tuned, converted to TFLite, deployed on-device | Hybrid classification adopted after the purely neural approach struggled on simple keyword-heavy requests |
 | 3 | Backend and real-time communication | FastAPI server, SQLite database, WebSocket integration | WebSocket confirmed as viable for real-time guest-to-staff updates over a local network |
-| 4 | System integration and evaluation | End-to-end system with staff dashboard and benchmarking | Full pipeline latency measured; NLU accuracy compared across three training conditions |
+| 4 | System integration and evaluation | End-to-end system with staff dashboard and benchmarking | Full pipeline tested; NLU accuracy compared across three training conditions |
 
-Each iteration ended with a review against the research objectives, and what was learned informed the next phase.
+Each iteration ended with a review against the research objectives, and what was learned fed into the next phase.
 
 ---
 
@@ -91,13 +91,13 @@ flowchart TB
     DASH -->|"HTTP REST — Status updates & staff messages"| API
 ```
 
-Running both STT and NLU directly on the guest device was a deliberate design choice, driven by three factors: (1) **privacy** — raw audio never leaves the device; (2) **reduced server load** — the server only ever receives structured text requests; and (3) **resilience** — the device can still transcribe and classify even if the server is temporarily unreachable. The detailed system design — including the voice processing pipeline, hybrid NLU pipeline, communication architecture, database schema, and department routing — is presented in Chapter 6.
+Running both STT and NLU directly on the guest device was a deliberate design choice for three reasons: (1) **privacy** — raw audio never leaves the device; (2) **reduced server load** — the server only ever receives structured text requests; and (3) **resilience** — the device can still transcribe and classify even if the server is temporarily unreachable. The detailed system design is covered in Chapter 6.
 
 ---
 
 ## 3.5 Technology Selection
 
-The technology choices for each component — speech recognition, intent classification, backend framework, database, mobile platform, and text-to-speech — are evaluated and justified in Chapter 5, Section 5.6, against the five core project constraints: offline capability, privacy, low latency, low-cost hardware, and minimal IT infrastructure.
+The technology choices for each component — speech recognition, intent classification, backend framework, database, mobile platform, and text-to-speech — are evaluated and justified in Chapter 5 (Section 5.6), against the five core project constraints: offline capability, privacy, low latency, low-cost hardware, and minimal IT infrastructure.
 
 ---
 
@@ -115,11 +115,9 @@ The dataset was generated using the Claude Haiku API to produce natural language
 
 ### 3.6.3 Vosk Transcription Pairing — The Core Experimental Dataset
 
-This step is the most methodologically significant part of the data collection process. Each of the 10,080 clean utterances was converted to audio using Google TTS (`gTTS` with `tld='co.in'` for Indian English pronunciation), converted to 16 kHz mono WAV using ffmpeg, and then transcribed by the Vosk engine (`vosk-model-small-en-in-0.4`). The result is a paired dataset (`vosk_transcriptions.csv`) containing a clean and a Vosk-transcribed version of every utterance.
+This step is the most important part of the data preparation process. Each of the 10,080 clean utterances was converted to audio using Google TTS (`gTTS` with `tld='co.in'` for Indian English pronunciation), converted to 16 kHz mono WAV using ffmpeg, and then transcribed by Vosk (`vosk-model-small-en-in-0.4`). The result is a paired dataset (`vosk_transcriptions.csv`) where every utterance has both a clean version and a Vosk-transcribed version side by side.
 
-The transcription process deliberately introduces realistic STT noise into the dataset — the same distortions a real guest voice would produce when passed through the on-device Vosk engine. The resulting paired dataset (`vosk_transcriptions.csv`) contains both a clean and a Vosk-transcribed version of every utterance, enabling direct comparison of model performance under each condition. The WER and CER characteristics of this pairing are measured and reported in Chapter 8 (Section 8.3).
-
-These paired records are the foundation of the three-model experimental design described in Section 3.6.4. Without them, it would not be possible to isolate the accuracy drop caused specifically by the STT step.
+This pairing deliberately introduces the same STT noise a real guest voice would produce when passed through the on-device Vosk engine. Without it, there would be no way to isolate the accuracy drop caused specifically by the speech recognition step. The WER and CER characteristics of these transcriptions are measured and reported in Chapter 8 (Section 8.3).
 
 ### 3.6.4 Three Training Datasets
 
@@ -133,7 +131,7 @@ Three training datasets were derived from the paired data — one for each model
 | vosk_only_dataset.csv | 10,080 | Vosk-transcribed text only | Model B |
 | paired_dataset.csv | 14,864 | Clean + Vosk mixed (deduplicated) | Model C (proposed approach) |
 
-`paired_dataset.csv` contains 14,864 records rather than 20,160 because duplicate entries — utterances where Vosk produced output identical to the clean text — were removed to avoid redundancy.
+`paired_dataset.csv` has 14,864 records rather than 20,160 because utterances where Vosk produced output identical to the clean text were removed to avoid redundancy.
 
 ### 3.6.5 Train/Validation/Test Split
 
@@ -145,7 +143,7 @@ Each model is trained using a stratified **85%/15% train/validation split** of i
 
 ### 3.7.1 MobileBERT Fine-Tuning
 
-All three model variants are fine-tuned from the same base checkpoint — `google/mobilebert-uncased` from HuggingFace — using an identical training configuration. The only variable across models is the training data. This design ensures that any difference in results reflects the impact of training data type on NLU performance, and nothing else.
+All three model variants are fine-tuned from the same base checkpoint — `google/mobilebert-uncased` from HuggingFace — using an identical training configuration. The only variable across models is the training data. This ensures that any difference in results reflects the impact of training data composition on NLU performance, and nothing else.
 
 **Table 3.9: Training Configuration**
 
@@ -167,7 +165,6 @@ All three model variants are fine-tuned from the same base checkpoint — `googl
 
 The maximum sequence length of 32 tokens was set after inspecting the training data, where over 98% of utterances contained fewer than 10 words (roughly 15 tokens after tokenisation). Shorter sequences reduce inference time and memory usage during on-device execution.
 
-
 ---
 
 ## 3.8 Evaluation Methodology
@@ -187,42 +184,38 @@ Metrics reported for each model and condition:
 - **Precision, Recall, F1-score**: Per-intent and macro-averaged.
 - **Confusion matrix**: To identify systematic misclassification between semantically similar intents.
 
-The key comparison is between Model A on Vosk output and Model C on Vosk output. This directly answers the core research question: does noise-aware training close the accuracy gap introduced by real speech recognition in an offline pipeline?
-
-An additional benchmark comparison is made against a server-side BERT-BASE classifier on the same test set, to put the results in context relative to a larger, unconstrained model.
+The key comparison is between Model A and Model C on Vosk output. This directly answers the core research question: does noise-aware training close the accuracy gap introduced by real speech recognition in an offline pipeline?
 
 ### 3.8.2 Speech Recognition Accuracy
 
-- **Metric**: Word Error Rate (WER)
-- **Formula**: `WER = (Substitutions + Insertions + Deletions) / Total Reference Words`
-- **Method**: Vosk transcriptions are compared against ground-truth reference text using the `jiwer` Python library.
-- **Benchmark**: Whisper (server-side) on the same corpus, as an accuracy ceiling.
-- **Variables analysed**: Accent variation, background noise level, utterance length, and intent category.
+Vosk's transcription quality is measured using **Word Error Rate (WER)** — the standard metric for speech recognition systems, calculated as:
+
+```
+WER = (Substitutions + Insertions + Deletions) / Total Reference Words
+```
+
+Vosk transcriptions from the pipeline are compared against the original clean text using the `jiwer` Python library. The WER is broken down by intent category to identify which service request types are most affected by transcription errors. This per-intent view is important because it directly explains which NLU categories are most at risk of accuracy degradation in a real deployment.
 
 ### 3.8.3 System Latency
 
-- **Metric**: End-to-end response time from voice input completion to system confirmation.
-- **Method**: Timestamps are logged at each pipeline stage — STT processing, NLU classification (keyword check and/or model inference), HTTP submission, WebSocket delivery, and TTS playback.
-- **Reported statistics**: Mean, minimum, and maximum latency across multiple test requests.
-- **Goal**: Identify which pipeline stages contribute most to total latency.
+End-to-end response time was observed during integration testing — from voice input completion through to the staff dashboard update. Timestamps were logged at each pipeline stage: STT processing, NLU classification (keyword check and/or model inference), HTTP submission, WebSocket delivery, and TTS playback confirmation. Formal statistical measurement across a large number of test requests was not completed within the scope of this project; latency is reported as observed during functional testing and identified as a direction for future work.
 
 ### 3.8.4 Cost-Effectiveness
 
-- **Metric**: Per-room deployment cost (hardware + software + maintenance).
-- **Method**: Itemised cost comparison across three scenarios:
-  1. This system (commodity Android tablet, local server, no recurring fees).
-  2. Cloud-based alternatives (Alexa for Hospitality, Google Nest for Hotels).
-  3. Traditional phone-based room service (staffing cost estimate).
+- **Metric**: Per-room deployment cost (hardware + software + ongoing fees).
+- **Method**: Itemised cost comparison across two scenarios:
+  1. This system (commodity Android tablet, local production-grade server, no recurring fees).
+  2. Cloud-based and commercial alternatives (Google Cloud STT, Alexa for Hospitality).
 - **Projection period**: 3 years for a hypothetical 50-room hotel.
 
 ---
 
 ## 3.9 Summary
 
-This chapter has described the research methodology, dataset preparation, model training, and evaluation strategy for the proposed voice assistant system. Technology selection is covered in Chapter 5 (Section 5.6), and the detailed system design is covered in Chapter 6.
+This chapter has described the research methodology, dataset preparation, model training, and evaluation strategy for the proposed voice assistant system. Technology selection is covered in Chapter 5 (Section 5.6), and the detailed system design is in Chapter 6.
 
-Design Science Research was chosen because the objectives require both a working system and its systematic evaluation. Iterative prototyping was used over a sequential approach because the technical unknowns — particularly how multiple AI components behave together on resource-constrained hardware — could only be resolved through working prototypes.
+Design Science Research was chosen because the project needed both a working system and a systematic evaluation of it. Iterative prototyping was used because the key technical unknowns — particularly how multiple AI components would behave together on budget hardware — could only be resolved by building and running real prototypes.
 
-The most methodologically significant part of the data work is the construction of a paired clean-and-Vosk-transcribed dataset: 10,080 utterances passed through a TTS-to-Vosk pipeline to simulate real pipeline input. This enables the three-model comparison (clean-trained, Vosk-trained, and mixed-trained) that directly addresses whether noise-aware training can close the accuracy gap introduced by on-device speech recognition.
+The most important part of the data preparation was creating the paired clean-and-Vosk-transcribed dataset: 10,080 utterances passed through a TTS-to-Vosk pipeline to simulate real pipeline conditions. This enables the three-model comparison (clean-trained, Vosk-trained, and mixed-trained) that directly addresses the core research question.
 
-Key architectural decisions — including `vosk-model-small-en-in-0.4` for Indian English acoustic matching, the two-tier hybrid NLU pipeline, and WebSocket-based real-time communication over LAN — are all grounded in the research objectives and the real deployment constraints of budget Sri Lankan hotels. The following chapter documents the requirements elicitation process and the full functional and non-functional requirements that shaped these decisions.
+Key decisions — including `vosk-model-small-en-in-0.4` for Indian English acoustic matching, the two-tier hybrid NLU pipeline, and WebSocket-based real-time communication over LAN — are all grounded in the research objectives and the real deployment constraints of budget Sri Lankan hotels. The next chapter documents the requirements elicitation process and the full functional and non-functional requirements that shaped these decisions.

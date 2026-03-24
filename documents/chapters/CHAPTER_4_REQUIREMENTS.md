@@ -2,84 +2,77 @@
 
 ## 4.1 Introduction
 
-This chapter documents how the system requirements were gathered and prioritised. Understanding what the system needs to do — and what constraints it must operate within — required input from two different perspectives: the hotel staff who would manage the system day-to-day, and the guests who would actually use it. Both perspectives informed the final requirements, and the differences between them highlighted some tensions that shaped the overall design.
+This chapter covers how the system requirements were gathered and prioritised. Since this is a research prototype without a hotel industry client, the requirements came from two places: published academic literature on hotel operations and voice assistant adoption (to understand what hotels actually need), and a small survey of people with recent hotel stay experience (to understand what guests want). Both perspectives shaped the final requirements.
 
 ---
 
 ## 4.2 Requirements Elicitation
 
-### 4.2.1 Hotel Management Interviews
+### 4.2.1 Hotel Operational Requirements — Literature Review
 
-Semi-structured interviews were conducted with management and front-desk staff at [X] small to mid-sized hotels across the Southern and Western Provinces of Sri Lanka. These locations were chosen because they represent the target deployment context — hotels in tourist-facing areas that handle a consistent volume of guest requests but lack the IT infrastructure or budget of larger chain hotels.
+There is no hotel client for this project, so the operational requirements had to come from somewhere else. The approach used here — drawing requirements from published research when no direct client exists — is standard practice in Design Science Research (Hevner et al., 2004). The literature review in Chapter 2 covered several studies on voice assistant adoption and hotel operations (Buhalis and Moldavska, 2021, 2022; Hwang and Erdem, 2025; Yilmaz et al., 2025), and these were combined with Sri Lanka-specific sources (Wickramasinghe and Ratnayake, 2022; SLTDA, 2024) to work out what operational problems the system actually needs to solve.
 
-The interviews were semi-structured rather than fully scripted. This allowed conversation to move naturally toward the concerns most relevant to each property, while still covering the same core topics across all sites. The interviews covered:
+**Key findings from the literature:**
 
-- How guest service requests are currently handled
-- The most common types of requests and how often they occur
-- Where the existing process breaks down
-- How requests are coordinated between departments
-- The technology and budget constraints the hotel operates under
-- Whether staff would be willing to adopt a voice-based system in guest rooms
+1. **Telephone-based service creates bottlenecks.** In most small and mid-sized hotels, all guest requests go through a single telephone line to the front desk. Buhalis and Moldavska (2022) identify this as a core operational problem — during busy periods, calls go unanswered, staff have to juggle multiple requests at once, and response times suffer. Hwang and Erdem (2025) back this up from the staff side, showing that manual request handling is one of the main workload problems frontline hotel staff face.
 
-**Key findings:**
+2. **Miscommunication is a real problem, especially with international guests.** When requests are handled verbally over the phone, things get misunderstood — the wrong items get delivered, or the request goes to the wrong department. Buhalis and Moldavska (2021) point to this as one of the main reasons hotels have started looking at voice assistants: a structured, intent-based system removes the guesswork from freeform phone conversations. Yilmaz et al. (2025) also connect these kinds of service errors directly to negative online reviews.
 
-1. Every hotel interviewed relied on telephone calls to the front desk as the primary method for handling all guest requests. During peak hours — particularly evenings and early mornings — this created a visible bottleneck, with calls going unanswered or staff having to prioritise between multiple incoming requests.
+3. **Small hotels have no way to track requests.** Most independent hotels have no system for logging what was requested, when it was fulfilled, or how long it took (Buhalis and Moldavska, 2022). When a guest asks about a pending request, staff have to physically check with colleagues. A simple digital log with real-time status updates would directly fix this.
 
-2. Miscommunication was a recurring problem, especially with international guests. Staff reported frequent cases where guests' requests were misunderstood over the phone, resulting in the wrong items being delivered or requests being routed to the wrong department.
+4. **Subscription costs stop small hotels from adopting commercial solutions.** Buhalis and Moldavska (2022) are clear on why voice assistants have only really taken off in large hotel chains: the cost. Commercial platforms need dedicated hardware per room, ongoing subscription fees, and a reliable internet connection. None of that fits the budget of a small independent hotel. This is especially relevant in Sri Lanka, where the accommodation sector is mostly made up of small, owner-operated properties (SLTDA, 2024).
 
-3. None of the hotels had a formal system for tracking request status or measuring how long requests took to fulfil. When guests followed up on a pending request, staff had to ask colleagues directly, which caused further delays.
-
-4. Recurring subscription costs were consistently flagged as a dealbreaker. Several managers mentioned that they had looked at existing voice assistant products but were deterred by monthly fees or the requirement for a dedicated internet connection with guaranteed uptime.
-
-5. Internet connectivity was unreliable at several properties, particularly those located outside Colombo. Some hotels experienced regular outages of several hours, making any cloud-dependent system an unacceptable operational risk.
+5. **Internet connectivity is unreliable outside Colombo.** Wickramasinghe and Ratnayake (2022) document that digital infrastructure quality varies a lot across Sri Lanka, with hotels outside the capital regularly losing connectivity for hours at a time. A system that needs constant internet access is simply not practical for this market. This finding directly drove the offline-first requirement.
 
 ### 4.2.2 Guest Survey
 
-A survey was administered to [X] individuals who had prior experience staying in hotels as guests. Respondents were recruited from [context, e.g., university contacts, social networks] and all had stayed in at least one hotel within the past 12 months. The survey aimed to understand:
+A short survey was given to 20 individuals with recent hotel stay experience. Respondents were recruited through convenience sampling — family members, relatives, and colleagues known to the researcher — and all had stayed in at least one hotel within the past 12 months. The sample covered a range of ages: four teenagers (under 20), seven young adults (20–35), five middle-aged adults (36–59), and four older adults (60–70). This spread was intentional, since voice assistant comfort levels tend to vary across age groups. The full survey instrument and a demographic summary are in Appendix C.
 
-- Satisfaction with current methods for making room service requests
-- Comfort level with using a voice assistant for hotel services
+The survey covered:
+
+- How respondents currently make room service requests and whether they had experienced problems
+- How comfortable they would be using a voice assistant for hotel services
 - Privacy concerns about voice-enabled devices in hotel rooms
-- Which services they would most value through a voice interface
-- Preferences for how the system should confirm a request before submitting it
+- Which services they would use most through a voice interface
+- How they would want the system to confirm a request before submitting it
 
 **Key findings:**
 
-1. [X]% of respondents reported experiencing delays or miscommunication when making service requests by telephone during a hotel stay.
+1. **75% (15/20)** said they had experienced delays or miscommunication when making service requests by phone during a hotel stay. This directly backed up what the literature says about telephone-based service being a bottleneck.
 
-2. [X]% expressed willingness to use a voice assistant for room service if they were assured that audio was not recorded or transmitted externally.
+2. **65% (13/20)** said they would use a voice assistant for room service if they knew the audio was not recorded or sent anywhere outside the room. Privacy assurance was the key factor — several respondents who initially said they would not use one changed their answer once the on-device processing was explained.
 
-3. The most commonly requested services across the survey were housekeeping, towel and toiletry requests, food ordering, and wake-up calls — which directly informed the 18 intent categories defined for the system.
+3. The most commonly requested services were towels and bedding (90%), housekeeping (85%), food and beverage orders (80%), and toiletries (65%) — which directly shaped the 18 intent categories built into the system.
 
-4. A clear majority preferred voice input with on-screen text confirmation before submission, rather than voice-only interaction. This preference for a review step before committing a request was a consistent theme, particularly around food orders where errors would be most disruptive.
+4. **80% (16/20)** preferred voice input with an on-screen text confirmation before the request was submitted, rather than voice-only interaction. This was especially strong for food orders, where mistakes are most disruptive, and directly drove the design of the confirmation step in the guest application.
 
-5. Privacy was identified as the most significant concern. [X]% of respondents said they would be uncomfortable with a cloud-connected device listening in their hotel room. This finding strongly reinforced the decision to process all audio on-device.
+5. Privacy was a notable concern. **25% (5/20)** said they would be uncomfortable with a cloud-connected voice device in their hotel room. This reinforced the decision to keep all audio processing on the device and not transmit any voice data externally.
 
 ---
 
 ## 4.3 Functional Requirements
 
-The following functional requirements were derived from the combined findings of the management interviews and guest survey. Requirements that emerged from a single source are noted accordingly; those supported by both are considered higher priority.
+The requirements below came from combining the literature findings (Section 4.2.1) with the guest survey results (Section 4.2.2). Where a requirement came from only one source, that is noted. Requirements backed by both sources were treated as higher priority.
 
 **Table 4.1: Functional Requirements**
 
 | ID | Requirement | Priority | Source |
 |----|-------------|----------|--------|
-| FR-01 | The system shall accept guest service requests through voice input | Must | Guest survey, Management interviews |
-| FR-02 | The system shall convert speech to text on the device without internet connectivity | Must | Management interviews (connectivity issues) |
-| FR-03 | The system shall classify guest requests into one of 18 predefined hotel service intent categories | Must | Management interviews (routing needs) |
-| FR-04 | The system shall display a text confirmation of the recognised request before submission | Must | Guest survey (preference for confirmation step) |
+| FR-01 | The system shall accept guest service requests through voice input | Must | Guest survey; Buhalis and Moldavska (2022) |
+| FR-02 | The system shall convert speech to text on the device without internet connectivity | Must | Wickramasinghe and Ratnayake (2022) — connectivity constraints |
+| FR-03 | The system shall classify guest requests into one of 18 predefined hotel service intent categories | Must | Buhalis and Moldavska (2021, 2022) — routing needs |
+| FR-04 | The system shall display a text confirmation of the recognised request before submission | Must | Guest survey — preference for confirmation step |
 | FR-05 | The system shall provide voice feedback confirming that a request has been submitted | Must | Guest survey |
-| FR-06 | The system shall deliver requests to the staff dashboard in real time over the hotel's local network | Must | Management interviews (response time concerns) |
-| FR-07 | The system shall allow staff to update request status (pending, in progress, completed, cancelled) | Must | Management interviews (no existing tracking method) |
-| FR-08 | The system shall route requests to the appropriate hotel department automatically based on intent | Must | Management interviews (coordination challenges) |
-| FR-09 | The system shall enable bidirectional messaging between staff and the guest's room device | Should | Management interviews |
+| FR-06 | The system shall deliver requests to the staff dashboard in real time over the hotel's local network | Must | Hwang and Erdem (2025) — response time concerns |
+| FR-07 | The system shall allow staff to update request status (pending, in progress, completed, cancelled) | Must | Buhalis and Moldavska (2022) — no existing tracking method |
+| FR-08 | The system shall route requests to the appropriate hotel department automatically based on intent | Must | Buhalis and Moldavska (2022) — coordination challenges |
+| FR-09 | The system shall enable bidirectional messaging between staff and the guest's room device | Should | Hwang and Erdem (2025) |
 | FR-10 | The system shall allow guests to cancel a pending request by voice command | Should | Guest survey |
-| FR-11 | The system shall allow guests to rate a completed service on a 1–5 scale | Should | Management interviews (no performance measurement) |
-| FR-12 | The system shall allow staff to transfer a request to a different department via the dashboard | Should | Management interviews |
-| FR-13 | The system shall maintain a record of all requests for operational review | Could | Management interviews |
+| FR-11 | The system shall allow guests to rate a completed service on a 1–5 scale | Should | Yilmaz et al. (2025) — service quality measurement |
+| FR-12 | The system shall allow staff to transfer a request to a different department via the dashboard | Should | Buhalis and Moldavska (2022) |
+| FR-13 | The system shall maintain a record of all requests for operational review | Could | Buhalis and Moldavska (2022) |
 
-The 18 intent categories referenced in FR-03 were identified through analysis of room service menus from Sri Lankan hotels, use cases from Buhalis and Moldavska (2021, 2022), and the service categories supported by Alexa for Hospitality.
+The 18 intent categories in FR-03 were defined by looking at room service menus from Sri Lankan hotels, the use cases in Buhalis and Moldavska (2021, 2022), and the service categories supported by Alexa for Hospitality.
 
 **Table 4.1a: Predefined Intent Categories (FR-03)**
 
@@ -108,15 +101,15 @@ The 18 intent categories referenced in FR-03 were identified through analysis of
 
 ## 4.4 Non-Functional Requirements
 
-The non-functional requirements define the constraints under which the system must operate. Several of these were not explicitly stated by interviewees but were inferred from the practical realities they described — for example, the requirement for offline operation came directly from reports of unreliable internet connectivity, and the cost constraint was set based on budget ranges mentioned across multiple properties.
+The non-functional requirements set out the constraints the system has to work within — things like how fast it needs to be, what hardware it should run on, and what it cannot do with guest data. Most of these followed directly from the findings above. The offline requirement came from the connectivity problems documented for Sri Lanka (Wickramasinghe and Ratnayake, 2022). The hardware cost limit came from the budget reality of small hotels in the Sri Lankan market (SLTDA, 2024; Buhalis and Moldavska, 2022). The privacy requirement was backed by both the literature and the guest survey.
 
 **Table 4.2: Non-Functional Requirements**
 
 | ID | Requirement | Target | Rationale |
 |----|-------------|--------|-----------|
 | NFR-01 | The system shall operate fully without internet connectivity | Full offline capability | Unreliable connectivity at target hotel locations |
-| NFR-02 | All voice processing shall occur on-device; no audio or transcript shall be transmitted externally | Zero external voice data | Privacy concerns identified by both guests and management |
-| NFR-03 | End-to-end response time from voice input to voice confirmation shall not exceed 5 seconds | < 5 seconds | Guest experience — comparable to a telephone call response |
+| NFR-02 | All voice processing shall occur on-device; no audio or transcript shall be transmitted externally | Zero external voice data | Privacy concerns from guests and literature |
+| NFR-03 | End-to-end response time from voice input to voice confirmation shall not exceed 5 seconds | < 5 seconds | Guest experience — comparable to a telephone response |
 | NFR-04 | The system shall run on commodity Android tablets costing under $150 USD | < $150 per room | Budget constraints of target small hotels |
 | NFR-05 | The system shall achieve a minimum intent classification accuracy of 90% on real speech input | ≥ 90% | Reliability threshold for service routing |
 | NFR-06 | The system shall support concurrent operation across multiple room devices on a single hotel server | Multi-room | Practical deployment on a single on-site machine |
@@ -127,7 +120,7 @@ The non-functional requirements define the constraints under which the system mu
 
 ## 4.5 Requirements Prioritisation
 
-Requirements were prioritised using the MoSCoW method, with input from the hotel management interviews to determine what would be genuinely necessary for adoption versus what would be a nice addition.
+Once the requirements were defined, they were prioritised using the MoSCoW method. The split between Must Have and Should Have was based on what the literature points to as essential for adoption in small hotel settings, versus what would be useful but is not a dealbreaker (Buhalis and Moldavska, 2022; Hwang and Erdem, 2025).
 
 **Table 4.3: MoSCoW Prioritisation**
 
@@ -138,14 +131,14 @@ Requirements were prioritised using the MoSCoW method, with input from the hotel
 | Could Have | FR-13, NFR-07, NFR-08 |
 | Won't Have (this release) | Multilingual support, voice-based guest feedback collection, integration with existing hotel PMS software |
 
-The "Won't Have" category reflects deliberate scope decisions rather than undesirable features. Multilingual support — particularly Sinhala and Tamil — was mentioned by several managers as highly valuable for local-language guests, but it falls outside the scope of this research prototype given the limitations of available offline STT models for those languages. These are discussed as future work in Chapter 11.
+The "Won't Have" items are deliberate scope decisions, not oversights. Multilingual support — particularly Sinhala and Tamil — would be highly valuable for Sri Lankan guests, but it is out of scope for this prototype given the current limitations of available offline STT models for those languages. These are discussed as future work in Chapter 11.
 
 ---
 
 ## 4.6 Summary
 
-Requirements were gathered through semi-structured interviews with hotel management at [X] properties in Sri Lanka and a survey of [X] past hotel guests. This dual-perspective approach ensured the system design was grounded in both operational realities and actual guest preferences, rather than assumptions made from either side alone.
+Requirements were gathered from two sources: published academic literature on hospitality operations (Section 4.2.1), and a convenience survey of 20 people with recent hotel stay experience (Section 4.2.2). Using both gave a clearer picture than either source alone would have.
 
-The findings converged on a clear picture: hotels need a system that reduces the telephone bottleneck, improves request tracking, and is affordable to deploy without ongoing subscription costs or IT support. Guests want a system that is fast, easy to use, and — most critically — does not transmit their voice data anywhere outside the room.
+The picture that emerged is consistent: hotels need something that removes the telephone bottleneck, gives staff a way to track requests, and can be deployed without subscription fees or IT support. Guests want it to be fast, straightforward, and — above everything else — not sending their voice data anywhere outside their room.
 
-These findings directly shaped the system's core design constraints: fully offline operation, on-device audio processing, commodity Android hardware, and zero recurring software costs. The "Won't Have" items identified through prioritisation are revisited as future work in Chapter 11. The following chapter presents the analysis of these requirements and the evaluation of candidate technologies to fulfil them.
+All of this fed directly into the design: offline operation, audio processing that stays on the device, cheap Android hardware, and no subscription fees. The "Won't Have" items — particularly multilingual support — are picked up again as future work in Chapter 11. The next chapter goes through the technology choices and analysis that turned these requirements into an actual working design.

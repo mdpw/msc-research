@@ -49,9 +49,78 @@ The 10,080-utterance dataset (18 intents, 560 per intent) was created with exact
 
 Unlike cloud-based solutions where privacy depends on provider policies and legal agreements, this prototype provides a structural privacy guarantee. Voice data cannot leave the guest device because the architecture has no mechanism to send audio externally. This is a stronger assurance than any policy-based approach and is particularly relevant as data protection legislation continues to develop across South and Southeast Asia.
 
-### 10.2.7 Genuinely Low-Cost Deployment
+### 10.2.7 Cost-Effectiveness Analysis
 
-The prototype runs on an Android tablet (USD 50–150), any existing PC as a server, and a fully open-source software stack with no recurring subscription fees. This is a realistic deployment model for small hotels in Sri Lanka. Commercial alternatives like Alexa for Hospitality require proprietary hardware and ongoing AWS subscription costs that are incompatible with the target market.
+One of the primary research objectives was to demonstrate that privacy-preserving, offline voice-based service automation is achievable on low-cost hardware. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel.
+
+#### Hardware and Software Cost — Production Deployment
+
+The prototype uses a Raspberry Pi 4 and SQLite for simplicity, but a real hotel deployment would require production-grade infrastructure. Table 10.1 reflects this realistic cost, not the prototype configuration.
+
+**Table 10.1: Production Deployment Cost for a 50-Room Hotel**
+
+| Component | Scope | Item | Estimated Cost (USD) | Notes |
+|-----------|-------|------|---------------------|-------|
+| Guest device | Per room (×50) | Entry-level Android tablet (8", 3GB RAM) | 50–150 each | Locally available in Sri Lanka; commodity hardware (see Section 5.6) |
+| Production server | Shared (×1) | Mini PC / small form-factor server (Intel NUC or equivalent, 16GB RAM, SSD) | 300–500 | Replaces Raspberry Pi for production; handles concurrent WebSocket connections and PostgreSQL under real hotel load |
+| Database | Shared | PostgreSQL (replaces prototype SQLite) | 0 | Open-source; production-grade; zero licence cost |
+| Wi-Fi access points | Shared | Dual-band WAP (one per floor, 2–3 units typical for a 50-room hotel) | 80–150 each | Required if hotel lacks adequate existing coverage; shared with all hotel systems |
+| Network router | Shared (×1) | Business-grade router with VLAN support | 100–200 | Isolates guest device traffic; recommended for security |
+| UPS / power backup | Shared (×1) | Uninterruptible power supply for server | 80–150 | Prevents data loss on power interruption |
+| Vosk STT model | Per device | `vosk-model-small-en-in-0.4` | 0 | Open-source; Apache 2.0 licence (Alpha Cephei, 2020) |
+| MobileBERT TFLite | Per device | Compressed intent classifier | 0 | Open-source; Apache 2.0 licence (Sun et al., 2020) |
+| Backend software | Server | FastAPI, PostgreSQL, Python | 0 | Open-source; no licence fees |
+| Ongoing API / subscription fees | — | None | 0 | No cloud calls; no per-request billing |
+
+**Estimated total hardware investment (50-room hotel):**
+
+| Scenario | Tablets (×50) | Server | Network (WAPs + router) | UPS | **Total** |
+|----------|:-------------:|:------:|:-----------------------:|:---:|:---------:|
+| Lower bound | $2,500 | $300 | $340 (2× WAP + router) | $80 | **~$3,220** |
+| Upper bound | $7,500 | $500 | $650 (3× WAP + router) | $150 | **~$8,800** |
+
+Spread over three years with zero recurring software costs, this amounts to approximately **USD 1,073–2,933 per year** for the entire hotel, or **USD 21–59 per room per year**. Network infrastructure (WAPs and router) is shared with all other hotel systems — email, POS, guest Wi-Fi — so the cost attributed to this system alone is proportionally lower in practice.
+
+#### Scenario Comparison — Two Deployment Models
+
+Sri Lanka's registered accommodation sector is predominantly composed of small and independent properties (SLTDA, 2024), for whom enterprise-grade hospitality platforms with per-room subscription fees represent a prohibitive cost barrier. This context makes the cost comparison below particularly relevant: the question is not whether the proposed system is cheap in absolute terms, but whether it is affordable relative to the alternatives that would otherwise serve this market.
+
+**Table 10.2: Three-Year TCO Comparison for a 50-Room Hotel**
+
+| Cost Item | This System | Cloud STT (Google) | Commercial Platform (e.g., Alexa for Hospitality) |
+|-----------|:-----------:|:-----------------:|:-------------------------------------------------:|
+| Guest devices (×50) | $2,500–7,500 | $2,500–7,500 | $5,000–10,000 (proprietary/branded hardware) |
+| Server (production-grade) | $300–500 | $300–500 | Included in subscription (cloud-hosted) |
+| Network infrastructure | $340–650 | $340–650 | Not required (cloud-managed) |
+| UPS | $80–150 | $80–150 | Not required |
+| Software licences | $0 | $0 | Subscription required (proprietary platform) |
+| STT API fees (3 yr) | $0 | $1,095–2,190 | Bundled in subscription |
+| Platform subscription (3 yr) | $0 | $0 | Not publicly priced; per-room, per-month billing |
+| Internet dependency | LAN only | Constant internet | Constant internet |
+| **Estimated 3-year total** | **$3,220–8,800** | **$4,315–11,000** | **Significantly higher; proprietary terms** |
+
+**Cloud STT cost estimate (Google Cloud Speech-to-Text):** Google Cloud STT is billed at USD 0.006 per 15 seconds of audio (Google Cloud, 2024; consistent with the figure cited in Section 5.6.1). The STT API fee range assumes 5–10 voice requests per room per day, each lasting approximately 10 seconds:
+
+```
+Low estimate  (5 req/day):  5 × 365 × (10/15) × $0.006 × 50 rooms × 3 yr = $1,095
+High estimate (10 req/day): 10 × 365 × (10/15) × $0.006 × 50 rooms × 3 yr = $2,190
+```
+
+This API cost accumulates indefinitely with no ceiling and requires reliable internet connectivity — which is not guaranteed across all Sri Lankan hotel properties (Wickramasinghe and Ratnayake, 2022) — introducing an infrastructure dependency absent from the proposed system.
+
+**Commercial hospitality platforms:** Dedicated voice platforms for hospitality — such as Amazon Alexa Smart Properties for Hospitality (Amazon Web Services, n.d.) — require proprietary or certified hardware, constant cloud connectivity, and per-room subscription agreements. Amazon has not published public pricing for Alexa Smart Properties; pricing is disclosed via enterprise sales engagement (Amazon Web Services, n.d.). However, even the hardware cost alone (Echo-class devices at USD 100+ per room for 50 rooms) matches the entire lower-bound hardware cost of the proposed system before any subscription fees are applied. Buhalis and Moldavska (2022) note that voice assistant adoption in hospitality has been concentrated in large chains precisely because the cost and infrastructure requirements of commercial platforms are incompatible with the operational constraints of small and independent properties — the market this research directly targets.
+
+#### Summary: Cost-Effectiveness Objective Met
+
+The proposed system is the lowest-cost option across both comparison scenarios, and the cost-effectiveness objective stated in Chapter 1 is substantiated on the following evidence:
+
+- **Zero recurring software costs** — the entire stack is open-source with no per-request, per-room, or per-month billing. Unlike cloud STT solutions whose API costs compound annually, this system's software cost is fixed at zero.
+- **No internet dependency** — operation over a local LAN eliminates ongoing connectivity costs and removes the infrastructure risk that cloud-dependent systems carry in markets with variable internet reliability (Wickramasinghe and Ratnayake, 2022).
+- **Commodity hardware** — Android tablets in the USD 50–150 range are available from local Sri Lankan retailers and can be repaired or replaced through local technicians, unlike proprietary hotel-grade hardware locked to specific vendors.
+- **No vendor lock-in** — all components (Vosk, MobileBERT, FastAPI, SQLite) can be substituted, modified, or extended without licence constraints or contractual dependencies.
+- **Market fit** — at USD 21–59 per room per year amortised over three years (including production-grade server, network infrastructure, and UPS), the system is within reach of the small independent hotel operators that make up the majority of Sri Lanka's registered accommodation sector (SLTDA, 2024), and for whom commercial alternatives with ongoing per-room subscription fees are not a realistic option.
+
+The research objective — to demonstrate that privacy-preserving, offline voice-based service automation is achievable on low-cost hardware — is therefore met. The proposed system delivers voice assistant capability at a hardware-only cost that commercial alternatives cannot match, with no ongoing technology expenditure required.
 
 ---
 

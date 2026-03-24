@@ -478,39 +478,3 @@ Android's built-in TTS engine is pre-installed on all Android devices, requires 
 This chapter has translated the system requirements into a concrete conceptual architecture, use case model, process flows, data model, and technology stack. The three-layer architecture — guest device handling all AI processing, server managing coordination and persistence, staff dashboard handling operational management — reflects the core design constraints of offline operation and privacy preservation.
 
 The technology evaluation has shown that in every component, the choices are constrained rather than arbitrary. Cloud-based alternatives were consistently excluded for violating the offline and privacy requirements, and heavier frameworks were excluded for the operational overhead they would impose in hotels with no IT support. The `vosk-model-small-en-in-0.4` Indian English model, MobileBERT TFLite, FastAPI, SQLite, and Android Native were each the best fit given the specific deployment context of small Sri Lankan hotels. The following chapter presents the implementation of this architecture and the key engineering decisions made during development.
-
----
-
-## References
-
-Alpha Cephei (2023) *Vosk offline speech recognition* [Software]. Available at: https://alphacephei.com/vosk/ (Accessed: 8 March 2026).
-
-Amazon Web Services (2024) *Amazon Polly pricing*. Available at: https://aws.amazon.com/polly/pricing/ (Accessed: 8 March 2026).
-
-Bunk, T., Varshneya, D., Vlasov, V. and Nichol, A. (2020) 'DIET: Lightweight language understanding for dialogue systems', *arXiv preprint arXiv:2004.09936*.
-
-CMU Sphinx (2023) *PocketSphinx* [Software repository]. Available at: https://github.com/cmusphinx/pocketsphinx (Accessed: 8 March 2026).
-
-Eren, G., Gölge, E. and the Coqui TTS Team (2021) *Coqui TTS: A deep learning toolkit for text-to-speech* [Software]. Available at: https://github.com/coqui-ai/TTS (Accessed: 8 March 2026).
-
-Fette, I. and Melnikov, A. (2011) *The WebSocket protocol*, RFC 6455. Internet Engineering Task Force (IETF).
-
-Google (2024a) *TensorFlow Lite: Machine learning for mobile and edge devices*. Available at: https://www.tensorflow.org/lite (Accessed: 8 March 2026).
-
-Google (2024b) *Jetpack Compose*. Available at: https://developer.android.com/jetpack/compose (Accessed: 8 March 2026).
-
-Google Cloud (2024) *Cloud Speech-to-Text pricing*. Available at: https://cloud.google.com/speech-to-text/pricing (Accessed: 8 March 2026).
-
-Hipp, D.R. (2024) *SQLite* [Software]. Available at: https://www.sqlite.org (Accessed: 8 March 2026).
-
-Huggins-Daines, D. et al. (2006) 'Pocketsphinx: A free, real-time continuous speech recognition system for hand-held devices', in *Proceedings of ICASSP 2006*, Vol. 1, pp. I-185–I-188.
-
-OASIS (2019) *MQTT version 5.0*. OASIS Standard.
-
-Radford, A. et al. (2023) 'Robust speech recognition via large-scale weak supervision', in *Proceedings of ICML 2023*, PMLR 202, pp. 28492–28518.
-
-Ramírez, S. (2024) *FastAPI* [Software]. Available at: https://fastapi.tiangolo.com (Accessed: 8 March 2026).
-
-Sanh, V. et al. (2019) 'DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter', *arXiv preprint arXiv:1910.01108*.
-
-Sun, Z. et al. (2020) 'MobileBERT: a compact task-agnostic BERT for resource-limited devices', in *Proceedings of ACL 2020*, pp. 2158–2170.
