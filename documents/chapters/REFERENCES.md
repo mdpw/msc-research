@@ -22,7 +22,7 @@ CMU Sphinx (2023) *PocketSphinx* [Software repository]. Available at: https://gi
 
 Devlin, J. et al. (2019) 'BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding', in *Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL-HLT)*. Minneapolis: ACL, pp. 4171-4186.
 
-Eren, G., Gölge, E. and the Coqui TTS Team (2021) *Coqui TTS: A deep learning toolkit for text-to-speech* [Software]. Available at: https://github.com/coqui-ai/TTS (Accessed: 8 March 2026).
+Hansen, M. (2023) *Piper: A fast, local neural text to speech system* [Software]. Available at: https://github.com/rhasspy/piper (Accessed: 25 March 2026).
 
 Fette, I. and Melnikov, A. (2011) *The WebSocket protocol*, RFC 6455. Internet Engineering Task Force (IETF).
 
@@ -39,6 +39,8 @@ Huggins-Daines, D. et al. (2006) 'Pocketsphinx: A free, real-time continuous spe
 Hwang, J. and Erdem, M. (2025) '"U" in User Experience (UX) Stands for the Frontline Employee: A Case Study of Voice Assistant Technology Use in Hotels', *Journal of Hospitality and Tourism Cases*. Available at: https://doi.org/10.1177/21649987251361910
 
 Korkmaz, A. et al. (2025) 'Real-Time Speech-to-Text on Edge: A Prototype System for Ultra-Low Latency Communication with AI-Powered NLP', *Information*, 16(8), p. 685. Available at: https://doi.org/10.3390/info16080685
+
+Kreps, J., Narkhede, N. and Rao, J. (2011) 'Kafka: A distributed messaging system for log processing', in *Proceedings of the NetDB Workshop at VLDB 2011*. Seattle: ACM.
 
 Larson, S. et al. (2022) 'A Survey of Intent Classification and Slot-Filling Datasets for Task-Oriented Dialog', *arXiv preprint arXiv:2207.13211*. Available at: https://arxiv.org/abs/2207.13211 (Accessed: 3 March 2026).
 

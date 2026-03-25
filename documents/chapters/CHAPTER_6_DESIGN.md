@@ -407,7 +407,7 @@ A connection status indicator in the bottom-right corner shows a green "Connecte
 | Decision | Rationale |
 |----------|-----------|
 | Department-filtered view | Staff only see requests relevant to their role. During a busy shift, seeing all departments' requests would create unnecessary noise and slow response times. |
-| Web-based, no installation | Hotels do not need to install software on staff devices. Any browser works, including on personal phones, satisfying NFR-07 and NFR-08. |
+| Web-based, no installation | Hotels do not need to install software on staff devices. Any browser works, including on personal phones, satisfying NFR-07. |
 | Real-time updates without page refresh | WebSocket ensures new requests appear instantly with a notification sound. Staff do not need to manually refresh, reducing the chance of missed requests. |
 | Inline messaging | Staff can communicate with guests directly from the request card without switching to a separate interface, keeping all context in one place. |
 | Room number prominently displayed | Room number is the primary identifier staff use to locate and serve a guest. It is visually emphasised on every card. |

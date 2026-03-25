@@ -97,6 +97,7 @@ Several design decisions were made deliberately to keep the prototype simple and
 | Authentication | None | JWT-based device registration and role-based staff login |
 | Device provisioning | Manual room number entry | Automated QR code or admin portal registration |
 | Server deployment | Single Uvicorn process | Docker + Nginx + Gunicorn with crash recovery |
+| Real-time messaging | In-memory WebSocket state | Redis Pub/Sub (single property) or Apache Kafka (multi-property) |
 | Communication security | HTTP over local Wi-Fi | HTTPS with TLS, even on local network |
 | Logging | Print statements | Structured logging with severity levels and timestamps |
 | Backups | Manual file copy | Automated scheduled database backups |
@@ -115,9 +116,17 @@ In a real hotel, the voice assistant would need to connect with existing operati
 
 The prototype stores all service requests in SQLite but does not surface analytical insights from that data. A reporting dashboard showing request volumes by department, average response times, peak service hours, and guest satisfaction trends would give hotel management a concrete operational return on investment from the system — not just improved guest experience, but data-driven insight into service delivery patterns.
 
-### 11.2.13 Offline Request Queuing
+### 11.2.13 Offline Request Queuing and Reliable Message Delivery
 
-The current prototype performs speech recognition and intent classification entirely on-device, but request submission still requires an active connection to the hotel server. If the server is temporarily unreachable — due to a Wi-Fi dropout or server restart — the classified request is lost and the guest receives no confirmation. Future work should implement a local request queue on the Android device: when submission fails, the request is stored in a local SQLite database with a pending-sync status, and the guest is notified that their request has been saved and will be sent shortly. A background sync service would retry submission automatically once connectivity is restored, then clear the local queue and deliver a confirmation. This would complete the resilience benefit already present in the on-device processing architecture and directly improve guest satisfaction by ensuring no request is silently dropped due to a transient network issue.
+The current prototype performs speech recognition and intent classification entirely on-device, but request submission still requires an active connection to the hotel server. If the server is temporarily unreachable — due to a Wi-Fi dropout or server restart — the classified request is lost and the guest receives no confirmation.
+
+Two levels of improvement should be addressed in future work.
+
+The first is a **device-side local queue**. When submission fails, the request should be stored in a local SQLite database on the Android device with a pending-sync status, and the guest should be told that their request has been saved and will be sent shortly. A background sync service would retry submission automatically once connectivity is restored, clear the local queue, and deliver a confirmation to the guest.
+
+The second is a **server-side message broker** for reliable broadcast delivery. The current prototype holds all WebSocket connection state in memory, which means it is lost on any server restart and cannot scale beyond a single process. Replacing the in-memory approach with a message broker — such as Apache Kafka (Kreps et al., 2011) or Redis Pub/Sub — would decouple request submission from WebSocket delivery. In this model, the Android device publishes a request event to a message queue; the broker guarantees delivery even if the WebSocket subscriber is temporarily down; and all connected dashboard clients receive the event once they are back online. Kafka in particular provides persistent message replay, which means no event is lost even if the staff dashboard disconnects mid-session. For single-property hotel deployments, Redis Pub/Sub is simpler to operate and more than sufficient. Kafka becomes relevant for multi-property deployments where request events need to be consumed by multiple downstream systems — analytics, PMS integration, or archival storage — simultaneously.
+
+Together, device-side queuing and a server-side message broker would give the system end-to-end delivery guarantees that the current architecture lacks, and would complete the resilience benefit that on-device processing alone provides.
 
 ---
 

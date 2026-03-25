@@ -114,7 +114,6 @@ The non-functional requirements set out the constraints the system has to work w
 | NFR-05 | The system shall achieve a minimum intent classification accuracy of 90% on real speech input | ≥ 90% | Reliability threshold for service routing |
 | NFR-06 | The system shall support concurrent operation across multiple room devices on a single hotel server | Multi-room | Practical deployment on a single on-site machine |
 | NFR-07 | The staff dashboard shall be accessible from any device with a web browser without installation | Browser-only access | Minimise additional hardware requirements for staff |
-| NFR-08 | The system shall require no specialist IT expertise for initial deployment and daily operation | Zero IT dependency | Limited or absent IT staff at small Sri Lankan hotels |
 
 ---
 
@@ -128,7 +127,7 @@ Once the requirements were defined, they were prioritised using the MoSCoW metho
 |----------|-------------|
 | Must Have | FR-01, FR-02, FR-03, FR-04, FR-05, FR-06, FR-07, FR-08, NFR-01, NFR-02, NFR-04 |
 | Should Have | FR-09, FR-10, FR-11, FR-12, NFR-03, NFR-05, NFR-06 |
-| Could Have | FR-13, NFR-07, NFR-08 |
+| Could Have | FR-13, NFR-07 |
 | Won't Have (this release) | Multilingual support, voice-based guest feedback collection, integration with existing hotel PMS software |
 
 The "Won't Have" items are deliberate scope decisions, not oversights. Multilingual support — particularly Sinhala and Tamil — would be highly valuable for Sri Lankan guests, but it is out of scope for this prototype given the current limitations of available offline STT models for those languages. These are discussed as future work in Chapter 11.

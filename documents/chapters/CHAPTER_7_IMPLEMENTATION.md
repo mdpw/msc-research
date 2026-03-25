@@ -48,7 +48,7 @@ The system spans three technology stacks corresponding to its three-tier archite
 | Languages | HTML5, CSS3, Vanilla JavaScript | |
 | WebSocket Client | Native browser WebSocket API | |
 
-A deliberate decision was made to keep external dependencies to a minimum throughout the project. The staff dashboard uses vanilla JavaScript with no frontend framework. The backend has no ORM layer — database queries are written in plain SQL. The Android app uses only the Vosk and TFLite SDKs beyond the standard Android libraries. This reduces deployment complexity and is consistent with the minimal IT expertise requirement (NFR-08).
+A deliberate decision was made to keep external dependencies to a minimum throughout the project. The staff dashboard uses vanilla JavaScript with no frontend framework. The backend has no ORM layer — database queries are written in plain SQL. The Android app uses only the Vosk and TFLite SDKs beyond the standard Android libraries. This reduces deployment complexity, which is practical for small hotels with limited technical resources.
 
 ---
 
@@ -317,7 +317,6 @@ At the time of submission, the prototype is fully functional for its defined sco
 | NFR-05: ≥ 90% intent classification accuracy | Achieved | 99.06% on Vosk test set (Model C) |
 | NFR-06: Multi-room concurrent operation | Implemented | WebSocket supports multiple simultaneous connections |
 | NFR-07: Browser-accessible dashboard | Implemented | Single HTML file, any modern browser |
-| NFR-08: No specialised IT expertise | Partially met | Simple deployment, but initial setup requires basic command-line knowledge |
 
 **Known limitations of the current prototype:**
 
