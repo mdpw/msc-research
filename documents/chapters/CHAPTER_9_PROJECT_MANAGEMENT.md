@@ -1,8 +1,14 @@
 # CHAPTER 9: PROJECT MANAGEMENT
 
-## 9.1 Project Schedule
+## 9.1 Introduction
 
-### 9.1.1 Work Breakdown Structure
+This chapter covers how the project was managed from planning through to submission. It describes the schedule, how risks were identified and handled, how code and model quality were maintained, and the social, legal, ethical, and professional considerations that shaped the work. Project management for a research prototype differs from a typical software project — decisions were often driven by what the research needed to find out rather than a fixed requirements list, and the iterative development approach shaped how the schedule and risk responses were structured.
+
+---
+
+## 9.2 Project Schedule
+
+### 9.2.1 Work Breakdown Structure
 
 The project was divided into six work packages, each with specific deliverables and a defined timeframe. Table 9.1 shows the breakdown.
 
@@ -40,7 +46,7 @@ M1▲ = Lit review done (Week 4)                       M6▲ = Submission (Week 
 
 WP3 (Android) and WP4 (Backend) were developed in parallel from Week 8, which was an intentional decision — the Android app and FastAPI server have well-defined API contracts, so they could be built independently and integrated in WP5. Report writing (WP6) began in Week 10 and ran concurrently with implementation to ensure documentation stayed current.
 
-### 9.1.2 Schedule Adherence
+### 9.2.2 Schedule Adherence
 
 The project broadly followed the planned timeline, with two deviations worth noting.
 
@@ -52,11 +58,11 @@ All planned deliverables were completed within the project timeline. The iterati
 
 ---
 
-## 9.2 Risk Management
+## 9.3 Risk Management
 
 A risk register was created at the start of the project and reviewed at the end of each development iteration. Risks were rated by likelihood and impact (Low / Medium / High) and given a mitigation strategy before any implementation began.
 
-### 9.2.1 Risk Register
+### 9.3.1 Risk Register
 
 **Table 9.2: Risk Register**
 
@@ -71,7 +77,7 @@ A risk register was created at the start of the project and reviewed at the end 
 | R7 | Unable to access hotels for requirements interviews | Low | Medium | Prepare alternative approach using published hospitality research and hotel service menus | Did not materialise — interviews were conducted as planned. |
 | R8 | Project scope too ambitious for the available timeline | Medium | High | Define clear MoSCoW priorities in Chapter 4; implement Must Have requirements first; defer Could Have items to future work | Managed through prioritisation — all Must Have and Should Have requirements were implemented. Won't Have items are documented as future work in Chapter 11. |
 
-### 9.2.2 Lessons from Materialised Risks
+### 9.3.2 Lessons from Materialised Risks
 
 Three risks materialised (R1, R4, R5), and the mitigation strategy worked in each case. The most consequential was R4. The large Vosk model caused out-of-memory crashes on a budget Android tablet — but this was discovered in the first week of Iteration 1, not at the end of the project. This early discovery is exactly what iterative prototyping is designed to enable. Under a sequential waterfall approach, this constraint would only have been found during integration testing in a much later stage, potentially requiring a major redesign.
 
@@ -79,9 +85,9 @@ R1, the speech recognition accuracy risk, is still partially present. The 11.43%
 
 ---
 
-## 9.3 Quality Management
+## 9.4 Quality Management
 
-### 9.3.1 Code Quality
+### 9.4.1 Code Quality
 
 The following practices were used to maintain code quality throughout development:
 
@@ -93,7 +99,7 @@ The following practices were used to maintain code quality throughout developmen
 
 **Naming conventions.** Kotlin conventions were followed in the Android application; PEP 8 conventions were followed in the Python backend and training scripts.
 
-### 9.3.2 Model Quality
+### 9.4.2 Model Quality
 
 Quality in the NLU training pipeline was maintained through several practices:
 
@@ -107,7 +113,7 @@ Quality in the NLU training pipeline was maintained through several practices:
 
 **Confusion matrix review.** Confusion matrices were generated for all four evaluation runs. Comparing `model_a_vosk_gap.png` with `model_c_mixed.png` directly shows how noise-aware training eliminated the specific misclassification patterns that appeared when Model A faced Vosk-transcribed input.
 
-### 9.3.3 System Quality
+### 9.4.3 System Quality
 
 End-to-end system quality was validated through:
 
@@ -121,9 +127,9 @@ End-to-end system quality was validated through:
 
 ---
 
-## 9.4 Social, Legal, Ethical and Professional Considerations
+## 9.5 Social, Legal, Ethical and Professional Considerations
 
-### 9.4.1 Data Protection and Privacy
+### 9.5.1 Data Protection and Privacy
 
 Privacy is both a core motivation of this research and an ethical obligation during its conduct.
 
@@ -133,7 +139,7 @@ Privacy is both a core motivation of this research and an ethical obligation dur
 
 **Compliance.** Sri Lanka's Personal Data Protection Act No. 9 of 2022, while still in its implementation phase, establishes core principles of data minimisation and purpose limitation. This system collects only what is needed for service delivery (request text and room number) and uses it only for routing service requests to staff. The architecture is compliant with these principles by design.
 
-### 9.4.2 Ethical Considerations
+### 9.5.2 Ethical Considerations
 
 **Informed consent.** The system is entirely opt-in. Guests are not required to use the voice assistant, and traditional service request methods remain available. The microphone activates only when the guest physically presses the microphone button — there is no passive or always-on listening capability. This directly addresses the privacy concerns identified in the literature review and reinforced by the guest survey findings.
 
@@ -143,7 +149,7 @@ Privacy is both a core motivation of this research and an ethical obligation dur
 
 **Research ethics.** Hotel management interviews and guest surveys were conducted with the informed consent of all participants. No vulnerable populations were involved. The research was conducted in accordance with [university name]'s ethics guidelines.
 
-### 9.4.3 Legal Considerations
+### 9.5.3 Legal Considerations
 
 All technologies used in the prototype are open-source and free for commercial use:
 
@@ -163,19 +169,19 @@ No proprietary software or paid API services are used anywhere in the system. A 
 
 The custom intent dataset and fine-tuned MobileBERT model created during this research are original contributions of the project and carry no licensing obligations for hotels adopting the system.
 
-### 9.4.4 Professional Considerations
+### 9.5.4 Professional Considerations
 
 The project was conducted in line with the British Computer Society (BCS) Code of Conduct:
 
 **Public interest.** The system aims to make functional AI technology accessible to small hotels in developing economies without requiring cloud infrastructure or technical expertise. Making privacy-preserving voice assistance practical at the price point of a budget Android tablet serves a genuine public interest.
 
-**Professional competence.** Technology selections were based on systematic comparative evaluation (Chapter 5) rather than familiarity or preference. Limitations were documented honestly throughout — the system's testing gaps (lack of formal latency measurement, TTS-based rather than real-speech WER) are explicitly acknowledged in Chapter 8 rather than glossed over.
+**Professional competence.** Technology selections were based on systematic comparative evaluation (Chapter 5) rather than familiarity or preference. Limitations were documented honestly throughout — the key testing gap (WER measured on TTS-synthesised audio rather than real human speech) is explicitly acknowledged in Chapter 8 rather than glossed over.
 
 **Duty to the profession.** This research contributes evidence on the practical feasibility of offline, on-device NLU using open-source edge components in a real deployment context. The three-model experimental design and the paired clean/Vosk dataset provide a replicable methodology that could be applied to other offline edge AI contexts beyond hospitality.
 
 ---
 
-## 9.5 Summary
+## 9.6 Summary
 
 The project was planned around six work packages with deliberate overlap between Android and backend development, and with report writing running concurrently with implementation from mid-project onwards. The schedule held broadly, with two manageable deviations. Risk management proved effective — all three risks that materialised (large Vosk model crashing budget hardware, TFLite label ordering mismatch, WebSocket disconnections on screen-off) had mitigation strategies in place and were resolved without major rescheduling.
 

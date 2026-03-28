@@ -1,6 +1,12 @@
 # CHAPTER 11: CONCLUSIONS
 
-## 11.1 Achievements
+## 11.1 Introduction
+
+This chapter draws together the outcomes of the project. It reviews what was achieved against each of the six research objectives, outlines the most valuable directions for future work, and closes with a reflection on the broader significance of the findings. The research set out to answer a specific question — whether noise-aware training can close the accuracy gap that offline STT introduces into NLU pipelines — and this chapter summarises the answer and what it means for practical deployment.
+
+---
+
+## 11.2 Achievements
 
 This research set out to demonstrate that a low-cost, offline voice assistant for hospitality services is achievable using small-scale neural models on commodity hardware. The following reviews each of the six research objectives defined in Chapter 1 against what was actually delivered.
 
@@ -34,27 +40,27 @@ The research successfully addressed all five research gaps identified in the lit
 
 ---
 
-## 11.2 Future Work
+## 11.3 Future Work
 
 The prototype successfully demonstrates the core concept. The following items describe the most valuable next steps, organised roughly by priority and feasibility.
 
-### 11.2.1 Field Deployment and User Study
+### 11.3.1 Field Deployment and User Study
 
 The most important next step is a real-world deployment. Controlled evaluation on a synthetic dataset can only go so far — the system needs to be tested with real hotel guests speaking in actual hotel rooms. This would involve deploying the prototype across a number of rooms in a partner hotel for a trial period, collecting real guest interaction data (with appropriate consent), and conducting structured interviews with staff about the system's impact on their workflow.
 
 A field study would do several things at once: validate the speech recognition accuracy with real Sri Lankan English accents in room acoustic conditions, identify new intent categories that real guests actually use, and reveal usability issues that do not appear in controlled testing. It would also allow the 99.06% accuracy figure — currently measured on TTS-synthesised speech — to be re-evaluated under genuine production conditions.
 
-### 11.2.2 Real Speech Data Collection and Model Retraining
+### 11.3.2 Real Speech Data Collection and Model Retraining
 
-The training dataset and WER measurements were based on text-to-speech audio passed through Vosk, not real human recordings. While this approach produced strong and reproducible results, the tokenizer mismatch between the Python evaluation pipeline and the Android deployment (see Section 10.3.8) means the actual on-device accuracy is lower than the reported 99.06%.
+The training dataset and WER measurements were based on text-to-speech audio passed through Vosk, not real human recordings. While this approach produced strong and reproducible results, the tokenizer mismatch between the Python evaluation pipeline and the Android deployment (see Section 10.4.8) means the actual on-device accuracy is lower than the reported 99.06%.
 
 Future work should collect real voice recordings from Sri Lankan English speakers across a range of accents and acoustic conditions, use the actual Vosk transcriptions of those recordings as training data, and re-evaluate all three models. This would give a much more accurate picture of real-world performance and would likely improve the Android model's practical accuracy.
 
-### 11.2.3 Proper WordPiece Tokenizer on Android
+### 11.3.3 Proper WordPiece Tokenizer on Android
 
 The current Android implementation uses a simplified word-level tokenizer rather than the full HuggingFace WordPiece tokenizer used during Python training. This means words not in the vocabulary map to the unknown token, and sub-word decomposition does not happen. Implementing a proper WordPiece tokenizer in Kotlin — or switching to TFLite's built-in tokenization support — would align on-device inference with the evaluation conditions and recover some of the accuracy gap between the reported figures and real Android performance.
 
-### 11.2.4 Multilingual Support
+### 11.3.4 Multilingual Support
 
 The system currently supports English only. In the Sri Lankan hospitality context, some staff and guests communicate more naturally in Sinhala, Tamil, or a mix of languages. Vosk supports Sinhala as a separate model, and the MobileBERT intent classifier could be fine-tuned on multilingual data. Future work could explore:
 
@@ -64,19 +70,19 @@ The system currently supports English only. In the Sri Lankan hospitality contex
 
 This would meaningfully expand the system's practical applicability across Sri Lanka's hospitality sector.
 
-### 11.2.5 Custom Language Model for Hospitality Vocabulary
+### 11.3.5 Custom Language Model for Hospitality Vocabulary
 
 The literature (Section 2.3.1) shows that custom Vosk language models trained on domain-specific vocabulary can achieve up to 40% WER reduction for specialist domains. A hospitality-specific language model trained on words like "concierge", "housekeeping", "amenities", and "complimentary" — and adapted for South Asian English pronunciation — would reduce the transcription errors that drive accuracy degradation in the NLU pipeline. This is particularly relevant for the high-WER intents like `temperature_control` (16.83%) and `towel_request` (16.33%), where Vosk consistently struggles with domain-specific vocabulary.
 
-### 11.2.6 Out-of-Scope Query Detection
+### 11.3.6 Out-of-Scope Query Detection
 
 The current system always assigns one of the 18 hotel service intents regardless of what the guest actually says. If a guest asks "What's the weather like tomorrow?" the system will still classify it as something and potentially send a spurious request to staff. Adding an explicit `out_of_scope` intent trained on non-service utterances would allow the system to recognise when a request falls outside its scope and respond helpfully — for example, "I can help with hotel services like room service and housekeeping. For other questions, please contact the front desk." This would reduce unnecessary staff notifications and build trust in the system over time.
 
-### 11.2.7 Wake Word Detection
+### 11.3.7 Wake Word Detection
 
 The prototype requires the guest to press a microphone button to initiate a request. A hands-free wake word system (for example, "Hey Hotel") would make the interaction more natural, particularly for accessibility use cases. Future work should implement a lightweight wake word detector with an always-listening low-power mode that activates the full voice pipeline only on wake word detection, keeping false positive rates low enough that background television or conversation does not trigger unwanted requests.
 
-### 11.2.8 Multi-Turn Dialogue and Complex Requests
+### 11.3.8 Multi-Turn Dialogue and Complex Requests
 
 The current prototype handles single-turn, single-intent commands. Real guest interactions are often more complex:
 
@@ -87,7 +93,7 @@ The current prototype handles single-turn, single-intent commands. Real guest in
 
 Handling these would require a lightweight dialogue state tracker on the device. This is a more significant engineering undertaking but would substantially increase the system's practical usefulness.
 
-### 11.2.9 Production Infrastructure
+### 11.3.9 Production Infrastructure
 
 Several design decisions were made deliberately to keep the prototype simple and focused. Moving towards production deployment would require addressing them:
 
@@ -104,28 +110,28 @@ Several design decisions were made deliberately to keep the prototype simple and
 
 None of these are fundamental redesigns — the architecture is sound. They are engineering tasks that turn a working prototype into a reliable deployed service.
 
-### 11.2.10 RAG-Based Hotel Information Assistant
+### 11.3.10 RAG-Based Hotel Information Assistant
 
 The system handles service requests but cannot answer informational queries such as "What time does the restaurant close?" or "Is there a pool?" A retrieval-augmented generation (RAG) module could allow hotel-specific information — facility hours, policies, local attractions — to be stored in a local vector database and queried by the voice assistant. Requests identified as informational rather than service requests would be routed to this module, which would retrieve and return relevant answers using a small on-device language model. This would extend the system from a request-routing tool into a genuine guest information assistant.
 
 
-### 11.2.11 Multi-Room Concurrent Load Testing
+### 11.3.11 Multi-Room Concurrent Load Testing
 
 The WebSocket server and SQLite backend were only tested under single-user conditions. A realistic hotel deployment of even modest size — 30 rooms with requests arriving concurrently during peak hours — would place meaningfully different demands on the system. Future work should test concurrent request submission using a tool such as `locust` or `asyncio`-based load simulation, targeting the SQLite write path specifically. The design chapter notes that SQLite’s write serialisation would become a bottleneck at scale; a load test would quantify the threshold at which response latency degrades beyond the NFR-03 target and provide clear evidence for migrating to PostgreSQL if needed.
 
-### 11.2.12 End-to-End Latency Over Wi-Fi
+### 11.3.12 End-to-End Latency Over Wi-Fi
 
-The latency measurements in Chapter 8 (Section 8.5b) timed the HTTP API on localhost, which eliminates network round-trip time entirely. A more realistic measurement would run the Android app on the physical tablet over a hotel-grade Wi-Fi network while the server runs on a separate machine, capturing the full network path. The HTTP API stage accounted for ~2,060ms of the pipeline total under localhost conditions — a figure that would increase under real Wi-Fi conditions, particularly on congested networks. Future latency testing should measure this Wi-Fi overhead and verify that NFR-03 remains satisfied in a genuine deployment environment.
+The latency measurements in Chapter 8 (Section 8.7) timed the HTTP API on localhost, which eliminates network round-trip time entirely. A more realistic measurement would run the Android app on the physical tablet over a hotel-grade Wi-Fi network while the server runs on a separate machine, capturing the full network path. The HTTP API stage accounted for ~2,060ms of the pipeline total under localhost conditions — a figure that would increase under real Wi-Fi conditions, particularly on congested networks. Future latency testing should measure this Wi-Fi overhead and verify that NFR-03 remains satisfied in a genuine deployment environment.
 
-### 11.2.13 Hotel Management System Integration
+### 11.3.13 Hotel Management System Integration
 
 In a real hotel, the voice assistant would need to connect with existing operational systems. Property management system (PMS) integration would allow service requests to be automatically associated with guest reservation records, enabling personalised interactions and linking requests to billing. Housekeeping system integration would synchronise room cleaning requests with existing scheduling tools to avoid duplicate task assignments. Exposing a well-documented REST API for third-party systems to subscribe to voice assistant events would allow hotels to integrate the prototype with their existing technology stack without modifying its core code.
 
-### 11.2.12 Analytics and Reporting
+### 11.3.14 Analytics and Reporting
 
 The prototype stores all service requests in SQLite but does not surface analytical insights from that data. A reporting dashboard showing request volumes by department, average response times, peak service hours, and guest satisfaction trends would give hotel management a concrete operational return on investment from the system — not just improved guest experience, but data-driven insight into service delivery patterns.
 
-### 11.2.13 Offline Request Queuing and Reliable Message Delivery
+### 11.3.15 Offline Request Queuing and Reliable Message Delivery
 
 The current prototype performs speech recognition and intent classification entirely on-device, but request submission still requires an active connection to the hotel server. If the server is temporarily unreachable — due to a Wi-Fi dropout or server restart — the classified request is lost and the guest receives no confirmation.
 
@@ -139,7 +145,7 @@ Together, device-side queuing and a server-side message broker would give the sy
 
 ---
 
-## 11.3 Summary
+## 11.4 Summary
 
 This research demonstrated that a low-cost, offline voice assistant for hospitality services is not just theoretically possible but practically buildable using small-scale neural models on commodity hardware. The prototype addresses all five research gaps identified in the literature: end-to-end offline voice processing, on-device NLU for hospitality intent classification, privacy-by-architecture without cloud dependency, real-time guest-to-staff communication, and deployment at a price point accessible to small hotels in developing economies.
 
