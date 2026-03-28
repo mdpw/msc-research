@@ -108,7 +108,16 @@ None of these are fundamental redesigns — the architecture is sound. They are 
 
 The system handles service requests but cannot answer informational queries such as "What time does the restaurant close?" or "Is there a pool?" A retrieval-augmented generation (RAG) module could allow hotel-specific information — facility hours, policies, local attractions — to be stored in a local vector database and queried by the voice assistant. Requests identified as informational rather than service requests would be routed to this module, which would retrieve and return relevant answers using a small on-device language model. This would extend the system from a request-routing tool into a genuine guest information assistant.
 
-### 11.2.11 Hotel Management System Integration
+
+### 11.2.11 Multi-Room Concurrent Load Testing
+
+The WebSocket server and SQLite backend were only tested under single-user conditions. A realistic hotel deployment of even modest size — 30 rooms with requests arriving concurrently during peak hours — would place meaningfully different demands on the system. Future work should test concurrent request submission using a tool such as `locust` or `asyncio`-based load simulation, targeting the SQLite write path specifically. The design chapter notes that SQLite’s write serialisation would become a bottleneck at scale; a load test would quantify the threshold at which response latency degrades beyond the NFR-03 target and provide clear evidence for migrating to PostgreSQL if needed.
+
+### 11.2.12 End-to-End Latency Over Wi-Fi
+
+The latency measurements in Chapter 8 (Section 8.5b) timed the HTTP API on localhost, which eliminates network round-trip time entirely. A more realistic measurement would run the Android app on the physical tablet over a hotel-grade Wi-Fi network while the server runs on a separate machine, capturing the full network path. The HTTP API stage accounted for ~2,060ms of the pipeline total under localhost conditions — a figure that would increase under real Wi-Fi conditions, particularly on congested networks. Future latency testing should measure this Wi-Fi overhead and verify that NFR-03 remains satisfied in a genuine deployment environment.
+
+### 11.2.13 Hotel Management System Integration
 
 In a real hotel, the voice assistant would need to connect with existing operational systems. Property management system (PMS) integration would allow service requests to be automatically associated with guest reservation records, enabling personalised interactions and linking requests to billing. Housekeeping system integration would synchronise room cleaning requests with existing scheduling tools to avoid duplicate task assignments. Exposing a well-documented REST API for third-party systems to subscribe to voice assistant events would allow hotels to integrate the prototype with their existing technology stack without modifying its core code.
 

@@ -207,6 +207,7 @@ The system currently supports English only. In the Sri Lankan hospitality contex
 | Tokenizer mismatch on Android | Android accuracy lower than reported 99.06% | Rule-based Tier 1 compensates for common cases | Implement WordPiece tokenizer in Kotlin |
 | Single STT engine (Vosk only) | Findings may not generalise to other STT engines | Vosk is the most practical offline choice | Replicate with Whisper tiny |
 | No real hotel deployment | Operational claims are theoretical | System tested on real device, architecture validated | Conduct field study in a Sri Lankan hotel |
+| No concurrent load testing | SQLite bottleneck threshold unknown | Single-user latency tested and within NFR-03 | Load test with locust at realistic room count |
 | English only | Limited applicability for non-English speakers | Target user group communicates in English | Add Sinhala/Tamil support |
 
 ---

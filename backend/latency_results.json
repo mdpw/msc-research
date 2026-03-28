@@ -1,0 +1,54 @@
+{
+  "n_requests": 20,
+  "stages": {
+    "stt_ms": {
+      "label": "Vosk STT (end-of-speech \u2192 transcript ready)",
+      "n": 20,
+      "min_ms": 267,
+      "mean_ms": 302.2,
+      "median_ms": 300.0,
+      "p95_ms": 341,
+      "max_ms": 341
+    },
+    "nlu_ms": {
+      "label": "NLU hybrid classifier (keyword/MobileBERT)",
+      "n": 20,
+      "min_ms": 4,
+      "mean_ms": 43.6,
+      "median_ms": 59.0,
+      "p95_ms": 63,
+      "max_ms": 63
+    },
+    "api_ms": {
+      "label": "HTTP API (POST /api/submit-request)",
+      "n": 20,
+      "min_ms": 2025.7,
+      "mean_ms": 2055.0,
+      "median_ms": 2057.1,
+      "p95_ms": 2109.3,
+      "max_ms": 2109.3
+    },
+    "websocket_ms": {
+      "estimated": 15.0
+    },
+    "tts_ms": {
+      "label": "TTS start (text ready \u2192 first audio output)",
+      "n": 20,
+      "min_ms": 287,
+      "mean_ms": 315.6,
+      "median_ms": 315.0,
+      "p95_ms": 341,
+      "max_ms": 341
+    },
+    "total_ms": {
+      "label": "End-to-end (STT + NLU + API + WS + TTS start)",
+      "n": 20,
+      "min_ms": 2645.6,
+      "mean_ms": 2731.6,
+      "median_ms": 2739.4,
+      "p95_ms": 2801.0,
+      "max_ms": 2801.0
+    }
+  },
+  "nfr03_pass": true
+}
