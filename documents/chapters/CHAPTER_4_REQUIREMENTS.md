@@ -2,7 +2,7 @@
 
 ## 4.1 Introduction
 
-This chapter covers how the system requirements were gathered and prioritised. Since this is a research prototype without a hotel industry client, the requirements came from two places: published academic literature on hotel operations and voice assistant adoption (to understand what hotels actually need), and a small survey of people with recent hotel stay experience (to understand what guests want). Both perspectives shaped the final requirements.
+This chapter covers how the system requirements were gathered and prioritised. Since this is a research prototype without a hotel industry client, the requirements came from two places: published academic literature on hotel operations and voice assistant adoption (to understand what hotels actually need), and a small survey of people with recent hotel stay experience (to understand what guests want). Together, these requirements define what "viable alternative to traditional room service communication" means in the Sri Lankan hotel context — and they set the standard against which the prototype is later evaluated.
 
 ---
 
@@ -119,7 +119,7 @@ The non-functional requirements set out the constraints the system has to work w
 
 ## 4.5 Requirements Prioritisation
 
-Once the requirements were defined, they were prioritised using the MoSCoW method. The split between Must Have and Should Have was based on what the literature points to as essential for adoption in small hotel settings, versus what would be useful but is not a dealbreaker (Buhalis and Moldavska, 2022; Hwang and Erdem, 2025).
+Once the requirements were defined, they were prioritised using the Must have, Should have, Could have, Won't have (MoSCoW) method. The split between Must Have and Should Have was based on what the literature points to as essential for adoption in small hotel settings, versus what would be useful but is not a dealbreaker (Buhalis and Moldavska, 2022; Hwang and Erdem, 2025).
 
 **Table 4.3: MoSCoW Prioritisation**
 
@@ -128,7 +128,7 @@ Once the requirements were defined, they were prioritised using the MoSCoW metho
 | Must Have | FR-01, FR-02, FR-03, FR-04, FR-05, FR-06, FR-07, FR-08, NFR-01, NFR-02, NFR-04 |
 | Should Have | FR-09, FR-10, FR-11, FR-12, NFR-03, NFR-05, NFR-06 |
 | Could Have | FR-13, NFR-07 |
-| Won't Have (this release) | Multilingual support, voice-based guest feedback collection, integration with existing hotel PMS software |
+| Won't Have (this release) | Multilingual support, voice-based guest feedback collection, integration with existing hotel Property Management System (PMS) software |
 
 The "Won't Have" items are deliberate scope decisions, not oversights. Multilingual support — particularly Sinhala and Tamil — would be highly valuable for Sri Lankan guests, but it is out of scope for this prototype given the current limitations of available offline STT models for those languages. These are discussed as future work in Chapter 11.
 
@@ -140,4 +140,4 @@ Requirements were gathered from two sources: published academic literature on ho
 
 The picture that emerged is consistent: hotels need something that removes the telephone bottleneck, gives staff a way to track requests, and can be deployed without subscription fees or IT support. Guests want it to be fast, straightforward, and — above everything else — not sending their voice data anywhere outside their room.
 
-All of this fed directly into the design: offline operation, audio processing that stays on the device, cheap Android hardware, and no subscription fees. The "Won't Have" items — particularly multilingual support — are picked up again as future work in Chapter 11. The next chapter goes through the technology choices and analysis that turned these requirements into an actual working design.
+All of this fed directly into the design: offline operation, audio processing that stays on the device, cheap Android hardware, and no subscription fees. These are precisely the characteristics that define viability for the target context — a prototype that fails on any one of these would not be a credible alternative to traditional room service communication in a small Sri Lankan hotel. The "Won't Have" items — particularly multilingual support — are picked up again as future work in Chapter 11. The next chapter goes through the technology choices and analysis that turned these requirements into an actual working design.

@@ -17,7 +17,7 @@ The system spans three technology stacks, one for each layer of the architecture
 | **Guest Application** | | |
 | Language | Kotlin | 2.0.21 |
 | UI Framework | Jetpack Compose | Latest stable (BOM 2024.09.00) |
-| IDE | Android Studio | Hedgehog / Iguana |
+| Integrated Development Environment (IDE) | Android Studio | Hedgehog / Iguana |
 | Min SDK | Android API 26 (Android 8.0) | |
 | Compile/Target SDK | Android API 34 (Android 14) | |
 | Build System | Gradle (Kotlin DSL) | |
@@ -34,13 +34,13 @@ The system spans three technology stacks, one for each layer of the architecture
 | Model Conversion | TensorFlow / tf-keras | 2.13+ |
 | Data Processing | pandas, scikit-learn | |
 | Dataset Generation | Claude Haiku API (anthropic) | |
-| TTS for Vosk Pairing | gTTS | 2.3+ |
+| TTS for Vosk Pairing | gTTS (Google Text-to-Speech) | 2.3+ |
 | Audio Conversion | ffmpeg / pydub | |
 | STT for Pairing | Vosk Python SDK | 0.3.45+ |
 | **Backend Server** | | |
 | Language | Python | 3.10+ |
 | Web Framework | FastAPI | 0.104.1 |
-| ASGI Server | Uvicorn | 0.24.0 |
+| Asynchronous Server Gateway Interface (ASGI) Server | Uvicorn | 0.24.0 |
 | Database | SQLite 3 | |
 | WebSocket | Starlette (via FastAPI) | |
 | Request Validation | Pydantic | 2.5.0 |
@@ -88,7 +88,7 @@ One practical problem was that the standard HuggingFace tokeniser is Python-only
 
 During early testing, the neural model sometimes gave unexpectedly low confidence on simple requests when Vosk introduced small transcription errors. For example, "I need towels" could come through as "i need tawels" and get a reduced score. This was the observation that led directly to the rule-based keyword matching layer — catching clear, simple requests before they even reach the neural model.
 
-**The three-model research design** was the core of this iteration. The central experiment was running three training sessions with identical hyperparameters but different input data, to see how the type of training text affects NLU performance when the model is fed Vosk transcriptions at inference time:
+**Noise-aware model training** was the central focus of this iteration. Deploying the model in a real pipeline means it will receive Vosk-transcribed input at inference time, not clean text — so three training strategies were compared to determine which produces sufficient accuracy for real pipeline conditions. All three used identical hyperparameters but different training data:
 - **Model A** — trained on clean text only (`new_hotel_dataset.csv`)
 - **Model B** — trained on Vosk-transcribed text only (`vosk_only_dataset.csv`)
 - **Model C** — trained on a mix of clean and Vosk-paired data (`paired_dataset.csv`)
@@ -162,7 +162,7 @@ The guest app is organised around a `MainActivity` that sets up and coordinates 
 
 The UI is built entirely in Jetpack Compose inside `VoiceAssistantScreen`. It updates reactively as request states change — no manual refresh or polling needed. The microphone button has an animated pulse effect while recording, and a 20-bar audio level visualiser shows the captured signal strength in real time.
 
-The on-device ML files are bundled in the APK under `assets/models/`:
+The on-device ML files are bundled in the Android Package Kit (APK) under `assets/models/`:
 
 **Table 7.3: On-Device ML Assets**
 
@@ -190,6 +190,8 @@ The training pipeline is six sequential Python scripts in `nlu-model/research/`:
 | `step5_convert_best_model.py` | Converts Model C (best checkpoint) to TFLite | `hotel_mobilebert_v2.tflite` (copied to Android assets as `hotel_mobilebert.tflite`) |
 | `step6_wer_analysis.py` | Computes WER and CER statistics on Vosk transcriptions | Per-intent and overall error rate analysis |
 
+The dataset structure follows established conventions in the intent classification literature — balanced examples per class and clear intent boundaries to avoid label confusion (Larson et al., 2022). Fine-tuning BERT-family models on domain-specific datasets using this approach has been shown to produce strong classification results even with relatively modest training set sizes (Zhang, Y. et al., 2022).
+
 **Training configuration (identical across all three models):**
 
 All three models were trained with the same hyperparameters — the full settings and the reasoning behind each choice are in Chapter 3 (Table 3.9). The only thing that differs between models is the training data. The data splits used were:
@@ -212,7 +214,7 @@ The best Model C checkpoint goes through three stages to become a TFLite file th
 
 1. **PyTorch → TensorFlow** — The saved PyTorch weights are loaded directly into a TensorFlow version of MobileBERT using the `from_pt=True` flag in `TFMobileBertForSequenceClassification`. This avoids retraining from scratch in TF.
 2. **TensorFlow → SavedModel** — The model is wrapped in a `tf.Module` with a concrete serving function that fixes all three input shapes to `[1, 32]`, which is what the converter needs to trace the model graph.
-3. **SavedModel → TFLite** — The TFLite converter applies `tf.lite.Optimize.DEFAULT` (dynamic range quantisation: weights are quantised to INT8, activations stay float32) with `SELECT_TF_OPS` enabled for BERT operations that standard TFLite builtins cannot handle.
+3. **SavedModel → TFLite** — The TFLite converter applies `tf.lite.Optimize.DEFAULT` (dynamic range quantisation: weights are quantised to 8-bit Integer (INT8), activations stay float32) with `SELECT_TF_OPS` enabled for BERT operations that standard TFLite builtins cannot handle.
 
 This brings the model down from ~94MB (PyTorch) to 26MB (TFLite) — a 72% size reduction. Full INT8 quantisation was deliberately skipped because BERT-family models are sensitive to aggressive quantisation and can lose accuracy when all activations are quantised too.
 
@@ -332,6 +334,6 @@ At the point of submission, the prototype is fully functional within its defined
 
 ## 7.7 Summary
 
-The system was built across four development cycles, each producing a testable prototype. The most important decisions came out of what those iterations revealed: switching from the 1.8GB Vosk model to the 36MB Indian English variant, adding the hybrid NLU pipeline after seeing failures with the neural-only approach, and designing the three-model training experiment that forms the core research contribution.
+The system was built across four development cycles, each producing a testable prototype. The most important decisions came out of what those iterations revealed: switching from the 1.8GB Vosk model to the 36MB Indian English variant, adding the hybrid NLU pipeline after seeing failures with the neural-only approach, and running the three-model training comparison to find the approach that produces sufficient accuracy for real Vosk pipeline conditions.
 
-The implementation uses Kotlin 2.0.21 for the Android client, Python with HuggingFace Transformers and FastAPI for the training pipeline and server, and vanilla HTML/CSS/JavaScript for the staff dashboard. Dependencies were kept minimal throughout by design. All functional requirements have been met, and the system works end-to-end from voice input on the guest tablet to a notification appearing on the staff dashboard. The next chapter presents the evaluation of this implementation.
+The implementation uses Kotlin 2.0.21 for the Android client, Python with HuggingFace Transformers and FastAPI for the training pipeline and server, and vanilla HTML/CSS/JavaScript for the staff dashboard. Dependencies were kept minimal throughout by design. All functional requirements have been met, and the system works end-to-end from voice input on the guest tablet to a notification appearing on the staff dashboard. The next chapter evaluates whether this implementation achieves sufficient technical accuracy and performance to be a viable alternative to traditional room service communication.

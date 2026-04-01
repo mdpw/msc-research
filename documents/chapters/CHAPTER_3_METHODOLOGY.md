@@ -14,7 +14,7 @@ This project follows **Design Science Research (DSR)**, as described by Hevner e
 
 2. **The research gap is practical.** As identified in Chapter 2, no existing system has combined offline on-device NLU — using open-source edge STT and compressed mobile transformers — specifically for hospitality. Closing that gap means building a real implementation, not a theoretical proposal.
 
-3. **Evaluation is part of the process.** DSR requires the artefact to be tested against defined criteria, which maps directly onto the research objectives: measuring NLU accuracy across clean and transcribed inputs, speech recognition WER, system latency, and deployment cost.
+3. **Evaluation is part of the process.** DSR requires the artefact to be tested against defined criteria. The evaluation here covers four dimensions that together answer the core research question: NLU accuracy under real pipeline conditions, speech recognition Word Error Rate (WER), system latency, and deployment cost.
 
 The DSR process for this project followed five phases:
 
@@ -115,9 +115,9 @@ The dataset was generated using the Claude Haiku API to produce natural language
 
 ### 3.6.3 Vosk Transcription Pairing — The Core Experimental Dataset
 
-This step is the most important part of the data preparation process. Each of the 10,080 clean utterances was converted to audio using Google TTS (`gTTS` with `tld='co.in'` for Indian English pronunciation), converted to 16 kHz mono WAV using ffmpeg, and then transcribed by Vosk (`vosk-model-small-en-in-0.4`). The result is a paired dataset (`vosk_transcriptions.csv`) where every utterance has both a clean version and a Vosk-transcribed version side by side.
+This step is the most important part of the data preparation process. Each of the 10,080 clean utterances was converted to audio using Google Text-to-Speech (TTS) (`gTTS` with `tld='co.in'` for Indian English pronunciation), converted to 16 kHz mono WAV using ffmpeg, and then transcribed by Vosk (`vosk-model-small-en-in-0.4`). The result is a paired dataset (`vosk_transcriptions.csv`) where every utterance has both a clean version and a Vosk-transcribed version side by side.
 
-This pairing deliberately introduces the same STT noise a real guest voice would produce when passed through the on-device Vosk engine. Without it, there would be no way to isolate the accuracy drop caused specifically by the speech recognition step. The WER and CER characteristics of these transcriptions are measured and reported in Chapter 8 (Section 8.3).
+This pairing deliberately introduces the same STT noise a real guest voice would produce when passed through the on-device Vosk engine. Without it, there would be no way to isolate the accuracy drop caused specifically by the speech recognition step. The WER and Character Error Rate (CER) characteristics of these transcriptions are measured and reported in Chapter 8 (Section 8.3).
 
 ### 3.6.4 Three Training Datasets
 
@@ -184,11 +184,11 @@ Metrics reported for each model and condition:
 - **Precision, Recall, F1-score**: Per-intent and macro-averaged.
 - **Confusion matrix**: To identify systematic misclassification between semantically similar intents.
 
-The key comparison is between Model A and Model C on Vosk output. This directly answers the core research question: does noise-aware training close the accuracy gap introduced by real speech recognition in an offline pipeline?
+The key comparison is between Model A and Model C on Vosk output. This shows whether noise-aware training produces NLU accuracy sufficient for real pipeline conditions — one of the core technical dimensions of system viability.
 
 ### 3.8.2 Speech Recognition Accuracy
 
-Vosk's transcription quality is measured using **Word Error Rate (WER)** — the standard metric for speech recognition systems, calculated as:
+Vosk's transcription quality is measured using **WER** — the standard metric for speech recognition systems, calculated as:
 
 ```
 WER = (Substitutions + Insertions + Deletions) / Total Reference Words
@@ -216,6 +216,6 @@ This chapter has described the research methodology, dataset preparation, model 
 
 Design Science Research was chosen because the project needed both a working system and a systematic evaluation of it. Iterative prototyping was used because the key technical unknowns — particularly how multiple AI components would behave together on budget hardware — could only be resolved by building and running real prototypes.
 
-The most important part of the data preparation was creating the paired clean-and-Vosk-transcribed dataset: 10,080 utterances passed through a TTS-to-Vosk pipeline to simulate real pipeline conditions. This enables the three-model comparison (clean-trained, Vosk-trained, and mixed-trained) that directly addresses the core research question.
+The most important part of the data preparation was creating the paired clean-and-Vosk-transcribed dataset: 10,080 utterances passed through a TTS-to-Vosk pipeline to simulate real pipeline conditions. This enables the three-model comparison (clean-trained, Vosk-trained, and mixed-trained) that evaluates the NLU component's accuracy under the conditions it would face in a real hotel deployment — directly informing whether the system is viable.
 
 Key decisions — including `vosk-model-small-en-in-0.4` for Indian English acoustic matching, the two-tier hybrid NLU pipeline, and WebSocket-based real-time communication over LAN — are all grounded in the research objectives and the real deployment constraints of budget Sri Lankan hotels. The next chapter documents the requirements elicitation process and the full functional and non-functional requirements that shaped these decisions.

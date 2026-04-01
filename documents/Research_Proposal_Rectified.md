@@ -21,7 +21,7 @@ Hotels in developing economies like Sri Lanka face a specific problem: the comme
 
 Phone-based room service has its own problems too. There are language barriers, long wait times, and no way to systematically track whether requests are being handled. The whole process depends on staff availability at any given moment.
 
-**Research Question:** Can a low-cost, fully offline voice assistant prototype, built on a standard Android device, achieve sufficient technical accuracy and performance to be a viable alternative to traditional room service communication in Sri Lankan hotels — and can any accuracy errors introduced by on-device speech recognition be reduced by training the model on real transcribed speech instead of clean text?
+**Research Question:** Can a low-cost, fully offline voice assistant prototype, built on a standard Android device, achieve sufficient technical accuracy and performance to be a viable alternative to traditional room service communication in Sri Lankan hotels?
 
 The aim of this project is to design, build, and evaluate a complete system that runs inside a hotel's local network with no cloud dependency at all.
 
@@ -51,7 +51,7 @@ Voice assistants in hotels have been studied quite a bit. Buhalis and Moldavska 
 
 **Task-Oriented Dialogue** research (Larson et al., 2022) shows there is a clear gap in hospitality-specific datasets and on-device NLU pipelines. Rasa's DIET architecture (Bunk et al., 2020) handles intent classification well, but it runs on a server — not on a mobile device. No published system combines offline STT, on-device NLU, and a hotel management backend in one integrated product.
 
-**Research Gap:** The individual components — offline STT, on-device NLU, hotel management systems — all exist, but nobody has combined them into a single, fully offline hospitality voice assistant. More specifically, training NLU models to handle noisy speech recognition output is an established technique for cloud systems, but no published work applies this to offline, on-device deployments in a hospitality context. This research addresses that gap directly.
+**Research Gap:** The individual components — offline STT, on-device NLU, hotel management systems — all exist, but nobody has combined them into a single, fully offline hospitality voice assistant that can be deployed on commodity Android hardware in a developing economy context. No published system demonstrates end-to-end viability across all four dimensions that matter for practical deployment: accuracy under real on-device STT conditions, acceptable latency, privacy-by-architecture, and low hardware cost. This research addresses that gap directly.
 
 ---
 
@@ -91,11 +91,12 @@ The full system will be built across three components:
 
 ### 5. Evaluation
 
-The system will be evaluated across three dimensions:
+The system will be evaluated across four dimensions that together determine viability:
 
-- **Intent classification accuracy** — measured on both clean text and speech-transcribed input, to quantify any accuracy gap introduced by the on-device speech recognition step
+- **Intent classification accuracy** — measured on both clean text and speech-transcribed input, including a three-model comparison (clean-trained, Vosk-trained, mixed) to determine which training strategy produces sufficient accuracy for real pipeline conditions
+- **Speech recognition quality** — word error rate across the full dataset, broken down by intent category to identify which service types are most affected
 - **System performance** — end-to-end latency per pipeline stage and resource consumption on budget Android hardware
-- **Cost** — cost-per-request estimate compared to cloud-based voice assistant alternatives (Alexa, Google, Dialogflow)
+- **Cost** — per-room deployment cost compared to cloud-based alternatives (Alexa for Hospitality, Google Cloud STT) over a three-year projection
 
 ---
 
@@ -137,10 +138,11 @@ A labelled dataset of natural language utterances covering the most common hotel
 **3. A Fine-Tuned On-Device Intent Classification Model**
 A small-scale language model fine-tuned on the hotel intent dataset and optimised for on-device inference on commodity Android hardware. The model is expected to achieve greater than 90% intent classification accuracy under realistic speech recognition conditions.
 
-**4. Performance Evaluation**
-- Intent classification accuracy under both clean text and speech-transcribed input conditions
+**4. Evaluation Results**
+- Intent classification accuracy under both clean text and real speech-transcribed input, demonstrating the system meets the ≥90% accuracy target under pipeline conditions
+- Speech recognition WER across the full dataset, with per-intent breakdown
 - End-to-end latency measurements per pipeline stage
-- Cost-per-request comparison against cloud-based voice assistant alternatives
+- Cost-per-room deployment comparison against cloud-based voice assistant alternatives
 
 **5. A Privacy-Preserving Architecture**
 All voice processing stays on the guest device — no audio is ever transmitted outside the hotel network. This gives the system a structural privacy guarantee that goes beyond policy promises, and makes it GDPR-compatible for hotels serving international guests.
@@ -149,9 +151,9 @@ All voice processing stays on the guest device — no audio is ever transmitted 
 
 ## Conclusion
 
-No existing system combines offline speech recognition, on-device intent classification, and a real-time hotel management backend into a single, affordable product. This project builds exactly that. By running all AI processing on the guest's device with no cloud dependency, the system avoids the recurring costs and privacy risks of commercial alternatives like Alexa for Hospitality.
+No existing system combines offline speech recognition, on-device intent classification, and a real-time hotel management backend into a single, affordable product for the hospitality sector. This project builds exactly that — and evaluates whether it achieves sufficient technical accuracy and performance to be a viable alternative to traditional room service communication in Sri Lankan hotels.
 
-The research will contribute a hotel-specific intent dataset, a fine-tuned on-device intent classification model, and a complete working prototype deployable on commodity Android hardware. It will also investigate whether training the model on realistic speech-transcribed examples alongside clean text can address the accuracy challenges that on-device speech recognition introduces — an area that no existing published work has explored in this specific offline hospitality context.
+The research contributes a hotel-specific intent dataset, a fine-tuned on-device intent classification model (trained on mixed clean and Vosk-transcribed data to handle real pipeline conditions), and a complete working prototype deployable on commodity Android hardware. The evaluation covers all four dimensions of viability: accuracy, speech recognition quality, latency, and cost — providing a complete picture of whether the system is ready for practical deployment.
 
 This is a realistic, deployable solution for hotels in developing economies that want to modernise guest services without expensive infrastructure or cloud subscriptions.
 

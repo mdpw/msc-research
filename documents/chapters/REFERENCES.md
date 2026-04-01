@@ -14,7 +14,7 @@ Buhalis, D. and Moldavska, I. (2022) 'Voice assistants in hospitality: using art
 
 Bujel, K., Slimi, A. and Kureychik, V. (2021) 'Effectiveness of Pre-training for Few-shot Intent Classification', *arXiv preprint arXiv:2109.05782*. Available at: https://arxiv.org/abs/2109.05782 (Accessed: 3 March 2026).
 
-Bunk, T. et al. (2020) 'DIET: Dual Intent and Entity Transformer', *Rasa Technologies*. Available at: https://rasa.com/blog/introducing-dual-intent-and-entity-transformer-diet-state-of-the-art-performance-on-a-lightweight-architecture (Accessed: 3 March 2026).
+Bunk, T. et al. (2020) *DIET: Dual Intent and Entity Transformer* [Blog post]. Rasa Technologies. Available at: https://rasa.com/blog/introducing-dual-intent-and-entity-transformer-diet-state-of-the-art-performance-on-a-lightweight-architecture (Accessed: 3 March 2026).
 
 Chantrapornchai, C. and Suchato, A. (2022) 'IoT Device Control with Offline Automatic Speech Recognition on Edge Device', *IEEE Conference Publication*. Available at: https://ieeexplore.ieee.org/document/10010962 (Accessed: 3 March 2026).
 
@@ -22,15 +22,17 @@ CMU Sphinx (2023) *PocketSphinx* [Software repository]. Available at: https://gi
 
 Devlin, J. et al. (2019) 'BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding', in *Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL-HLT)*. Minneapolis: ACL, pp. 4171-4186.
 
-Hansen, M. (2023) *Piper: A fast, local neural text to speech system* [Software]. Available at: https://github.com/rhasspy/piper (Accessed: 25 March 2026).
-
-Fette, I. and Melnikov, A. (2011) *The WebSocket protocol*, RFC 6455. Internet Engineering Task Force (IETF).
+Fette, I. and Melnikov, A. (2011) *The WebSocket Protocol*, RFC 6455. Internet Engineering Task Force (IETF). Available at: https://tools.ietf.org/html/rfc6455 (Accessed: 8 March 2026).
 
 Google (2024a) *TensorFlow Lite: Machine learning for mobile and edge devices*. Available at: https://www.tensorflow.org/lite (Accessed: 8 March 2026).
 
 Google (2024b) *Jetpack Compose*. Available at: https://developer.android.com/jetpack/compose (Accessed: 8 March 2026).
 
 Google Cloud (2024) *Speech-to-Text pricing*. Available at: https://cloud.google.com/speech-to-text/pricing (Accessed: 24 March 2026).
+
+Hansen, M. (2023) *Piper: A fast, local neural text to speech system* [Software]. Available at: https://github.com/rhasspy/piper (Accessed: 25 March 2026).
+
+Hevner, A.R., March, S.T., Park, J. and Ram, S. (2004) 'Design Science in Information Systems Research', *MIS Quarterly*, 28(1), pp. 75-105. Available at: https://doi.org/10.2307/25148625
 
 Hipp, D.R. (2024) *SQLite* [Software]. Available at: https://www.sqlite.org (Accessed: 8 March 2026).
 
@@ -44,7 +46,9 @@ Kreps, J., Narkhede, N. and Rao, J. (2011) 'Kafka: A distributed messaging syste
 
 Larson, S. et al. (2022) 'A Survey of Intent Classification and Slot-Filling Datasets for Task-Oriented Dialog', *arXiv preprint arXiv:2207.13211*. Available at: https://arxiv.org/abs/2207.13211 (Accessed: 3 March 2026).
 
-OASIS (2019) *MQTT version 5.0*. OASIS Standard.
+Marriott International (2018) *Marriott International Rolls Out Alexa for Hospitality to Hotels Across the United States*. Press Release, 19 June. Available at: https://news.marriott.com/news/2018/06/19/marriott-international-rolls-out-alexa-for-hospitality-to-hotels-across-the-united-states (Accessed: 24 March 2026).
+
+OASIS (2019) *MQTT version 5.0*. OASIS Standard. Available at: https://docs.oasis-open.org/mqtt/mqtt/v5.0/mqtt-v5.0.html (Accessed: 8 March 2026).
 
 Radford, A. et al. (2023) 'Robust Speech Recognition via Large-Scale Weak Supervision', in *Proceedings of the 40th International Conference on Machine Learning (ICML 2023)*. Honolulu: PMLR. Available at: https://arxiv.org/abs/2212.04356
 
@@ -63,6 +67,8 @@ Sun, Z. et al. (2020) 'MobileBERT: a Compact Task-Agnostic BERT for Resource-Lim
 Wang, X. et al. (2025) 'Empowering Edge Intelligence: A Comprehensive Survey on On-Device AI Models', *ACM Computing Surveys*. Available at: https://doi.org/10.1145/3724420
 
 Wickramasinghe, K. and Ratnayake, R. (2022) 'Connecting the Connected: How Is Sri Lanka Prepared to Respond to Digital Tourists?', in *Information and Communication Technology for Competitive Strategies (ICTCS 2021)*. Singapore: Springer, pp. 247-258. Available at: https://doi.org/10.1007/978-981-16-5461-9_22
+
+World Travel and Tourism Council (WTTC) (2023) *Economic Impact Research 2023*. London: WTTC. Available at: https://wttc.org/research/economic-impact (Accessed: 3 March 2026).
 
 Yilmaz, E. et al. (2025) 'Echoes of Innovation: Exploring the Use of Voice Assistants to Boost Hotel Reputation', *Journal of Theoretical and Applied Electronic Commerce Research*, 20(1), p. 46. Available at: https://doi.org/10.3390/jtaer20010046
 

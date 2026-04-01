@@ -2,7 +2,7 @@
 
 ## 6.1 Introduction
 
-This chapter covers the detailed system design of the low-cost offline voice assistant prototype. The technologies chosen in Chapter 5 are put together here into a working architecture. It walks through the three-tier system structure, the voice processing pipeline, the database schema, the API design, and both user interfaces. Where a design choice is not immediately obvious, the reasoning is explained alongside the technical detail.
+This chapter covers the detailed system design of the low-cost offline voice assistant prototype. The technologies chosen in Chapter 5 are put together here into a working architecture. It walks through the three-tier system structure, the voice processing pipeline, the database schema, the API design, and both user interfaces. Every design choice was made to satisfy the four viability constraints — offline operation, on-device privacy, acceptable latency, and low hardware cost — and where a choice is not immediately obvious, the reasoning is explained alongside the technical detail.
 
 ---
 
@@ -58,11 +58,11 @@ The whole system is built around one core idea: all the heavy AI work — speech
 Each guest room has one Android tablet running the app. The tablet handles the entire AI pipeline on its own — audio capture, speech recognition via Vosk, NLU classification, and TTS confirmation. It communicates with the server over HTTP to submit requests and via WebSocket to receive real-time status updates.
 
 The key components on the device are:
-- `AudioRecorder` — captures 16kHz, 16-bit PCM mono audio in 4,096-byte chunks, with voice activity detection based on RMS energy threshold (0.02)
+- `AudioRecorder` — captures 16kHz, 16-bit PCM mono audio in 4,096-byte chunks, with voice activity detection based on Root Mean Square (RMS) energy threshold (0.02)
 - `VoskService` — on-device speech-to-text using `vosk-model-small-en-in-0.4` (~36MB)
 - `NLUService` — hybrid two-tier classification pipeline (rule-based keywords → MobileBERT TFLite)
 - `TextToSpeechService` — Android native TTS for voice confirmations and status announcements
-- `ApiService` — HTTP REST client (OkHttp 4.11.0) for submitting requests and retrieving history
+- `ApiService` — HTTP Representational State Transfer (REST) client (OkHttp 4.11.0) for submitting requests and retrieving history
 - `WebSocketService` — persistent WebSocket connection for real-time updates from the server
 
 **Tier 2 — Hotel Server**
@@ -91,7 +91,7 @@ The pipeline has three major phases:
 
 **Phase 1 — Audio Capture and Transcription**
 
-When the guest presses the microphone button, `AudioRecorder` starts capturing 16kHz PCM audio in 4,096-byte chunks and feeds them to Vosk in real time. A voice activity detector (VAD) monitors the RMS energy of each chunk against a threshold of 0.02. Recording stops when 1,500ms of silence is detected or the 10-second maximum is reached. The Vosk transcription is then cleaned — filler words and greetings like "Hi Sera" are removed, and the text is lowercased.
+When the guest presses the microphone button, `AudioRecorder` starts capturing 16kHz Pulse Code Modulation (PCM) audio in 4,096-byte chunks and feeds them to Vosk in real time. A voice activity detector (VAD) monitors the RMS energy of each chunk against a threshold of 0.02. Recording stops when 1,500ms of silence is detected or the 10-second maximum is reached. The Vosk transcription is then cleaned — filler words and greetings like "Hi Sera" are removed, and the text is lowercased.
 
 **Phase 2 — Intent Classification**
 
@@ -103,7 +103,7 @@ Once an intent is classified above the confidence threshold (0.60 for the neural
 
 ### 6.3.2 Hybrid NLU Pipeline — Core Design Feature
 
-The most distinctive part of this system is the two-stage NLU pipeline. It was not planned from the start — it came out of a practical problem noticed during development: purely neural classification was giving unexpectedly low confidence on simple, clear requests. For example, "I need towels" was being classified as `pillow_request` with only 0.72 confidence after small Vosk transcription variations.
+A key design feature for ensuring NLU reliability under real pipeline conditions is the two-stage hybrid NLU pipeline. It was not planned from the start — it came out of a practical problem noticed during development: purely neural classification was giving unexpectedly low confidence on simple, clear requests. For example, "I need towels" was being classified as `pillow_request` with only 0.72 confidence after small Vosk transcription variations.
 
 **Figure 6.3: Hybrid NLU Pipeline Flow**
 

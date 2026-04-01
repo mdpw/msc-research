@@ -12,12 +12,10 @@ Each research objective defined in Chapter 1 is reviewed against what was actual
 
 | Objective | Outcome | Assessment |
 |-----------|---------|-----------|
-| Design and develop a low-cost, offline-capable voice assistant prototype for hospitality services using small-scale neural models | A working prototype was built and demonstrated end-to-end from voice input to staff notification | Fully achieved |
-| Implement on-device speech recognition and intent classification using small-scale neural models (Vosk, MobileBERT) | Both models run entirely on-device on a commodity Android tablet without internet connectivity. `vosk-model-small-en-in-0.4` (Indian English) was selected specifically for South Asian accent compatibility | Fully achieved |
-| Build a lightweight backend system using FastAPI and SQLite with real-time staff communication via WebSocket | Backend handles request persistence, department routing (DB-driven with keyword fallback), and bidirectional WebSocket communication | Fully achieved |
-| Develop a hospitality-domain intent classification dataset covering 18 service request categories | Custom dataset of 10,080 labelled utterances created across 18 categories (560 per intent), with paired clean and Vosk-transcribed versions enabling noise-aware training | Fully achieved |
-| Evaluate speech recognition accuracy, intent classification performance, and the accuracy impact of the real STT pipeline on NLU | Three-model evaluation completed on a 2,016-sample shared held-out test set. Model A (clean-trained) dropped from 98.07% on clean text to 89.34% on Vosk output (8.73 pp gap). Model C (noise-aware) recovered to 99.06% on Vosk output — exceeding the clean baseline | Fully achieved |
-| Demonstrate that privacy-preserving, offline voice-based service automation is achievable on low-cost hardware | All voice processing occurs on-device; no audio or transcript data leaves the hotel network | Fully achieved |
+| Design and develop a low-cost, offline voice assistant prototype deployable on commodity Android hardware | A working prototype was built and demonstrated end-to-end from voice input to staff notification, running on a commodity Android tablet in the $50–$150 price range across four development iterations | Fully achieved |
+| Build a hospitality-domain dataset and train a noise-aware NLU model | Custom dataset of 10,080 labelled utterances across 18 categories (560 per intent), with paired Vosk-transcribed version enabling noise-aware training. `vosk-model-small-en-in-0.4` and fine-tuned MobileBERT (26MB TFLite) deployed on-device with a hybrid keyword + neural NLU pipeline | Fully achieved |
+| Build a lightweight backend with real-time staff communication | FastAPI + SQLite backend with DB-driven department routing and bidirectional WebSocket communication between guest devices and staff dashboard — no cloud infrastructure required | Fully achieved |
+| Evaluate system accuracy, latency, and cost-effectiveness, and demonstrate privacy-preserving offline operation | Three-model evaluation on 2,016-sample test set: Model C achieved 99.06% on Vosk output (111.3% gap recovery). WER 11.43% overall. P95 latency 2,827ms. Hardware cost under $150. All voice processing on-device — no audio leaves the hotel network | Fully achieved |
 
 ---
 
@@ -25,7 +23,7 @@ Each research objective defined in Chapter 1 is reviewed against what was actual
 
 ### 10.3.1 Identifying and Quantifying the Real-World Accuracy Gap
 
-The most important contribution of this research is measuring something that standard NLU benchmarking does not reveal. A MobileBERT model trained only on clean text (Model A) achieves 98.07% accuracy when tested on clean text — which is what most published work would report as the model's performance. When the same model is evaluated on actual Vosk transcriptions of the same utterances, accuracy drops to 89.34%, a reduction of 8.73 percentage points. This degradation is not random noise. It is a predictable consequence of Vosk's characteristic transcription errors — phonetically similar substitutions, insertions, and deletions — changing the vocabulary the clean-trained model learned to associate with specific intents.
+One of the key technical findings of this research is measuring something that standard NLU benchmarking does not reveal. A MobileBERT model trained only on clean text (Model A) achieves 98.07% accuracy when tested on clean text — which is what most published work would report as the model's performance. When the same model is evaluated on actual Vosk transcriptions of the same utterances, accuracy drops to 89.34%, a reduction of 8.73 percentage points. This degradation is not random noise. It is a predictable consequence of Vosk's characteristic transcription errors — phonetically similar substitutions, insertions, and deletions — changing the vocabulary the clean-trained model learned to associate with specific intents.
 
 With an overall WER of 11.43% across the dataset, and 47.8% of utterances changed in some way by Vosk, the production voice pipeline operates in meaningfully different conditions from what clean-text evaluation assumes. This finding addresses a genuine gap: offline, on-device deployments using open-source edge STT introduce a noise profile that differs from both clean text and cloud STT error patterns, and this profile needs to be accounted for in training to achieve reliable real-world performance.
 
@@ -45,7 +43,7 @@ Model C recovers `towel_request` F1 to 0.98 on Vosk output. This one intent illu
 
 ### 10.3.4 Consistent Noise Profile Between Training and Deployment
 
-One of the more important design decisions in this research was using the same Vosk model (`vosk-model-small-en-in-0.4`) to generate the noisy training data that is deployed in the Android application. This consistency is what makes noise-aware training work. If the training noise was generated by a different STT engine or a different Vosk variant, the error patterns in training would not match the errors the model encounters in production. The Indian English model was also a better acoustic fit for Sri Lankan English than a US English model, which kept the WER to 11.43% rather than significantly higher.
+A key design decision in this research was using the same Vosk model (`vosk-model-small-en-in-0.4`) to generate the noisy training data that is deployed in the Android application. This consistency is what makes noise-aware training work. If the training noise was generated by a different STT engine or a different Vosk variant, the error patterns in training would not match the errors the model encounters in production. The Indian English model was also a better acoustic fit for Sri Lankan English than a US English model, which kept the WER to 11.43% rather than significantly higher.
 
 ### 10.3.5 Balanced and Reproducible Evaluation Design
 
@@ -55,9 +53,9 @@ The 10,080-utterance dataset (18 intents, 560 per intent) was created with exact
 
 Unlike cloud-based solutions where privacy depends on provider policies and legal agreements, this prototype provides a structural privacy guarantee. Voice data cannot leave the guest device because the architecture has no mechanism to send audio externally. This is a stronger assurance than any policy-based approach and is particularly relevant as data protection legislation continues to develop across South and Southeast Asia.
 
-### 10.3.7 Cost-Effectiveness Analysis
+### 10.3.7 Cost-Effectiveness and Viability at Scale
 
-One of the primary research objectives was to demonstrate that privacy-preserving, offline voice-based service automation is achievable on low-cost hardware. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel.
+Demonstrating that the system is affordable at the hardware level is essential evidence for the research question — "viable alternative" only holds if hotels can actually afford to deploy it. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel.
 
 #### Hardware and Software Cost — Production Deployment
 
@@ -71,7 +69,7 @@ The prototype runs on a laptop server with SQLite, which is sufficient for a sin
 | Production server | Shared (×1) | Mini PC / small form-factor server (Intel NUC or equivalent, 16GB RAM, SSD) | 300–500 | Replaces Raspberry Pi for production; handles concurrent WebSocket connections and PostgreSQL under real hotel load |
 | Database | Shared | PostgreSQL (replaces prototype SQLite) | 0 | Open-source; production-grade; zero licence cost |
 | Wi-Fi access points | Shared | Dual-band WAP (one per floor, 2–3 units typical for a 50-room hotel) | 80–150 each | Required if hotel lacks adequate existing coverage; shared with all hotel systems |
-| Network router | Shared (×1) | Business-grade router with VLAN support | 100–200 | Isolates guest device traffic; recommended for security |
+| Network router | Shared (×1) | Business-grade router with Virtual Local Area Network (VLAN) support | 100–200 | Isolates guest device traffic; recommended for security |
 | UPS / power backup | Shared (×1) | Uninterruptible power supply for server | 80–150 | Prevents data loss on power interruption |
 | Vosk STT model | Per device | `vosk-model-small-en-in-0.4` | 0 | Open-source; Apache 2.0 licence (Alpha Cephei, 2020) |
 | MobileBERT TFLite | Per device | Compressed intent classifier | 0 | Open-source; Apache 2.0 licence (Sun et al., 2020) |
@@ -264,6 +262,6 @@ The system currently supports English only. In the Sri Lankan hospitality contex
 
 ## 10.7 Summary
 
-The prototype successfully demonstrates that a low-cost, offline voice assistant for hospitality services is achievable using small-scale neural models on commodity Android hardware. Beyond the working system, the primary research contribution is measuring the accuracy gap between clean-text NLU evaluation and real offline pipeline performance, and showing that Vosk-specific noise-aware training closes it. Model A's 8.73 percentage point drop from clean text (98.07%) to Vosk output (89.34%) confirms that standard clean-text benchmarks overstate the actual performance of NLU models in offline STT pipelines. Model C's recovery to 99.06% — a 111.3% gap recovery that exceeds the clean-text baseline — demonstrates that paired noise-aware training is an effective and practical solution.
+The prototype successfully demonstrates that a low-cost, fully offline voice assistant for hospitality services is achievable on commodity Android hardware — and that it meets the technical bar for viability as an alternative to traditional room service communication. NLU accuracy reaches 99.06% under real pipeline conditions (Model C), the system runs within the 5-second latency target, total hardware cost falls in the $50–$150 per-room range, and privacy is guaranteed by architecture. An important technical finding supporting this conclusion is the three-model experiment: Model A's 8.73 percentage point drop from clean text (98.07%) to Vosk output (89.34%) shows that clean-text benchmarks overstate real pipeline performance, and Model C's recovery to 99.06% — 111.3% gap recovery — demonstrates that noise-aware training is what makes the NLU component reliable in a real deployment.
 
 The most important caveat is that both the WER measurement and the training noise profiles were derived from TTS-synthesised speech rather than real speaker recordings. Confirming these results with actual hotel guest speech is the most critical next step before drawing firm conclusions about production readiness. Deploying the system in a real hotel and evaluating it on real guest utterances is the most important direction for future research.

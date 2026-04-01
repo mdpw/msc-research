@@ -2,9 +2,9 @@
 
 ## 8.1 Introduction
 
-This chapter covers how the system and the NLU models were tested. Testing was organised around three concerns: whether the NLU models perform as expected under real pipeline conditions, whether the speech recognition introduces errors that matter, and whether the backend and end-to-end system actually work. Each concern required a different testing approach, and the level of rigour applied to each was proportional to how directly it affects the research question.
+This chapter covers how the system and the NLU models were tested. The evaluation is structured around three integrated dimensions of system viability: NLU accuracy under real pipeline conditions, speech recognition quality, and backend reliability and performance. Together, these provide evidence for whether the prototype achieves sufficient technical accuracy and performance to be a viable alternative to traditional room service communication.
 
-The most important evaluation is the controlled NLU model comparison — this is where the core research question is answered. The system-level testing (API, integration, and latency) is more practical in nature and was designed to show that the prototype is functional and meets its non-functional requirements, rather than to produce publishable benchmarks.
+Each concern required a different testing approach. The NLU model comparison involved a controlled experiment across three training strategies. The speech recognition testing measured word error rate against the full dataset. The system-level testing (API, integration, and latency) confirmed the prototype is functional and meets its non-functional requirements.
 
 ---
 
@@ -12,13 +12,13 @@ The most important evaluation is the controlled NLU model comparison — this is
 
 The testing strategy for this project was shaped by what actually needed to be verified, not by a predefined framework. The system has three distinct concerns that each require a different approach:
 
-1. **NLU model accuracy** — does the model correctly classify hotel service requests, and does it degrade when it receives Vosk-transcribed text instead of clean text? This is the core research question and needed the most rigorous, controlled testing.
+1. **NLU model accuracy** — does the model correctly classify hotel service requests under real pipeline conditions, and does noise-aware training produce sufficient accuracy for reliable intent routing? This required the most rigorous, controlled testing.
 
-2. **Speech recognition accuracy** — how much does Vosk distort guest utterances, and which types of requests are most affected?
+2. **Speech recognition accuracy** — how much does Vosk distort guest utterances, and which types of requests are most affected? This determines whether the STT component is fit for purpose in the hospitality domain.
 
-3. **System functionality** — does the backend API behave correctly, and does the end-to-end pipeline from voice input to staff notification actually work?
+3. **System functionality** — does the backend API behave correctly, does end-to-end latency fall within practical bounds, and does the full pipeline from voice input to staff notification actually work?
 
-The NLU evaluation was the main focus because it directly answers the research question. The system and API testing was more pragmatic — just enough to confirm the prototype works reliably for demonstration and evaluation, without going overboard with formal test suites for a research prototype.
+All three dimensions are necessary to answer the core research question about viability. The system and API testing was pragmatic — enough to confirm the prototype works reliably — but the results feed directly into the NFR compliance assessment, which provides the clearest summary of whether the system meets its viability targets.
 
 Automated unit tests were not written for the Android app beyond what Android Studio includes by default. The reasoning was simple: the app was built iteratively and tested live on a physical device throughout development. The hybrid NLU pipeline, WebSocket reconnection, and voice confirmation flow were all verified through hands-on testing rather than automated instrumentation. This is a known limitation and is acknowledged in Section 8.9.
 
@@ -28,7 +28,7 @@ Automated unit tests were not written for the Android app beyond what Android St
 
 ### 8.3.1 Test Design
 
-The central research question is whether a model trained on clean text loses accuracy when given Vosk-transcribed input — and whether noise-aware training fixes that. To answer this properly, a controlled comparison was done across three model variants on the same held-out test set.
+A key dimension of system viability is whether the NLU component maintains sufficient accuracy when operating inside the real STT pipeline — not just in isolation on clean text. To evaluate this, a controlled comparison was done across three model variants on the same held-out test set, covering three training strategies: clean-only, Vosk-only, and mixed (noise-aware).
 
 The test set is a 20% stratified hold-out from `vosk_transcriptions.csv` — 2,016 samples covering all 18 intent categories. Using the same test set for all three models means the results are directly comparable. Each sample has both a `clean_text` column and a `vosk_text` column, so the same data can be evaluated under both input conditions.
 
@@ -56,7 +56,7 @@ All four runs used `step4_evaluate.py`, which computes accuracy, macro F1, weigh
 | Model B | Vosk-transcribed only | 96.38% (Vosk input) | 0.9636 | 0.9636 |
 | **Model C** | **Mixed (clean + Vosk)** | **99.06% (Vosk input)** | **0.9905** | **0.9905** |
 
-The results confirm what the research expected. Model A scores 98.07% on clean text but drops to 89.34% when given Vosk output — an 8.73 percentage point fall caused entirely by the STT step. That drop is the research gap this project set out to close.
+The results confirm that noise-aware training is necessary for pipeline viability. Model A scores 98.07% on clean text but drops to 89.34% when given Vosk output — an 8.73 percentage point fall caused entirely by the STT step. Without addressing this, the system would fall short of the NFR-05 accuracy target (≥90%) and be unreliable in practice.
 
 Model C, trained on the mixed paired dataset, scores 99.06% on the same Vosk-transcribed test set — actually beating Model A's clean-text performance. The gap is not just closed but reversed. This works out to 111.3% gap recovery, meaning noise-aware training more than compensates for what the STT step takes away.
 
@@ -214,13 +214,13 @@ WebSocket delivery was not independently timed but estimated at ~15ms, which is 
 
 *HTTP API values measured by `test_latency.py` against a locally running server; all 20 requests returned HTTP 200. Device-side values recorded during integration testing on the physical Android tablet. End-to-end totals are per-run sums across all five stages.*
 
-**NFR-03 compliance:** The P95 end-to-end latency from end-of-speech to the start of TTS confirmation is 2,827ms — well within the 5-second target. Adding a typical guest utterance of ~2–3 seconds of speaking, the total time from the guest starting to talk to hearing a confirmation is still comfortably below 5 seconds.
+**NFR-03 compliance:** The 95th Percentile (P95) end-to-end latency from end-of-speech to the start of TTS confirmation is 2,827ms — well within the 5-second target. Adding a typical guest utterance of ~2–3 seconds of speaking, the total time from the guest starting to talk to hearing a confirmation is still comfortably below 5 seconds.
 
 The HTTP API stage is the biggest contributor at around 2,060ms mean. This is higher than expected for a local server, but it reflects the full processing chain — the FastAPI handler writes to SQLite, broadcasts a WebSocket notification to connected dashboards, and then returns a response. On the physical tablet connecting over Wi-Fi rather than localhost, this figure would be slightly higher, but the NFR-03 margin is large enough to absorb it.
 
 The NLU stage shows two distinct timing clusters: ~4ms for Tier 1 keyword matches (which bypass the neural model entirely) and ~60ms for Tier 2 MobileBERT TFLite inference. This is exactly what the hybrid pipeline design was supposed to produce.
 
-**Limitations of this measurement:** The HTTP API was timed on localhost, which removes Wi-Fi latency from the picture. A more realistic measurement would test the full path over a hotel Wi-Fi network — this is noted as future work in Chapter 11.
+**Limitations of this measurement:** The HTTP API was timed on localhost, which removes Wi-Fi latency from the picture. A more realistic measurement would test the full path over a hotel Wi-Fi network.
 
 ---
 
@@ -230,13 +230,13 @@ It is worth being upfront about what this testing did not cover.
 
 **Real speech WER:** The WER figures in Section 8.4 came from TTS-synthesised audio, not recordings of real people. A proper WER evaluation would use actual voice recordings from Sri Lankan English speakers in a hotel environment. Without that, the real-world speech recognition performance is estimated rather than directly measured.
 
-**Multi-room load testing:** The server was only tested with a small number of simultaneous connections — one guest device and one or two dashboard browsers. How it behaves under realistic hotel load (say, 30 rooms submitting requests at once during peak hours) has not been tested. SQLite's write limitations would likely become noticeable at that scale. This is identified as future work in Chapter 11.
+**Multi-room load testing:** The server was only tested with a small number of simultaneous connections — one guest device and one or two dashboard browsers. How it behaves under realistic hotel load (say, 30 rooms submitting requests at once during peak hours) has not been tested. SQLite's write limitations would likely become noticeable at that scale.
 
 **Security testing:** The staff dashboard has no authentication, and the API endpoints have no input sanitisation beyond Pydantic validation. No security testing was done, which is consistent with the prototype scope.
 
 ---
 
-## 8.9 Testing Summary
+## 8.9 Summary
 
 **Table 8.7: NFR Compliance Summary**
 
@@ -259,10 +259,10 @@ It is worth being upfront about what this testing did not cover.
 | Backend API functionality | Manual test script (test_api.py), 4 endpoint tests | Passed |
 | End-to-end system integration | Manual testing on physical hardware | Passed all scenarios |
 | System latency (end-to-end pipeline, 20 requests) | Manual measurement — `test_latency.py` + Android timestamps | Completed — P95 2,827ms, within NFR-03 (5s target) |
-| Real speech WER with human participants | Not conducted | Future work |
-| Multi-room concurrent load | Not tested | Future work |
+| Real speech WER with human participants | Not conducted | Not in scope |
+| Multi-room concurrent load | Not tested | Not in scope |
 | Security / authentication | Out of scope for prototype | Not tested |
 
-The part of the testing that matters most for this research — the controlled NLU model comparison — was done rigorously, with a fixed held-out test set, consistent metrics across all model variants, and full per-intent breakdowns. The results clearly show the accuracy gap that the STT step creates and how noise-aware training closes it. The system-level testing was enough to demonstrate a working prototype. The gaps that remain are realistic for a research prototype and are discussed as future work in Chapter 11.
+Taken together, the evaluation results provide evidence across all dimensions of viability: NLU accuracy sufficient for reliable intent routing (Model C: 99.06%), speech recognition acceptable for the hospitality domain (11.43% WER overall), end-to-end latency within the 5-second target (P95 2,827ms), and hardware cost within the target range. The NFR compliance table above summarises this directly. The controlled NLU model comparison was done rigorously — fixed held-out test set, consistent metrics, full per-intent breakdowns — and makes clear that noise-aware training is what makes the NLU component viable for real pipeline conditions. The system-level testing was enough to confirm a working prototype. The gaps that remain are realistic for a research prototype and are discussed as future work in Chapter 11.
 
 The next chapter reflects on the project management side of this work — how development was planned, what risks were identified, and how the project evolved across its iterations.

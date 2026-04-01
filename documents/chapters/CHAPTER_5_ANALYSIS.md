@@ -38,7 +38,7 @@ The system is split into three layers, all running over the hotel's local Wi-Fi.
 +================================================================+
 ```
 
-The key design decision here is that all the AI work — speech recognition and intent classification — happens on the guest's tablet. The server is kept deliberately lightweight: it stores requests, maps them to the right department, and pushes real-time updates to connected clients. That said, it is important to be honest about what this means for reliability in the current prototype. If the server is temporarily unreachable, the STT and NLU still work fine on the device, but the guest cannot actually submit their request. The app tells them to use the room's land line phone instead. There is no local queue that saves the request and retries once the server comes back — if submission fails, the request is simply lost. This is a known limitation of the prototype and is discussed as future work in Section 11.2.13. What is guaranteed regardless of server availability is that raw audio never leaves the tablet at any point, which directly satisfies the privacy requirement (NFR-02).
+The key design decision here is that all the AI work — speech recognition and intent classification — happens on the guest's tablet. The server is kept deliberately lightweight: it stores requests, maps them to the right department, and pushes real-time updates to connected clients. That said, it is important to be honest about what this means for reliability in the current prototype. If the server is temporarily unreachable, the STT and NLU still work fine on the device, but the guest cannot actually submit their request. The app tells them to use the room's land line phone instead. There is no local queue that saves the request and retries once the server comes back — if submission fails, the request is simply lost. This is a known limitation of the prototype and is discussed further in Chapter 10 (Section 10.3). What is guaranteed regardless of server availability is that raw audio never leaves the tablet at any point, which directly satisfies the privacy requirement (NFR-02).
 
 ---
 
@@ -46,7 +46,7 @@ The key design decision here is that all the AI work — speech recognition and 
 
 There are two actors: the **Guest**, who interacts through voice and touch on the Android tablet, and the **Staff Member**, who uses the web dashboard to manage requests.
 
-**Figure 5.2: UML Use Case Diagram**
+**Figure 5.2: Unified Modeling Language (UML) Use Case Diagram**
 
 *(See attached UML diagram — Figure 5.2)*
 
@@ -281,9 +281,9 @@ SQLite was chosen as the database for this prototype. It needs no server process
 
 ## 5.6 Technology Evaluation and Selection
 
-Every component in this system was evaluated against four constraints that came directly from the requirements in Chapter 4: offline capability (NFR-01), privacy (NFR-02), low response latency (NFR-03), and low hardware cost (NFR-04).
+Every component in this system was evaluated against four constraints that came directly from the requirements in Chapter 4: offline capability (NFR-01), privacy (NFR-02), low response latency (NFR-03), and low hardware cost (NFR-04). These four constraints are not just engineering preferences — they are the dimensions that determine whether the system is viable as an alternative to traditional room service communication. A component that satisfies all four moves the system closer to a credible answer to the research question; a component that fails any one of them would undermine the viability claim.
 
-It is also worth being transparent about the prototype-vs-production distinction here. Some choices — like SQLite over PostgreSQL — are practical for a research prototype but would need to change at scale. Where that is the case, the production alternative is identified explicitly. Table 5.2 gives the full picture of what was selected and why.
+The prototype-vs-production distinction matters here. Some choices — like SQLite over PostgreSQL — are practical for a research prototype but would need to change at scale. Where that is the case, the production alternative is identified explicitly. Table 5.2 gives the full picture of what was selected and why.
 
 **Table 5.2: Technology Stack Summary**
 
@@ -311,7 +311,7 @@ Speech-to-text is the entry point of the whole pipeline, so this was the most im
 
 **Google Cloud Speech-to-Text and Amazon Transcribe** are commercial cloud services with excellent accuracy, but they both require a constant internet connection and charge per minute of audio. Google Cloud STT costs $0.006 per 15 seconds (Google Cloud, 2024), which is an ongoing cost that simply does not work for the target hotels.
 
-**CMU Sphinx (PocketSphinx)** is an older offline engine (~30MB) built on pre-deep-learning acoustic models (Huggins-Daines et al., 2006). It has seen very little development since 2019 and its accuracy is noticeably below modern systems.
+**CMU Sphinx / PocketSphinx** (CMU Sphinx, 2023) is an older offline engine (~30MB) built on pre-deep-learning acoustic models (Huggins-Daines et al., 2006). It has seen very little development since 2019 and its accuracy is noticeably below modern systems.
 
 **Table 5.3: Speech Recognition Technology Comparison**
 
@@ -333,7 +333,7 @@ Speech-to-text is the entry point of the whole pipeline, so this was the most im
 
 Vosk was chosen for three reasons. The first is real-time streaming. Vosk processes audio as the guest speaks, so there is no waiting period after they finish. Whisper works the other way — it waits for the full recording and then processes it, which adds noticeable latency and makes the interaction feel unnatural. This is a problem for keeping end-to-end response time under 5 seconds (NFR-03).
 
-The second reason is that Vosk has a proper native Android SDK with straightforward Kotlin integration (Alpha Cephei, 2023). Getting Whisper running on Android would require converting the model to ONNX format and building a custom inference wrapper — extra complexity that could easily break things on a research prototype. Vosk also offers a range of model sizes, and the `vosk-model-small-en-in-0.4` variant at ~36MB was chosen specifically to stay within the memory constraints of a budget tablet (discussed in Chapter 7). Beyond the size, this model was trained on Indian English acoustic data, which matters a lot for this deployment. Sri Lankan English is acoustically similar to Indian English — shared vowel quality, intonation patterns, and consonant articulation — so a US English model would be a poor acoustic fit. The tourism angle reinforces this: India is Sri Lanka's largest source of international visitors, with 416,974 arrivals in 2024 making up roughly 20% of all international tourists (Sri Lanka Tourism Development Authority, 2024). The `vosk-model-small-en-in-0.4` model directly addresses the most common guest accent the system will encounter.
+The second reason is that Vosk has a proper native Android Software Development Kit (SDK) with straightforward Kotlin integration (Alpha Cephei, 2023). Getting Whisper running on Android would require converting the model to Open Neural Network Exchange (ONNX) format and building a custom inference wrapper — extra complexity that could easily break things on a research prototype. Vosk also offers a range of model sizes, and the `vosk-model-small-en-in-0.4` variant at ~36MB was chosen specifically to stay within the memory constraints of a budget tablet (discussed in Chapter 7). Beyond the size, this model was trained on Indian English acoustic data, which matters a lot for this deployment. Sri Lankan English is acoustically similar to Indian English — shared vowel quality, intonation patterns, and consonant articulation — so a US English model would be a poor acoustic fit. The tourism angle reinforces this: India is Sri Lanka's largest source of international visitors, with 416,974 arrivals in 2024 making up roughly 20% of all international tourists (Sri Lanka Tourism Development Authority, 2024). The `vosk-model-small-en-in-0.4` model directly addresses the most common guest accent the system will encounter.
 
 The third reason is privacy. Audio never leaves the tablet at any point in the pipeline, which satisfies NFR-02 directly. Cloud options were ruled out for violating both NFR-01 and NFR-02. CMU Sphinx was ruled out for its poor accuracy and the fact that it is no longer actively maintained.
 
@@ -389,7 +389,7 @@ As a side benefit, the rule-based layer is very fast — common requests like "e
 
 **Selection: FastAPI**
 
-FastAPI (Ramírez, 2024) was chosen mainly because it handles async natively. The server has to keep WebSocket connections open with multiple guest room tablets and the staff dashboard at the same time, while also handling HTTP requests — all without blocking. Flask's synchronous design would need Flask-SocketIO bolted on to achieve this, which adds a dependency and complicates the concurrency model. Django was overkill — the system just needs a focused API server and WebSocket hub, not a full web framework with an ORM, templating engine, and admin panel built in.
+FastAPI (Ramírez, 2024) was chosen mainly because it handles async natively. The server has to keep WebSocket connections open with multiple guest room tablets and the staff dashboard at the same time, while also handling HTTP requests — all without blocking. Flask's synchronous design would need Flask-SocketIO bolted on to achieve this, which adds a dependency and complicates the concurrency model. Django was overkill — the system just needs a focused API server and WebSocket hub, not a full web framework with an Object-Relational Mapping (ORM) layer, templating engine, and admin panel built in.
 
 Express.js was not suitable because the entire ML stack — training, evaluation, and the NLU pipeline — is Python-based. Adding a Node.js backend would mean maintaining two separate language environments and duplicating business logic.
 
@@ -419,7 +419,7 @@ A small hotel generating around 100–200 service requests per day does not push
 
 The data itself is naturally relational: requests belong to rooms, messages belong to requests. MongoDB's document model would be an awkward fit for this. PostgreSQL and MySQL are both technically capable options, but deploying either one at a small hotel requires setting up user accounts, configuring network binding, and keeping it maintained — none of which can be assumed when there is no IT staff on site.
 
-**Production pathway:** SQLite serialises writes, which is sufficient for small hotel deployments but would become a bottleneck under sustained concurrent load — for example, during peak periods when many rooms submit requests simultaneously. The schema and FastAPI CRUD layer are already written to be PostgreSQL-compatible, so switching would only require a driver and connection string change.
+**Production pathway:** SQLite serialises writes, which is sufficient for small hotel deployments but would become a bottleneck under sustained concurrent load — for example, during peak periods when many rooms submit requests simultaneously. The schema and FastAPI Create, Read, Update, Delete (CRUD) layer are already written to be PostgreSQL-compatible, so switching would only require a driver and connection string change.
 
 ---
 
@@ -440,11 +440,11 @@ The data itself is naturally relational: requests belong to rooms, messages belo
 
 WebSocket (Fette and Melnikov, 2011) keeps a single persistent TCP connection open and allows both sides to send messages at any time. The system needs this in three places: guest tablets sending requests and receiving status updates, the staff dashboard receiving requests and sending messages back, and the server pushing changes to all connected clients. This bidirectional requirement rules out Server-Sent Events straight away — they only go one way (server to client).
 
-HTTP polling would work technically, but the latency is a problem. A guest waiting to hear that their request is "in progress" would not find out until the next polling cycle. Repeated connection setup would also drain the tablet battery much faster than a persistent WebSocket connection. MQTT (OASIS, 2019) was also considered but needs a separate broker process like Mosquitto running on the network — that is unnecessary infrastructure complexity for a simple point-to-point LAN scenario.
+HTTP polling would work technically, but the latency is a problem. A guest waiting to hear that their request is "in progress" would not find out until the next polling cycle. Repeated connection setup would also drain the tablet battery much faster than a persistent WebSocket connection. Message Queuing Telemetry Transport (MQTT) (OASIS, 2019) was also considered but needs a separate broker process like Mosquitto running on the network — that is unnecessary infrastructure complexity for a simple point-to-point LAN scenario.
 
 The server maintains separate WebSocket endpoints for guest devices and the staff dashboard, with connection state held in memory. The Android client handles reconnection automatically using exponential backoff, capping at a maximum delay to avoid indefinite disconnection.
 
-**Production pathway:** Because connection state is in-memory, it is lost if the server restarts. For a single-property deployment, a Redis Pub/Sub layer would persist WebSocket state and allow the server to restart without dropping all connected clients. For multi-property deployments — where events need to be consumed by multiple downstream systems simultaneously — Apache Kafka (Kreps et al., 2011) is a stronger fit, as it provides persistent message replay and decouples event producers from consumers entirely. Both approaches are discussed as future work in Section 11.2.13.
+**Production pathway:** Because connection state is in-memory, it is lost if the server restarts. For a single-property deployment, a Redis Pub/Sub layer would persist WebSocket state and allow the server to restart without dropping all connected clients. For multi-property deployments — where events need to be consumed by multiple downstream systems simultaneously — Apache Kafka (Kreps et al., 2011) is a stronger fit, as it provides persistent message replay and decouples event producers from consumers entirely. Both are scalability considerations for a production deployment, beyond the scope of this prototype.
 
 ---
 
@@ -466,11 +466,11 @@ The server maintains separate WebSocket endpoints for guest devices and the staf
 
 Android came down to three practical reasons. First, commodity Android tablets cost $50–$150 at local retailers across Sri Lanka. Entry-level iPads start at over $300 — that is more than twice the price per room, which makes iOS unviable for the target hotels (NFR-04). Android hardware is also easier to repair and replace locally.
 
-Second, both Vosk and TensorFlow Lite have first-party native Android SDKs. Flutter and React Native do have community plugins for these libraries, but community plugins for ML inference bring version compatibility risks that could cause hard-to-diagnose failures during evaluation. Keeping to the native SDKs avoids that uncertainty.
+Second, both Vosk and TensorFlow Lite (Google, 2024a) have first-party native Android SDKs. Flutter and React Native do have community plugins for these libraries, but community plugins for ML inference bring version compatibility risks that could cause hard-to-diagnose failures during evaluation. Keeping to the native SDKs avoids that uncertainty.
 
-Third, Jetpack Compose with Material Design 3 is a good fit for a UI that is driven by changing state — recording state, processing state, live request list updates, and WebSocket-driven status changes all map cleanly onto Compose's observable state model. This design alignment carries through to the implementation, where Compose's recomposition behaviour becomes directly relevant, as discussed in Chapter 6.
+Third, Jetpack Compose (Google, 2024b) with Material Design 3 is a good fit for a UI that is driven by changing state — recording state, processing state, live request list updates, and WebSocket-driven status changes all map cleanly onto Compose's observable state model. This design alignment carries through to the implementation, where Compose's recomposition behaviour becomes directly relevant, as discussed in Chapter 6.
 
-**Production pathway:** The prototype uses a fixed room number and a server IP stored manually in SharedPreferences. A real deployment would use an MDM platform like VMware Workspace ONE to remotely configure room numbers and server credentials across all tablets without touching each device physically.
+**Production pathway:** The prototype uses a fixed room number and a server IP stored manually in SharedPreferences. A real deployment would use a Mobile Device Management (MDM) platform like VMware Workspace ONE to remotely configure room numbers and server credentials across all tablets without touching each device physically.
 
 ---
 
@@ -491,7 +491,7 @@ Third, Jetpack Compose with Material Design 3 is a good fit for a UI that is dri
 
 Android's built-in TTS engine is already on every Android device. No extra storage, no setup, no cost. For this prototype — where the research question is about NLU accuracy and pipeline latency rather than voice quality — the native engine is perfectly good enough for reading back confirmations and status announcements.
 
-**Production pathway:** Voice quality matters in a real hotel, since it shapes how guests perceive the assistant. Piper TTS (Hansen, 2023) is an open-source neural TTS engine designed specifically for edge and embedded deployment — it runs on low-power hardware (including Raspberry Pi) and produces natural-sounding voices from compact models (~50–100MB). It is actively maintained and used in production by the Home Assistant and Rhasspy smart home platforms, which share similar on-device, offline constraints. A custom English voice model fine-tuned for hotel-specific phrasing could be deployed on the Android device itself, keeping TTS fully on-device and offline. Amazon Polly was not suitable because it requires cloud connectivity (violates NFR-01) and costs $4 per million characters synthesised (Amazon Web Services, 2024).
+**Production pathway:** Voice quality matters in a real hotel, since it shapes how guests perceive the assistant. Piper TTS (Hansen, 2023) is an open-source neural TTS engine designed specifically for edge and embedded deployment — it runs on low-power hardware (including Raspberry Pi 4, Raspberry Pi Foundation, 2025) and produces natural-sounding voices from compact models (~50–100MB). It is actively maintained and used in production by the Home Assistant and Rhasspy smart home platforms, which share similar on-device, offline constraints. A custom English voice model fine-tuned for hotel-specific phrasing could be deployed on the Android device itself, keeping TTS fully on-device and offline. Amazon Polly was not suitable because it requires cloud connectivity (violates NFR-01) and costs $4 per million characters synthesised (Amazon Web Services, 2024).
 
 ---
 
