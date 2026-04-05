@@ -292,7 +292,7 @@ The system runs entirely within the hotel's existing local Wi-Fi network. No ext
 
 The network profile feature in the Android app lets multiple server addresses be stored in `SharedPreferences` and switched without recompiling the app. This was useful for testing across different network environments during development.
 
-> **Note — prototype deployment only.** The configuration above reflects what was actually used during development and evaluation: a laptop running SQLite, manual IP entry, and HTTP without TLS. A real hotel deployment would require a different stack — a production-grade server, PostgreSQL, MDM-managed tablets, and encrypted connections. Those differences are covered in Chapter 10 (Section 10.3, Table 10.1) and the production infrastructure recommendations in Chapter 11 (Section 11.2.9).
+> **Note — prototype deployment only.** The configuration above reflects what was actually used during development and evaluation: a laptop running SQLite, manual IP entry, and HTTP without TLS. A real hotel deployment would require a different stack — a production-grade server, PostgreSQL, MDM-managed tablets, and encrypted connections. Those differences are covered in Chapter 10 (Section 10.3, Table 10.1) and the production infrastructure recommendations in Chapter 11 (Section 11.3.1).
 
 ---
 
@@ -328,7 +328,7 @@ At the point of submission, the prototype is fully functional within its defined
 - **No staff authentication.** The dashboard login only records a department and name — there is no password or role-based access control.
 - **Single-room load testing only.** The system has been tested with one concurrent guest device. Multi-room load testing with many simultaneous connections has not been done yet.
 - **Hardcoded server address.** The server IP is stored manually in `SharedPreferences`. A production deployment would manage this centrally.
-- **No structured logging.** The backend and training scripts use `print` statements for debugging. This worked fine during development but makes it harder to diagnose issues at scale. Structured logging with severity levels and timestamps would be needed before any real-world deployment (discussed further in Chapter 10, Section 10.3).
+- **No structured logging.** The backend and training scripts use `print` statements for debugging. This worked fine during development but makes it harder to diagnose issues at scale. Structured logging with severity levels and timestamps would be needed before any real-world deployment (discussed further in Chapter 10, Section 10.5.2).
 
 ---
 

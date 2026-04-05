@@ -48,25 +48,25 @@ There are two actors: the **Guest**, who interacts through voice and touch on th
 
 **Figure 5.2: Unified Modeling Language (UML) Use Case Diagram**
 
-*(See attached UML diagram — Figure 5.2)*
+_(See attached UML diagram — Figure 5.2)_
 
 ### 5.3.1 Use Case Descriptions
 
 **Table 5.1: Use Case Descriptions**
 
-| ID | Use Case | Actor | Description |
-|----|----------|-------|-------------|
+| ID    | Use Case                   | Actor | Description                                                                                                                                                                                                     |
+| ----- | -------------------------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | UC-01 | Make voice service request | Guest | Guest presses the microphone button and speaks a service request. The system records audio, transcribes it using Vosk, classifies the intent using the hybrid NLU pipeline, and presents a confirmation screen. |
-| UC-02 | Confirm or reject request | Guest | The system reads back the recognised request via Android TTS. Guest says "yes" to confirm or "no" to reject. On confirmation, the request is submitted to the server via HTTP POST. |
-| UC-03 | View request history | Guest | Guest views a scrollable list of current and past requests with live status indicators, sorted by priority: in progress → pending → completed → cancelled. |
-| UC-04 | Cancel request | Guest | Guest says "cancel order [number]". The system extracts the request ID using regex, confirms via voice, and sends a cancel request to the server. |
-| UC-05 | Rate completed service | Guest | After a request is marked completed, the guest can submit a 1–5 star rating. The rating is sent to the server and becomes visible on the staff dashboard. |
-| UC-06 | Receive real-time updates | Guest | When staff update a request status or send a message, the guest device receives a WebSocket notification and announces it via TTS. |
-| UC-07 | Log in to dashboard | Staff | Staff member selects their department and enters their name to access their department-filtered request queue. |
-| UC-08 | View department requests | Staff | Dashboard shows all requests routed to the staff member's department, with status badges, timestamps, and room numbers. |
-| UC-09 | Update request status | Staff | Staff clicks "In Progress" or "Complete". The change is immediately broadcast to the relevant guest device via WebSocket. |
-| UC-10 | Send message to guest | Staff | Staff types a message (e.g., "We'll be there in 5 minutes") which is delivered to the guest device and read aloud via TTS. |
-| UC-11 | Transfer request | Staff | Staff reassigns a request to a different department using a dropdown selector. The request immediately appears in the new department's queue. |
+| UC-02 | Confirm or reject request  | Guest | The system reads back the recognised request via Android TTS. Guest says "yes" to confirm or "no" to reject. On confirmation, the request is submitted to the server via HTTP POST.                             |
+| UC-03 | View request history       | Guest | Guest views a scrollable list of current and past requests with live status indicators, sorted by priority: in progress → pending → completed → cancelled.                                                      |
+| UC-04 | Cancel request             | Guest | Guest says "cancel order [number]". The system extracts the request ID using regex, confirms via voice, and sends a cancel request to the server.                                                               |
+| UC-05 | Rate completed service     | Guest | After a request is marked completed, the guest can submit a 1–5 star rating. The rating is sent to the server and becomes visible on the staff dashboard.                                                       |
+| UC-06 | Receive real-time updates  | Guest | When staff update a request status or send a message, the guest device receives a WebSocket notification and announces it via TTS.                                                                              |
+| UC-07 | Log in to dashboard        | Staff | Staff member selects their department and enters their name to access their department-filtered request queue.                                                                                                  |
+| UC-08 | View department requests   | Staff | Dashboard shows all requests routed to the staff member's department, with status badges, timestamps, and room numbers.                                                                                         |
+| UC-09 | Update request status      | Staff | Staff clicks "In Progress" or "Complete". The change is immediately broadcast to the relevant guest device via WebSocket.                                                                                       |
+| UC-10 | Send message to guest      | Staff | Staff types a message (e.g., "We'll be there in 5 minutes") which is delivered to the guest device and read aloud via TTS.                                                                                      |
+| UC-11 | Transfer request           | Staff | Staff reassigns a request to a different department using a dropdown selector. The request immediately appears in the new department's queue.                                                                   |
 
 ---
 
@@ -74,17 +74,18 @@ There are two actors: the **Guest**, who interacts through voice and touch on th
 
 ### 5.4.1 Voice Request Pipeline
 
-The voice pipeline handles everything from when the guest presses the microphone button through to the request appearing on the staff dashboard. It has three main stages: audio capture and speech recognition on the device, hybrid intent classification, and a confirmation step before the request is submitted to the server. The specific parameter values chosen for each stage are covered in the design chapter.
+The voice pipeline handles everything from when the guest presses the microphone button through to the request appearing on the staff dashboard. It has three main stages: audio capture and speech recognition on the device (Figure 5.3), hybrid intent classification followed by confirmation and submission (Figure 5.4). The specific parameter values chosen for each stage are covered in the design chapter.
 
-**Figure 5.3: Voice Request Pipeline**
+**Figure 5.3: Audio Capture and Speech Recognition**
 
 > **To generate this diagram for the Word document:**
+>
 > 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
 > 2. Paste the code below into the editor
 > 3. Click **Submit** — the diagram renders on the right
 > 4. Right-click the image → **Save image as** → save as PNG
 > 5. In Word, Insert → Pictures → choose the saved PNG
-> 6. Add caption: *Figure 5.3: Voice Request Pipeline*
+> 6. Add caption: _Figure 5.3: Audio Capture and Speech Recognition_
 
 ```plantuml
 @startuml
@@ -97,7 +98,7 @@ skinparam diamondBorderColor #AAAAAA
 skinparam noteBackgroundColor #FFFDE7
 skinparam noteBorderColor #DDDDDD
 
-title Figure 5.3: Voice Request Pipeline
+title Figure 5.3: Audio Capture and Speech Recognition
 
 start
 
@@ -119,6 +120,41 @@ endif
 :Vosk STT Processing\n<i>On-device, real-time streaming\nno audio leaves the device</i>;
 
 :Clean Transcription\n<i>Remove greetings, normalise to lowercase</i>;
+
+:Cleaned transcript output\n<i>Passed to intent classification stage</i>;
+
+stop
+
+@enduml
+```
+
+**Figure 5.4: Intent Classification and Request Submission**
+
+> **To generate this diagram for the Word document:**
+>
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: _Figure 5.4: Intent Classification and Request Submission_
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam activityBackgroundColor #F8F9FA
+skinparam activityBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam diamondBackgroundColor #FFF9E6
+skinparam diamondBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #DDDDDD
+
+title Figure 5.4: Intent Classification and Request Submission
+
+start
+
+:Cleaned transcript received\n<i>From audio capture stage</i>;
 
 :Check cancellation pattern\n<i>Regex match on transcript</i>;
 
@@ -158,151 +194,61 @@ endif
 @enduml
 ```
 
-```
-Guest presses
-microphone button
-       |
-       v
-[Start Audio Recording]
-16kHz, 16-bit PCM, mono
-Dynamic buffer (min × 2)
-       |
-       v
-[Voice Activity Detection]
-RMS energy threshold: 0.02
-       |
-       +---> Speech energy detected? --No--> Keep waiting (max 10,000ms)
-       |
-      Yes
-       |
-       v
-[Record until silence]
-1,500ms silence timeout
-       |
-       v
-[Vosk STT Processing]
-vosk-model-small-en-in-0.4
-On-device, real-time streaming
-       |
-       v
-[Clean Transcription]
-Remove greetings (e.g., "Hi Sera")
-Normalise to lowercase
-       |
-       v
-[Check cancellation pattern]
-Regex: "cancel order [number]"
-       |
-       +---> Match? --Yes--> Extract request ID
-       |                           |
-       |                    Voice confirmation
-       |                           |
-       |                    Cancel via HTTP --> End
-       |
-      No
-       |
-       v
-[Tier 1: Keyword Matching]
-Pre-compiled regex patterns
-Case-insensitive, word boundary matching
-       |
-       +---> Match found? --Yes--> Intent + confidence 0.99 --> [Confirmation Step]
-       |
-      No
-       |
-       v
-[Tier 2: MobileBERT TFLite]
-Tokenise (max 32 tokens)
-hotel_mobilebert.tflite (26MB)
-Softmax over 18 intent classes
-       |
-       v
-[Confidence check]
-       |
-       +---> < 0.60? --Yes--> TTS: "I couldn't quite understand, please try again"
-       |                           |
-       |                    Retry (max 2 attempts)
-       |                           |
-       |                    Still < 0.60? --> TTS: "Sorry, could not understand" --> End
-       |
-      >= 0.60
-       |
-       v
-[Confirmation Step]
-TTS: "You'd like [intent]. Shall I submit this?"
-Record yes/no response
-       |
-       +---> "No" --> TTS: "Request cancelled" --> End
-       |
-      "Yes"
-       |
-       v
-[HTTP POST to server]
-Submit request with room number,
-transcription, and intent
-       |
-       v
-[Server Processing]
-Map intent → department (via intent_department_mapping)
-Store in SQLite
-Broadcast via WebSocket to dashboard
-       |
-       v
-[TTS: "Your request has been submitted"]
-End
-```
-
 ### 5.4.2 Staff Request Handling Flow
 
-**Figure 5.4: Staff Request Handling Flow**
+**Figure 5.5: Staff Request Handling Flow**
 
-```
-New request appears
-on staff dashboard
-(WebSocket notification)
-       |
-       v
-[Staff reviews request]
-Request text, intent,
-room number, timestamp
-       |
-       v
-[Correct department?]
-       |
-       +---> No --> Transfer to correct dept via dropdown --> End (for this staff member)
-       |
-      Yes
-       |
-       v
-[Mark as "In Progress"]
-Status update broadcast to guest via WebSocket
-Guest device announces update via TTS
-       |
-       v
-[Need to message guest?]
-       |
-       +---> Yes --> Type and send message
-       |                    |
-       |             Guest receives TTS announcement
-       |
-      No
-       |
-       v
-[Fulfil request]
-Staff performs the physical service
-       |
-       v
-[Mark as "Completed"]
-Completed timestamp recorded in SQLite
-Guest receives WebSocket notification + TTS
-       |
-       v
-[Guest rates service — optional]
-1–5 star rating submitted via HTTP
-Rating visible on staff dashboard
-       |
-       v
-End
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 5.5: Staff Request Handling Flow*
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam activityBackgroundColor #F8F9FA
+skinparam activityBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam diamondBackgroundColor #FFF9E6
+skinparam diamondBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #DDDDDD
+
+title Figure 5.5: Staff Request Handling Flow
+
+start
+
+:New request appears on staff dashboard\n<i>WebSocket notification received</i>;
+
+:Staff reviews request\n<i>Request text, intent, room number, timestamp</i>;
+
+if (Correct department?) then (No)
+  :Transfer to correct department\n<i>Via dropdown selector on dashboard</i>;
+  stop
+else (Yes)
+endif
+
+:Mark as "In Progress"\n<i>Status broadcast to guest device via WebSocket\nGuest TTS announces update</i>;
+
+if (Need to message guest?) then (Yes)
+  :Type and send message\n<i>Via dashboard message field</i>;
+  note right: Guest device receives\nmessage via WebSocket\nand reads it aloud via TTS
+endif
+
+:Fulfil request\n<i>Staff performs the physical service</i>;
+
+:Mark as "Completed"\n<i>Completed timestamp recorded in SQLite\nGuest receives WebSocket notification + TTS</i>;
+
+if (Guest rates service?) then (Yes)
+  :1–5 star rating submitted via HTTP\n<i>Rating visible on staff dashboard</i>;
+endif
+
+stop
+
+@enduml
 ```
 
 ---
@@ -311,9 +257,9 @@ End
 
 The database has five tables. Three of them — `rooms`, `departments`, and `intent_department_mapping` — are configuration tables that get seeded once when the server first starts up. The two tables that change during normal operation are `requests` (the main entity) and `staff_messages`, which sits in a one-to-many relationship with it, since one request can have multiple messages from staff.
 
-**Figure 5.5: Entity-Relationship Diagram**
+**Figure 5.6: Entity-Relationship Diagram**
 
-*(See attached ER diagram — Figure 5.5)*
+*(See attached ER diagram — Figure 5.6)*
 
 ```
 +-------------------+     +------------------------+
@@ -367,17 +313,17 @@ The prototype-vs-production distinction matters here. Some choices — like SQLi
 
 **Table 5.2: Technology Stack Summary**
 
-| Component | Prototype Selection | Production Recommendation | Primary Reason for Prototype Choice |
-|-----------|--------------------|--------------------------|------------------------------------|
-| Speech Recognition | Vosk (vosk-model-small-en-in-0.4, ~36MB) | Custom Vosk language model fine-tuned on hospitality vocabulary | Real-time streaming; native Android SDK; fully offline; Indian English accent support |
-| Intent Classification | MobileBERT TFLite (`hotel_mobilebert.tflite`, 26MB) + Rule-based hybrid | Expanded dataset; multi-language models | Purpose-built for mobile; ~62ms latency; no server required |
-| Backend Framework | FastAPI (Python) | FastAPI with load balancing | Native async + WebSocket; Python ML ecosystem |
-| Database | SQLite | PostgreSQL | Zero-configuration; no DBA required; single-file |
-| Real-Time Communication | WebSocket (OkHttp / Starlette) | WebSocket with message queue (Redis) | Full-duplex; no broker dependency |
-| Mobile Platform | Android Native (Kotlin/Jetpack Compose) | Android with MDM provisioning | Low-cost hardware; native ML SDK; local availability |
-| Text-to-Speech | Android Native TTS | Piper TTS (custom hotel voice model) | Pre-installed; zero cost; no additional model required |
-| Staff Dashboard | Web-based (HTML/CSS/JS) | React/Vue with role-based auth | Browser-accessible; zero installation; rapid iteration |
-| Server Configuration | Single IP/port (SharedPreferences) | MDM-managed certificates | Sufficient for controlled prototype evaluation |
+| Component               | Prototype Selection                                                     | Production Recommendation                                       | Primary Reason for Prototype Choice                                                   |
+| ----------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Speech Recognition      | Vosk (vosk-model-small-en-in-0.4, ~36MB)                                | Custom Vosk language model fine-tuned on hospitality vocabulary | Real-time streaming; native Android SDK; fully offline; Indian English accent support |
+| Intent Classification   | MobileBERT TFLite (`hotel_mobilebert.tflite`, 26MB) + Rule-based hybrid | Expanded dataset; multi-language models                         | Purpose-built for mobile; ~62ms latency; no server required                           |
+| Backend Framework       | FastAPI (Python)                                                        | FastAPI with load balancing                                     | Native async + WebSocket; Python ML ecosystem                                         |
+| Database                | SQLite                                                                  | PostgreSQL                                                      | Zero-configuration; no DBA required; single-file                                      |
+| Real-Time Communication | WebSocket (OkHttp / Starlette)                                          | WebSocket with message queue (Redis)                            | Full-duplex; no broker dependency                                                     |
+| Mobile Platform         | Android Native (Kotlin/Jetpack Compose)                                 | Android with MDM provisioning                                   | Low-cost hardware; native ML SDK; local availability                                  |
+| Text-to-Speech          | Android Native TTS                                                      | Piper TTS (custom hotel voice model)                            | Pre-installed; zero cost; no additional model required                                |
+| Staff Dashboard         | Web-based (HTML/CSS/JS)                                                 | React/Vue with role-based auth                                  | Browser-accessible; zero installation; rapid iteration                                |
+| Server Configuration    | Single IP/port (SharedPreferences)                                      | MDM-managed certificates                                        | Sufficient for controlled prototype evaluation                                        |
 
 ---
 
@@ -395,19 +341,19 @@ Speech-to-text is the entry point of the whole pipeline, so this was the most im
 
 **Table 5.3: Speech Recognition Technology Comparison**
 
-| Criteria | Vosk (~36MB) | Whisper (tiny) | Google Cloud STT | CMU Sphinx |
-|----------|:---:|:---:|:---:|:---:|
-| Offline Capable | Yes | Yes | No | Yes |
-| Model Size | ~36MB | 150MB | N/A (cloud) | ~30MB |
-| Real-Time Streaming | Yes | No (batch) | Yes | Yes |
-| Accuracy (General English) | Good | Good | Excellent | Fair |
-| South Asian Accent Robustness | Good (Indian EN model) | Good | Excellent | Poor |
-| Native Android SDK | Yes | No (wrapper required) | Yes | Yes |
-| Computational Requirements | Low | Moderate | N/A | Very Low |
-| Cost | Free | Free | $0.006/15 sec | Free |
-| Active Development | Yes | Yes | Yes | Minimal |
-| Satisfies NFR-01 (Offline) | ✓ | ✓ | ✗ | ✓ |
-| Satisfies NFR-02 (Privacy) | ✓ | ✓ | ✗ | ✓ |
+| Criteria                      |      Vosk (~36MB)      |    Whisper (tiny)     | Google Cloud STT | CMU Sphinx |
+| ----------------------------- | :--------------------: | :-------------------: | :--------------: | :--------: |
+| Offline Capable               |          Yes           |          Yes          |        No        |    Yes     |
+| Model Size                    |         ~36MB          |         150MB         |   N/A (cloud)    |   ~30MB    |
+| Real-Time Streaming           |          Yes           |      No (batch)       |       Yes        |    Yes     |
+| Accuracy (General English)    |          Good          |         Good          |    Excellent     |    Fair    |
+| South Asian Accent Robustness | Good (Indian EN model) |         Good          |    Excellent     |    Poor    |
+| Native Android SDK            |          Yes           | No (wrapper required) |       Yes        |    Yes     |
+| Computational Requirements    |          Low           |       Moderate        |       N/A        |  Very Low  |
+| Cost                          |          Free          |         Free          |  $0.006/15 sec   |    Free    |
+| Active Development            |          Yes           |          Yes          |       Yes        |  Minimal   |
+| Satisfies NFR-01 (Offline)    |           ✓            |           ✓           |        ✗         |     ✓      |
+| Satisfies NFR-02 (Privacy)    |           ✓            |           ✓           |        ✗         |     ✓      |
 
 **Selection: Vosk (vosk-model-small-en-in-0.4)**
 
@@ -427,17 +373,17 @@ Once the guest's speech is transcribed, the system needs to figure out what they
 
 **Table 5.4: Intent Classification Technology Comparison**
 
-| Criteria | MobileBERT (TFLite) | DistilBERT (TFLite) | Rasa DIET | Rule-Based Only |
-|----------|:---:|:---:|:---:|:---:|
-| Model Size | ~26MB | ~67MB | ~100MB+ server | <1MB |
-| On-Device Inference | Yes | Yes | No (server-side) | Yes |
-| Inference Latency (mobile) | ~62ms | ~150ms | N/A | <5ms |
-| Classification Accuracy | High (99.06% on Vosk test set) | High | High | Moderate |
-| Handles Natural Phrasing Variation | Yes | Yes | Yes | No |
-| Requires Running Server | No | No | Yes | No |
-| Native TFLite Conversion | Yes | Requires extra steps | Not supported | N/A |
-| Purpose-Built for Mobile | Yes | No | No | N/A |
-| Satisfies NFR-03 (Latency) | ✓ | Marginal | Dependent on server | ✓ |
+| Criteria                           |      MobileBERT (TFLite)       | DistilBERT (TFLite)  |      Rasa DIET      | Rule-Based Only |
+| ---------------------------------- | :----------------------------: | :------------------: | :-----------------: | :-------------: |
+| Model Size                         |             ~26MB              |        ~67MB         |   ~100MB+ server    |      <1MB       |
+| On-Device Inference                |              Yes               |         Yes          |  No (server-side)   |       Yes       |
+| Inference Latency (mobile)         |             ~62ms              |        ~150ms        |         N/A         |      <5ms       |
+| Classification Accuracy            | High (99.06% on Vosk test set) |         High         |        High         |    Moderate     |
+| Handles Natural Phrasing Variation |              Yes               |         Yes          |         Yes         |       No        |
+| Requires Running Server            |               No               |          No          |         Yes         |       No        |
+| Native TFLite Conversion           |              Yes               | Requires extra steps |    Not supported    |       N/A       |
+| Purpose-Built for Mobile           |              Yes               |          No          |         No          |       N/A       |
+| Satisfies NFR-03 (Latency)         |               ✓                |       Marginal       | Dependent on server |        ✓        |
 
 **Selection: Hybrid MobileBERT TFLite + Rule-Based Pipeline**
 
@@ -457,15 +403,15 @@ As a side benefit, the rule-based layer is very fast — common requests like "e
 
 **Table 5.5: Backend Framework Comparison**
 
-| Criteria | FastAPI | Flask | Django | Express.js |
-|----------|:---:|:---:|:---:|:---:|
-| Native Async Support | Yes | No | Partial (v3.1+) | Yes |
-| Native WebSocket Support | Yes (Starlette) | Requires Flask-SocketIO | Requires Django Channels | Requires Socket.IO |
-| Automatic API Documentation | Yes (Swagger/OpenAPI) | No | No | No |
-| Python ML Ecosystem | Yes | Yes | Yes | No |
-| Dependency Footprint | Light | Light | Heavy | Light |
-| Request Validation | Built-in (Pydantic) | Manual | Built-in (Forms) | Manual |
-| Performance (requests/sec) | High | Moderate | Moderate | High |
+| Criteria                    |        FastAPI        |          Flask          |          Django          |     Express.js     |
+| --------------------------- | :-------------------: | :---------------------: | :----------------------: | :----------------: |
+| Native Async Support        |          Yes          |           No            |     Partial (v3.1+)      |        Yes         |
+| Native WebSocket Support    |    Yes (Starlette)    | Requires Flask-SocketIO | Requires Django Channels | Requires Socket.IO |
+| Automatic API Documentation | Yes (Swagger/OpenAPI) |           No            |            No            |         No         |
+| Python ML Ecosystem         |          Yes          |           Yes           |           Yes            |         No         |
+| Dependency Footprint        |         Light         |          Light          |          Heavy           |       Light        |
+| Request Validation          |  Built-in (Pydantic)  |         Manual          |     Built-in (Forms)     |       Manual       |
+| Performance (requests/sec)  |         High          |        Moderate         |         Moderate         |        High        |
 
 **Selection: FastAPI**
 
@@ -483,15 +429,15 @@ One practical benefit that came up during development: FastAPI's Pydantic valida
 
 **Table 5.6: Database Technology Comparison**
 
-| Criteria | SQLite | PostgreSQL | MySQL | MongoDB |
-|----------|:---:|:---:|:---:|:---:|
-| Server Process Required | No | Yes | Yes | Yes |
-| Configuration Required | None | Moderate | Moderate | Moderate |
-| Concurrent Write Performance | Limited | Excellent | Good | Good |
-| Storage Footprint | Minimal (<1MB per hotel) | ~100MB+ | ~200MB+ | ~300MB+ |
-| Data Model | Relational | Relational | Relational | Document |
-| DBA Expertise Required | None | Yes | Yes | Yes |
-| Backup Method | Copy single file | pg_dump | mysqldump | mongodump |
+| Criteria                     |          SQLite          | PostgreSQL |   MySQL    |  MongoDB  |
+| ---------------------------- | :----------------------: | :--------: | :--------: | :-------: |
+| Server Process Required      |            No            |    Yes     |    Yes     |    Yes    |
+| Configuration Required       |           None           |  Moderate  |  Moderate  | Moderate  |
+| Concurrent Write Performance |         Limited          | Excellent  |    Good    |   Good    |
+| Storage Footprint            | Minimal (<1MB per hotel) |  ~100MB+   |  ~200MB+   |  ~300MB+  |
+| Data Model                   |        Relational        | Relational | Relational | Document  |
+| DBA Expertise Required       |           None           |    Yes     |    Yes     |    Yes    |
+| Backup Method                |     Copy single file     |  pg_dump   | mysqldump  | mongodump |
 
 **Selection: SQLite**
 
@@ -507,14 +453,14 @@ The data itself is naturally relational: requests belong to rooms, messages belo
 
 **Table 5.7: Real-Time Communication Technology Comparison**
 
-| Criteria | WebSocket | HTTP Polling | Server-Sent Events | MQTT |
-|----------|:---:|:---:|:---:|:---:|
-| Bidirectional | Yes | Simulated | No (server → client only) | Yes |
-| Latency | Low | High (polling interval) | Low | Low |
-| Connection Overhead | Single handshake | Repeated connections | Single connection | Single connection |
-| Requires External Broker | No | No | No | Yes (e.g., Mosquitto) |
-| Native Android Support | Yes (OkHttp) | Yes | Limited | Requires library |
-| Battery Impact on Tablets | Low | High | Low | Low |
+| Criteria                  |    WebSocket     |      HTTP Polling       |    Server-Sent Events     |         MQTT          |
+| ------------------------- | :--------------: | :---------------------: | :-----------------------: | :-------------------: |
+| Bidirectional             |       Yes        |        Simulated        | No (server → client only) |          Yes          |
+| Latency                   |       Low        | High (polling interval) |            Low            |          Low          |
+| Connection Overhead       | Single handshake |  Repeated connections   |     Single connection     |   Single connection   |
+| Requires External Broker  |        No        |           No            |            No             | Yes (e.g., Mosquitto) |
+| Native Android Support    |   Yes (OkHttp)   |           Yes           |          Limited          |   Requires library    |
+| Battery Impact on Tablets |       Low        |          High           |            Low            |          Low          |
 
 **Selection: WebSocket (OkHttp on Android / Starlette on server)**
 
@@ -532,15 +478,15 @@ The server maintains separate WebSocket endpoints for guest devices and the staf
 
 **Table 5.8: Mobile Platform Comparison**
 
-| Criteria | Android (Kotlin) | iOS (Swift) | Flutter | React Native |
-|----------|:---:|:---:|:---:|:---:|
-| Device Cost Range (Sri Lanka) | $50–$150 | $300+ (iPad) | Depends on target | Depends on target |
-| Local Hardware Availability | High | Limited | Target-dependent | Target-dependent |
-| Vosk SDK Support | Native | Native | Community plugin | Community plugin |
-| TFLite SDK Support | Native | Core ML (conversion needed) | Community plugin | Community plugin |
-| On-Device TTS | Built-in | Built-in | Plugin required | Plugin required |
-| ML Inference Performance | Native JNI | Native | Near-native | JS bridge overhead |
-| Jetpack Compose / Material 3 | Yes | N/A | Via Flutter widgets | N/A |
+| Criteria                      | Android (Kotlin) |         iOS (Swift)         |       Flutter       |    React Native    |
+| ----------------------------- | :--------------: | :-------------------------: | :-----------------: | :----------------: |
+| Device Cost Range (Sri Lanka) |     $50–$150     |        $300+ (iPad)         |  Depends on target  | Depends on target  |
+| Local Hardware Availability   |       High       |           Limited           |  Target-dependent   |  Target-dependent  |
+| Vosk SDK Support              |      Native      |           Native            |  Community plugin   |  Community plugin  |
+| TFLite SDK Support            |      Native      | Core ML (conversion needed) |  Community plugin   |  Community plugin  |
+| On-Device TTS                 |     Built-in     |          Built-in           |   Plugin required   |  Plugin required   |
+| ML Inference Performance      |    Native JNI    |           Native            |     Near-native     | JS bridge overhead |
+| Jetpack Compose / Material 3  |       Yes        |             N/A             | Via Flutter widgets |        N/A         |
 
 **Selection: Android Native (Kotlin 2.0.21 with Jetpack Compose)**
 
@@ -558,14 +504,14 @@ Third, Jetpack Compose (Google, 2024b) with Material Design 3 is a good fit for 
 
 **Table 5.9: Text-to-Speech Technology Comparison**
 
-| Criteria | Android Native TTS | Piper TTS | Amazon Polly |
-|----------|:---:|:---:|:---:|
-| Additional Storage | None (pre-installed) | ~50–100MB per voice model | N/A (cloud) |
-| Voice Quality | Acceptable | High (natural) | High (natural) |
-| Custom Voice Support | No | Yes | Yes |
-| Offline Operation | Yes | Yes | No |
-| Configuration Required | None | Model download + setup | API key + internet |
-| Cost | Free | Free | $4 per 1M characters |
+| Criteria               |  Android Native TTS  |         Piper TTS         |     Amazon Polly     |
+| ---------------------- | :------------------: | :-----------------------: | :------------------: |
+| Additional Storage     | None (pre-installed) | ~50–100MB per voice model |     N/A (cloud)      |
+| Voice Quality          |      Acceptable      |      High (natural)       |    High (natural)    |
+| Custom Voice Support   |          No          |            Yes            |         Yes          |
+| Offline Operation      |         Yes          |            Yes            |          No          |
+| Configuration Required |         None         |  Model download + setup   |  API key + internet  |
+| Cost                   |         Free         |           Free            | $4 per 1M characters |
 
 **Selection: Android Native TTS**
 

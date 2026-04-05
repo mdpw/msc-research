@@ -23,27 +23,19 @@ Each research objective defined in Chapter 1 is reviewed against what was actual
 
 ### 10.3.1 Identifying and Quantifying the Real-World Accuracy Gap
 
-One of the key technical findings of this research is measuring something that standard NLU benchmarking does not reveal. A MobileBERT model trained only on clean text (Model A) achieves 98.07% accuracy when tested on clean text — which is what most published work would report as the model's performance. When the same model is evaluated on actual Vosk transcriptions of the same utterances, accuracy drops to 89.34%, a reduction of 8.73 percentage points. This degradation is not random noise. It is a predictable consequence of Vosk's characteristic transcription errors — phonetically similar substitutions, insertions, and deletions — changing the vocabulary the clean-trained model learned to associate with specific intents.
-
-With an overall WER of 11.43% across the dataset, and 47.8% of utterances changed in some way by Vosk, the production voice pipeline operates in meaningfully different conditions from what clean-text evaluation assumes. This finding addresses a genuine gap: offline, on-device deployments using open-source edge STT introduce a noise profile that differs from both clean text and cloud STT error patterns, and this profile needs to be accounted for in training to achieve reliable real-world performance.
+Model A, trained only on clean text, achieves 98.07% accuracy on clean text — which is what most published work would report. On actual Vosk transcriptions of the same utterances, accuracy drops to 89.34%, a reduction of 8.73 percentage points. With a WER of 11.43% and 47.8% of utterances changed in some way by Vosk, the production pipeline operates under meaningfully different conditions from what clean-text evaluation assumes. Offline, on-device STT introduces a noise profile that must be accounted for in training — and this study measures that gap directly.
 
 ### 10.3.2 Noise-Aware Training Closes — and Exceeds — the Gap
 
-Model C, trained on the mixed paired dataset (clean + Vosk-transcribed text), achieves 99.06% accuracy on real Vosk output — not only recovering the 8.73 percentage point drop but surpassing the clean baseline by 0.99 percentage points. The gap recovery of 111.3% shows that the noise-aware model generalises better across both conditions than the clean-only model does on its best condition.
-
-Model B, trained only on Vosk-transcribed text, also outperforms the clean-trained baseline on Vosk output (96.38% vs 89.34%), which confirms that any exposure to the target noise profile helps. However, Model B is 2.68 percentage points below Model C, which shows that the mixed training strategy — preserving clean-text generalisation while adding Vosk robustness — is better than training on noisy data alone.
-
-These results are the main empirical finding: Vosk-specific noise-aware training using a paired clean and noisy dataset is an effective and practical way to close the accuracy gap between clean-text NLU benchmarks and real offline pipeline performance.
+Model C, trained on the mixed paired dataset (clean + Vosk-transcribed text), achieves 99.06% on real Vosk output — recovering the 8.73 percentage point drop and surpassing the clean baseline by 0.99 points (111.3% gap recovery). Model B, trained on Vosk-transcribed text only, reaches 96.38% on Vosk output, confirming that any exposure to the target noise profile helps. But it falls 2.68 points below Model C, showing that the mixed strategy — preserving clean-text generalisation while adding Vosk robustness — is better than training on noisy data alone.
 
 ### 10.3.3 A Concrete Example: The towel_request Case
 
-The most visible illustration of Vosk-induced accuracy degradation is the `towel_request` category. In clean-text evaluation, Model A performs well (precision 0.97). On Vosk output, recall drops to 0.51 and F1 falls to 0.67 — the weakest result across all 18 intents in all evaluation conditions. Vosk's WER for towel_request utterances is 16.33% (third-highest across all intents), and the confusion matrix shows the word "towel" being consistently transcribed as phonetically similar alternatives that fall into the vocabulary of other intents: `room_cleaning`, `toiletries_request`, `food_order`, and `checkout_billing`.
-
-Model C recovers `towel_request` F1 to 0.98 on Vosk output. This one intent illustrates the broader pattern clearly: Vosk's phonetic substitutions create intent-specific accuracy drops invisible under clean-text evaluation, and noise-aware training directly addresses them.
+`towel_request` is the clearest illustration of the gap. Model A achieves precision 0.97 on clean text, but on Vosk output recall drops to 0.51 and F1 falls to 0.67 — the weakest result across all 18 intents. Vosk's WER for this category is 16.33% (third-highest), and the confusion matrix shows "towel" being transcribed as phonetically similar words that land in `room_cleaning`, `toiletries_request`, `food_order`, and `checkout_billing`. Model C recovers `towel_request` F1 to 0.98 on Vosk output — directly demonstrating how noise-aware training addresses intent-specific degradation that clean-text evaluation cannot detect.
 
 ### 10.3.4 Consistent Noise Profile Between Training and Deployment
 
-A key design decision in this research was using the same Vosk model (`vosk-model-small-en-in-0.4`) to generate the noisy training data that is deployed in the Android application. This consistency is what makes noise-aware training work. If the training noise was generated by a different STT engine or a different Vosk variant, the error patterns in training would not match the errors the model encounters in production. The Indian English model was also a better acoustic fit for Sri Lankan English than a US English model, which kept the WER to 11.43% rather than significantly higher.
+The same Vosk model (`vosk-model-small-en-in-0.4`) was used to generate the noisy training data and is deployed in the Android application. This consistency is what makes noise-aware training work — if training noise came from a different STT engine or model variant, the error patterns would not match production. The Indian English model was also a better acoustic fit for Sri Lankan English than a US English model, keeping WER at 11.43%.
 
 ### 10.3.5 Balanced and Reproducible Evaluation Design
 
@@ -51,11 +43,11 @@ The 10,080-utterance dataset (18 intents, 560 per intent) was created with exact
 
 ### 10.3.6 Privacy by Architecture
 
-Unlike cloud-based solutions where privacy depends on provider policies and legal agreements, this prototype provides a structural privacy guarantee. Voice data cannot leave the guest device because the architecture has no mechanism to send audio externally. This is a stronger assurance than any policy-based approach and is particularly relevant as data protection legislation continues to develop across South and Southeast Asia.
+Voice data cannot leave the guest device — the architecture has no mechanism to send audio externally. This is a structural guarantee, not a policy-based one. It is a stronger assurance than cloud-based alternatives where privacy depends on provider agreements, and is particularly relevant as data protection legislation develops across South and Southeast Asia.
 
 ### 10.3.7 Cost-Effectiveness and Viability at Scale
 
-Demonstrating that the system is affordable at the hardware level is essential evidence for the research question — "viable alternative" only holds if hotels can actually afford to deploy it. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel. This section provides a structured cost-effectiveness appraisal as defined in the evaluation methodology (Section 3.8.4): an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel.
+A "viable alternative" only holds if hotels can actually afford to deploy it. This section presents an itemised per-room deployment cost, a comparison against cloud-based and commercial alternatives, and a three-year total cost of ownership (TCO) projection for a hypothetical 50-room hotel, as defined in the evaluation methodology (Section 3.8.4).
 
 #### Hardware and Software Cost — Production Deployment
 
@@ -87,7 +79,7 @@ Spread over three years with zero recurring software costs, this amounts to appr
 
 #### Scenario Comparison — Two Deployment Models
 
-Sri Lanka's registered accommodation sector is predominantly composed of small and independent properties (SLTDA, 2024), for whom enterprise-grade hospitality platforms with per-room subscription fees represent a prohibitive cost barrier. This context makes the cost comparison below particularly relevant: the question is not whether the proposed system is cheap in absolute terms, but whether it is affordable relative to the alternatives that would otherwise serve this market.
+Sri Lanka's accommodation sector is predominantly small and independent properties (SLTDA, 2024), for whom per-room subscription fees are a prohibitive barrier. The question is not whether the system is cheap in absolute terms, but whether it is affordable relative to the alternatives that would otherwise serve this market.
 
 **Table 10.2: Three-Year TCO Comparison for a 50-Room Hotel**
 
@@ -103,16 +95,16 @@ Sri Lanka's registered accommodation sector is predominantly composed of small a
 | Internet dependency | LAN only | Constant internet | Constant internet |
 | **Estimated 3-year total** | **$3,220–8,800** | **$4,315–11,000** | **Significantly higher; proprietary terms** |
 
-**Cloud STT cost estimate (Google Cloud Speech-to-Text):** Google Cloud STT is billed at USD 0.006 per 15 seconds of audio (Google Cloud, 2024; consistent with the figure cited in Section 5.6.1). The STT API fee range assumes 5–10 voice requests per room per day, each lasting approximately 10 seconds:
+**Cloud STT cost estimate (Google Cloud Speech-to-Text):** Billed at USD 0.006 per 15 seconds of audio (Google Cloud, 2024; consistent with Section 5.6.1), assuming 5–10 requests per room per day at ~10 seconds each:
 
 ```
 Low estimate  (5 req/day):  5 × 365 × (10/15) × $0.006 × 50 rooms × 3 yr = $1,095
 High estimate (10 req/day): 10 × 365 × (10/15) × $0.006 × 50 rooms × 3 yr = $2,190
 ```
 
-This API cost accumulates indefinitely with no ceiling and requires reliable internet connectivity — which is not guaranteed across all Sri Lankan hotel properties (Wickramasinghe and Ratnayake, 2022) — introducing an infrastructure dependency absent from the proposed system.
+This cost accumulates with no ceiling and requires reliable internet — not guaranteed across all Sri Lankan hotel properties (Wickramasinghe and Ratnayake, 2022).
 
-**Commercial hospitality platforms:** Dedicated voice platforms for hospitality — such as Amazon Alexa Smart Properties for Hospitality (Amazon Web Services, n.d.) — require proprietary or certified hardware, constant cloud connectivity, and per-room subscription agreements. Amazon has not published public pricing for Alexa Smart Properties; pricing is disclosed via enterprise sales engagement (Amazon Web Services, n.d.). However, even the hardware cost alone (Echo-class devices at USD 100+ per room for 50 rooms) matches the entire lower-bound hardware cost of the proposed system before any subscription fees are applied. Buhalis and Moldavska (2022) note that voice assistant adoption in hospitality has been concentrated in large chains precisely because the cost and infrastructure requirements of commercial platforms are incompatible with the operational constraints of small and independent properties — the market this research directly targets.
+**Commercial hospitality platforms:** Platforms such as Amazon Alexa Smart Properties for Hospitality require proprietary hardware, constant cloud connectivity, and per-room subscription fees not publicly disclosed (Amazon Web Services, n.d.). The hardware cost alone (Echo-class devices at USD 100+ per room) matches the entire lower-bound cost of the proposed system before any subscription is applied. Buhalis and Moldavska (2022) note that commercial platform adoption has been confined to large chains precisely because their costs are incompatible with small independent properties.
 
 #### Summary: Cost-Effectiveness Objective Met
 
@@ -124,95 +116,46 @@ The proposed system is the lowest-cost option across both comparison scenarios, 
 - **No vendor lock-in** — all components (Vosk, MobileBERT, FastAPI, SQLite) can be substituted, modified, or extended without licence constraints or contractual dependencies.
 - **Market fit** — at USD 21–59 per room per year amortised over three years (including production-grade server, network infrastructure, and UPS), the system is within reach of the small independent hotel operators that make up the majority of Sri Lanka's registered accommodation sector (SLTDA, 2024), and for whom commercial alternatives with ongoing per-room subscription fees are not a realistic option.
 
-The research objective — to demonstrate that privacy-preserving, offline voice-based service automation is achievable on low-cost hardware — is therefore met. The proposed system delivers voice assistant capability at a hardware-only cost that commercial alternatives cannot match, with no ongoing technology expenditure required.
+The cost-effectiveness objective is met. The system delivers voice assistant capability at a hardware-only cost that commercial alternatives cannot match, with no ongoing software expenditure.
 
 ---
 
 ## 10.4 Limitations and Weaknesses
 
-### 10.4.1 WER Derived from TTS-Synthesised Speech, Not Real Speakers
+### 10.4.1 WER Measured on Synthesised Speech, Not Real Guests
 
-The WER of 11.43% and the Vosk noise profiles used for training were produced by passing text-to-speech audio (gTTS, `tld='co.in'`) through the Vosk model, not by recording real hotel guests. TTS-to-Vosk transcription produces realistic phonetic errors, but it does not capture the full range of acoustic variation from real speakers: non-native pronunciation patterns, hesitations, varying microphone distances, room acoustics, and accent strength differences across individuals.
-
-This is the most significant methodological limitation of the study. The noise-aware training approach is sound and the results are strong, but they were obtained under controlled synthetic conditions. The actual WER in a real hotel deployment — with guests of diverse nationalities — would likely be different, and whether Model C's advantage transfers to those conditions remains unknown.
+The 11.43% WER and the Vosk noise profiles used for Model C training were generated by passing gTTS audio through Vosk — not by recording real speakers. TTS does not replicate the full range of real speech: varying accents, hesitations, microphone distance, and room acoustics. Whether the noise-aware training advantage holds with real hotel guests remains untested. This is the most significant methodological limitation of the study.
 
 ### 10.4.2 Synthetically Generated Training Data
 
-The 10,080-utterance dataset was generated synthetically through template expansion and paraphrase augmentation, not collected from real hotel guest interactions. Synthetic data may not capture the full range of real speech, including:
+All 10,080 utterances were produced through template expansion and paraphrase augmentation, not collected from real guest interactions. The dataset does not include fragmented sentences, code-switching between English and Sinhala or Tamil, or culturally specific phrasing. Model performance on genuine guest speech has not been measured.
 
-- Incomplete or fragmented sentences common in natural spoken requests
-- Code-switching between English and Sinhala or Tamil
-- Indirect or culturally specific ways of making requests
-- Natural hesitations, fillers, and self-corrections
+### 10.4.3 Tokenizer Mismatch on Android
 
-The model's performance on genuinely real guest utterances — both in accuracy and in handling unexpected phrasings — has not been tested.
+The Python evaluation pipeline uses the correct HuggingFace WordPiece tokenizer, which is why 99.06% accuracy is reported. The Android implementation in `NLUService.kt` uses a simplified word-level tokenizer — words not found in `vocab.json` are replaced with an unknown token, and sub-word splitting is not performed. Actual on-device accuracy is therefore lower than the reported figure, particularly for hotel-specific vocabulary. The rule-based Tier 1 keyword layer partially compensates for the most common requests. Implementing a proper WordPiece tokenizer in Kotlin, or using TFLite's built-in tokenization support, would be the recommended fix in a production deployment.
 
-### 10.4.3 Residual Weakness in misc_request
+### 10.4.4 No Field Testing in a Real Hotel
 
-Even with noise-aware training, `misc_request` is the weakest intent for Model C, with F1 of 0.96 on Vosk output compared to 1.00 for several other intents. The confusion matrix shows some `misc_request` instances being misclassified as `blanket_request` and `pillow_request`. This is an inherent challenge with having a general catch-all category that by design overlaps semantically with other classes. Neither training strategy fully resolves this ambiguity, and it would persist with more data.
+The system was not deployed in an operational hotel. User acceptance, staff adoption, latency on real hotel Wi-Fi under competing traffic, and guest usability with diverse accents have not been measured. Strong evaluation results under controlled conditions do not guarantee the same performance in a live environment.
 
-### 10.4.4 No Out-of-Scope Query Handling
+### 10.4.5 Prototype-Scale Architecture
 
-The system assumes all voice input from guests is a hotel service request. It has no mechanism to distinguish valid service requests ("Can I have a bottle of water?") from unrelated utterances ("What is the weather like tomorrow?"). The 18-class classifier always assigns one of the 18 labels regardless of input type. The 0.60 confidence threshold provides some protection, but no specific mechanism was designed or evaluated for detecting out-of-scope queries. In real deployment, unrecognised inputs that pass the threshold would generate unnecessary staff notifications, which could erode staff trust in the system over time.
+Several decisions are appropriate for a research prototype but would need to change for production: SQLite has limited concurrent write support under multi-room load; there is no staff authentication; HTTP traffic is unencrypted; and the server runs as a single Uvicorn process with no crash recovery. These are deliberate scope boundaries, not oversights. The research goal was to demonstrate feasibility, not to deliver a production-ready system.
 
-### 10.4.5 Limited Intent Scope
+### 10.4.6 English Language Only
 
-The prototype handles 18 single-turn, single-intent voice commands. Real hotel operations involve interactions the current system cannot handle:
+The system supports English only. In Sri Lanka, guests and staff may communicate in Sinhala, Tamil, or a code-switched mix. Vosk has a Sinhala model, and the NLU pipeline could in principle support multilingual input, but this was outside the scope of this prototype. Multilingual support is the most contextually relevant direction for future work.
 
-- Multi-item requests ("I'd like two towels and a pillow")
-- Conditional requests ("If the restaurant is still open, I'd like to order dinner")
-- Follow-up references ("Actually, make that three instead of two")
-- Conversational queries ("What time does the pool close?")
-
-Multi-turn dialogue, entity extraction beyond simple quantities, and complex request parsing are outside the current prototype's scope.
-
-### 10.4.6 Prototype-Scale Architecture
-
-Several design decisions are reasonable for a single-hotel research prototype but would not scale without changes:
-
-| Prototype Decision | Production Limitation |
-|-------------------|-----------------------|
-| SQLite database | Limited concurrent write support under high multi-room load |
-| No staff authentication | Any device on the hotel Wi-Fi can access the dashboard and API |
-| Manual room number configuration | Each device must be set up individually; no central provisioning |
-| Single Uvicorn process | No crash recovery, process management, or load balancing |
-| HTTP without TLS | Local network traffic is unencrypted |
-
-These are deliberate scope decisions, not oversights. The research goal was to demonstrate feasibility, not to deliver a production-ready product.
-
-### 10.4.7 No Field Testing in a Real Hotel
-
-The system was not deployed in an actual hotel for operational testing. User acceptance, staff adoption, end-to-end latency on real hotel Wi-Fi with competing traffic, and guest usability with real accents have not been measured. High classification accuracy under controlled evaluation does not guarantee the same experience in a live hotel environment.
-
-### 10.4.8 Tokenizer Mismatch Between Evaluation and Android Deployment
-
-MobileBERT uses a WordPiece tokenizer, where words are split into sub-word units — for example, "housekeeping" becomes ["house", "##keeping"]. The Python evaluation pipeline (Steps 3 and 4) uses the correct HuggingFace MobileBERT tokenizer, which is why the reported 99.06% accuracy is achieved.
-
-The Android implementation in `NLUService.kt`, however, uses a simplified word-level tokenizer that splits text by whitespace and looks up each whole word in a `vocab.json` file. Any word not found in the vocabulary is replaced with the unknown token, and sub-word tokenization is not performed. As a result, the actual intent classification accuracy on the Android device will be lower than 99.06% — particularly for less common words and hotel-specific terminology that Vosk transcribes into forms requiring sub-word decomposition.
-
-This was a practical trade-off made to avoid implementing a full WordPiece tokenizer in Kotlin. The rule-based keyword matching layer (Tier 1) partially compensates by handling the most common hotel service requests before the MobileBERT model is invoked. Implementing a proper WordPiece tokenizer on Android, or using TFLite's built-in tokenization support, would be the recommended fix in a production deployment.
-
-### 10.4.9 Single STT Engine Evaluated
-
-This research uses Vosk as the only offline STT engine. The core finding — that there is an accuracy gap between clean-text NLU and Vosk-pipeline NLU, and that noise-aware training closes this gap — is demonstrated specifically for Vosk's transcription error patterns.
-
-Other offline STT engines such as Whisper (tiny variant) or CMU Sphinx would produce different transcription errors with different characteristics. The size of the accuracy gap and the degree to which noise-aware training recovers it would likely differ for other STT engines. The general principle — that NLU models should be trained on STT-transcribed data to perform well in a real pipeline — is expected to hold across engines, but this has not been empirically validated in this study. Future work could replicate the three-model pipeline with Whisper tiny as the STT engine to test whether the findings generalise.
-
-### 10.4.10 English Language Only
-
-The system currently supports English only. In the Sri Lankan hospitality context, some staff and guests may communicate more naturally in Sinhala, Tamil, or a code-switched mix of languages. Vosk supports Sinhala as a separate model, and the NLU model could in principle be fine-tuned on Sinhala or multilingual data, but this was outside the scope of this research. Supporting multiple languages is identified as a direction for future work.
-
-### 10.4.11 Summary of Limitations
+### 10.4.7 Summary of Limitations
 
 | Limitation | Impact on Findings | Mitigation in This Study | Future Work |
 |---|---|---|---|
-| Synthetic dataset | Accuracy may be optimistic vs. real guest speech | Accepted practice when real data unavailable | Collect real hotel utterances for retraining |
-| TTS-generated Vosk transcriptions | Gap magnitude may differ with real speech | Demonstrates principle of noise-aware training | Re-measure with real recorded speech |
-| Tokenizer mismatch on Android | Android accuracy lower than reported 99.06% | Rule-based Tier 1 compensates for common cases | Implement WordPiece tokenizer in Kotlin |
-| Single STT engine (Vosk only) | Findings may not generalise to other STT engines | Vosk is the most practical offline choice | Replicate with Whisper tiny |
-| No real hotel deployment | Operational claims are theoretical | System tested on real device, architecture validated | Conduct field study in a Sri Lankan hotel |
-| No concurrent load testing | SQLite bottleneck threshold unknown | Single-user latency tested and within NFR-03 | Load test with locust at realistic room count |
-| English only | Limited applicability for non-English speakers | Target user group communicates in English | Add Sinhala/Tamil support |
+| TTS-synthesised WER | Gap magnitude may differ with real speech | Demonstrates the principle of noise-aware training | Re-measure with real recorded speech |
+| Synthetic training data | Accuracy may be optimistic vs. real guest speech | Accepted practice when real data is unavailable | Collect real hotel utterances for retraining |
+| Tokenizer mismatch on Android | On-device accuracy lower than reported 99.06% | Tier 1 keyword layer compensates for common cases | Implement WordPiece tokenizer in Kotlin |
+| No real hotel deployment | Operational claims are based on controlled testing | System tested on real hardware; architecture validated | Conduct field study in a Sri Lankan hotel |
+| Prototype-scale architecture | Not production-ready without further engineering | Scope limited to feasibility demonstration | Replace SQLite, add authentication and TLS |
+| English only | Limited applicability for non-English speakers | Target guests communicate in English | Add Sinhala and Tamil support |
 
 ---
 
@@ -246,22 +189,20 @@ The system currently supports English only. In the Sri Lankan hospitality contex
 
 ## 10.6 Knowledge and Expertise Gained
 
-**On-device machine learning deployment.** Working through the full PyTorch → TFLite → Android pipeline gave a clear understanding of the practical challenges of edge ML deployment. The most useful lesson was that model conversion is not a straightforward export step — it requires careful checking of input/output format consistency (particularly the requirement to include `token_type_ids` as a third input), tokenisation compatibility with `padding='max_length'` for fixed-shape TFLite inputs, and label map alignment between the PyTorch training output and the TFLite inference output.
+**On-device machine learning deployment.** The PyTorch → TFLite → Android pipeline is not a straightforward export. It requires careful checking of input format consistency (including `token_type_ids` as a third input), tokenisation with `padding='max_length'` for fixed-shape TFLite inputs, and label map alignment between PyTorch and TFLite outputs.
 
-**Experimental design for comparative NLU evaluation.** Designing an experiment that isolates training data composition as the only variable — identical model architecture, identical hyperparameters, identical test set — required careful planning. The most important decision was fixing the shared test set before training any model. Without this, the gap between Model A and Model C could have been attributed to differences in what samples they were evaluated on rather than genuine differences in behaviour.
+**Experimental design for comparative NLU evaluation.** Isolating training data composition as the only variable — identical architecture, hyperparameters, and test set across all three models — required fixing the shared test set before training any model. Without this, accuracy differences between Model A and Model C could have been attributed to test set composition rather than genuine behaviour differences.
 
-**ASR-NLU pipeline interaction.** This research showed concretely that the accuracy gap between clean-text NLU performance and real pipeline performance is measurable and intent-specific. The `towel_request` case — WER 16.33%, F1 dropping from 0.97 to 0.67 under clean-trained evaluation — shows that this gap is not evenly distributed and is driven by specific intents with phonetically vulnerable vocabulary. This is a practically useful insight for any offline voice system design.
+**ASR-NLU pipeline interaction.** The accuracy gap between clean-text and real pipeline performance is measurable and intent-specific. The `towel_request` case — WER 16.33%, F1 dropping from 0.97 to 0.67 — shows the gap is driven by intents with phonetically vulnerable vocabulary. Per-intent WER is a useful pre-deployment diagnostic: higher WER intents are the ones most at risk from pipeline-induced accuracy loss.
 
-**Per-intent WER as a diagnostic tool.** The variation in WER across intents (6.78% for `emergency` to 16.83% for `temperature_control`) shows that Vosk's difficulty varies systematically with the vocabulary in each category. Intents with higher WER are also the ones most likely to show accuracy degradation when the model is trained only on clean text. This relationship provides a useful pre-deployment diagnostic: compute per-intent WER first to identify which categories are most at risk from pipeline-induced accuracy loss.
+**Privacy-preserving system design.** Privacy-by-design is an architectural commitment, not a compliance checkbox. Ensuring voice data cannot leave the device required thinking through data flows at every stage — from microphone capture through to the WebSocket broadcast — and influenced component selection from the start.
 
-**Privacy-preserving system design.** Designing a system where voice data privacy is guaranteed by architecture rather than by policy required thinking carefully about data flows at every level. This experience reinforced that privacy-by-design is not an afterthought or a compliance checkbox — it is an architectural commitment that influences component selection and data flow design from the start.
-
-**Research methodology.** The Design Science Research approach combined with iterative prototyping worked well for a project involving substantial technical uncertainty. The most valuable lesson: starting with a working prototype early reveals constraints that no amount of upfront planning can anticipate. Both the Vosk accent mismatch problem and the hybrid NLU pipeline design emerged from hands-on implementation, not from design documents.
+**Research methodology.** Starting with a working prototype early reveals constraints that no amount of upfront planning can anticipate. The Vosk accent mismatch problem and the hybrid NLU pipeline design both emerged from hands-on implementation, not from design documents.
 
 ---
 
 ## 10.7 Summary
 
-The prototype successfully demonstrates that a low-cost, fully offline voice assistant for hospitality services is achievable on commodity Android hardware — and that it meets the technical bar for viability as an alternative to traditional room service communication. NLU accuracy reaches 99.06% under real pipeline conditions (Model C), the system runs within the 5-second latency target, total hardware cost falls in the $50–$150 per-room range, and privacy is guaranteed by architecture. An important technical finding supporting this conclusion is the three-model experiment: Model A's 8.73 percentage point drop from clean text (98.07%) to Vosk output (89.34%) shows that clean-text benchmarks overstate real pipeline performance, and Model C's recovery to 99.06% — 111.3% gap recovery — demonstrates that noise-aware training is what makes the NLU component reliable in a real deployment.
+The prototype meets the technical bar for viability as an offline alternative to traditional room service communication. Model C achieves 99.06% NLU accuracy on real Vosk output — recovering the 8.73 percentage point gap that clean-text training introduces — the system runs within the 5-second latency target, hardware cost falls in the $50–$150 per-room range, and voice data never leaves the guest device. The three-model experiment is the key supporting evidence: it shows that clean-text benchmarks overstate real pipeline performance, and that noise-aware training is what makes the NLU component reliable in a real deployment.
 
-The most important caveat is that both the WER measurement and the training noise profiles were derived from TTS-synthesised speech rather than real speaker recordings. Confirming these results with actual hotel guest speech is the most critical next step before drawing firm conclusions about production readiness. Deploying the system in a real hotel and evaluating it on real guest utterances is the most important direction for future research.
+The main caveat is that both the WER measurement and the training noise profiles came from TTS-synthesised speech, not real recordings. Confirming these results with actual hotel guest speech is the most critical next step before drawing firm conclusions about production readiness.
