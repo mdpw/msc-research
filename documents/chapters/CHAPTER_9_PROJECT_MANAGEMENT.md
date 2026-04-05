@@ -10,41 +10,41 @@ This chapter covers how the project was managed from planning through to submiss
 
 ### 9.2.1 Work Breakdown Structure
 
-The project was divided into six work packages, each with specific deliverables and a defined timeframe. Table 9.1 shows the breakdown.
+The project was divided into six work packages, each with specific deliverables and a defined timeframe. The full project ran across 25 weeks from Week 1 to Week 25. Table 9.1 shows the breakdown.
 
 **Table 9.1: Work Breakdown Structure**
 
 | Work Package | Activities | Planned Duration |
 |-------------|-----------|-----------------|
-| WP1: Research and Planning | Literature review, requirements gathering, hotel management interviews, guest survey, technology evaluation | Weeks 1–4 |
-| WP2: Dataset Development and Model Training | Hotel intent dataset creation (10,080 utterances), Vosk transcription pairing, three-model MobileBERT training, TFLite conversion, accuracy evaluation | Weeks 4–7 |
-| WP3: Android Application Development | Vosk integration, hybrid NLU pipeline, voice UI in Jetpack Compose, TTS, request submission flow, WebSocket client | Weeks 6–10 |
-| WP4: Backend and Dashboard Development | FastAPI server, SQLite database design, WebSocket implementation, staff dashboard HTML/CSS/JS | Weeks 8–11 |
-| WP5: Integration and Testing | End-to-end integration, system testing, NLU and WER evaluation, bug fixes | Weeks 11–14 |
-| WP6: Report Writing and Submission | Dissertation writing, diagrams, appendices, proofreading, final submission | Weeks 10–18 |
+| WP1: Research and Planning | Literature review, requirements gathering, hotel management interviews, guest survey, technology evaluation | Weeks 1–5 |
+| WP2: Dataset Development and Model Training | Hotel intent dataset creation (10,080 utterances), Vosk transcription pairing, three-model MobileBERT training, TFLite conversion, accuracy evaluation | Weeks 5–9 |
+| WP3: Android Application Development | Vosk integration, hybrid NLU pipeline, voice UI in Jetpack Compose, TTS, request submission flow, WebSocket client | Weeks 8–15 |
+| WP4: Backend and Dashboard Development | FastAPI server, SQLite database design, WebSocket implementation, staff dashboard HTML/CSS/JS | Weeks 10–14 |
+| WP5: Integration and Testing | End-to-end integration, system testing, NLU and WER evaluation, bug fixes | Weeks 15–20 |
+| WP6: Report Writing and Submission | Dissertation writing, diagrams, appendices, proofreading, final submission | Weeks 13–25 |
 
 **Figure 9.1: Project Gantt Chart**
 
 *(See attached Gantt chart — Figure 9.1)*
 
 ```
-Week:        1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18
-             |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
-WP1 Research [========]
-WP2 Dataset        [======]
-                       M2▲ (>90% NLU accuracy)
-WP3 Android               [============]
-                                      M3▲ (Voice-to-text working)
-WP4 Backend                    [=========]
-WP5 Testing                               [========]
-                                              M4▲ (End-to-end prototype)
-                                                     M5▲ (Evaluation done)
-WP6 Writing                         [========================]
-             |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
-M1▲ = Lit review done (Week 4)                       M6▲ = Submission (Week 18)
+Week:        1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+             |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
+WP1 Research [==========]
+WP2 Dataset           [==========]
+                                M2▲ (>90% NLU accuracy)
+WP3 Android                 [==============================]
+                                                         M3▲ (Voice-to-text working)
+WP4 Backend                       [====================]
+WP5 Testing                                          [============]
+                                                              M4▲ (End-to-end prototype)
+                                                                    M5▲ (Evaluation done)
+WP6 Writing                               [================================]
+             |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
+M1▲ = Lit review done (Week 5)                                    M6▲ = Submission (Week 25)
 ```
 
-WP3 (Android) and WP4 (Backend) were developed in parallel from Week 8, which was an intentional decision — the Android app and FastAPI server have well-defined API contracts, so they could be built independently and integrated in WP5. Report writing (WP6) began in Week 10 and ran concurrently with implementation to ensure documentation stayed current.
+WP3 (Android) and WP4 (Backend) were developed in parallel from Week 10, which was an intentional decision — the Android app and FastAPI server have well-defined API contracts, so they could be built independently and integrated in WP5. Report writing (WP6) began in Week 13 and ran concurrently with implementation to ensure documentation stayed current.
 
 ### 9.2.2 Schedule Adherence
 
@@ -52,7 +52,7 @@ The project broadly followed the planned timeline, with two deviations worth not
 
 **Deviation 1 — Model conversion took longer than expected.** Converting MobileBERT from PyTorch to TFLite was estimated at two to three days but took close to a week. The main difficulty was building a compatible BERT word-piece tokeniser in Kotlin from scratch, since the standard HuggingFace tokeniser is Python-only and cannot run on Android. The tokeniser had to correctly handle subword splitting, special tokens ([CLS], [SEP], [UNK]), padding, and truncation in a way that matched exactly what the model expected. This was tedious to verify and required careful debugging against known test inputs. The delay was absorbed within the buffer in WP3.
 
-**Deviation 2 — Report writing started later than planned.** The original plan had writing beginning in Week 10, but WebSocket stability issues in Iteration 3 (unexpected client disconnections when the device screen turned off) demanded more focused engineering time. Writing began in earnest in Week 12. This was managed by maintaining detailed notes during implementation and increasing writing effort in the final weeks.
+**Deviation 2 — Report writing started later than planned.** The original plan had writing beginning in Week 13, but WebSocket stability issues in Iteration 3 (unexpected client disconnections when the device screen turned off) demanded more focused engineering time. Writing began in earnest in Week 15. This was managed by maintaining detailed notes during implementation and increasing writing effort in the final weeks.
 
 All planned deliverables were completed within the project timeline. The iterative development approach provided natural review points at the end of each iteration, which helped catch schedule risks before they became critical problems.
 

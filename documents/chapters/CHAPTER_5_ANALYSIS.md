@@ -74,9 +74,89 @@ There are two actors: the **Guest**, who interacts through voice and touch on th
 
 ### 5.4.1 Voice Request Pipeline
 
-The voice pipeline handles everything from when the guest presses the microphone button through to the request appearing on the staff dashboard. The specific values in the flow below come directly from the implementation: a 1,500ms silence timeout to detect end of speech, a maximum recording duration of 10,000ms, a minimum NLU confidence threshold of 0.60, up to 2 retries on low-confidence results, and a maximum tokenisation length of 32 tokens.
+The voice pipeline handles everything from when the guest presses the microphone button through to the request appearing on the staff dashboard. It has three main stages: audio capture and speech recognition on the device, hybrid intent classification, and a confirmation step before the request is submitted to the server. The specific parameter values chosen for each stage are covered in the design chapter.
 
 **Figure 5.3: Voice Request Pipeline**
+
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 5.3: Voice Request Pipeline*
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam activityBackgroundColor #F8F9FA
+skinparam activityBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam diamondBackgroundColor #FFF9E6
+skinparam diamondBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #DDDDDD
+
+title Figure 5.3: Voice Request Pipeline
+
+start
+
+:Guest presses microphone button;
+
+:Audio Capture\n<i>16kHz PCM, on-device</i>;
+
+:Voice Activity Detection\n<i>Monitors speech energy</i>;
+
+if (Speech detected?) then (No)
+  :Keep waiting;
+  note right: Stops after maximum\nrecording duration
+  stop
+else (Yes)
+endif
+
+:Record until silence detected;
+
+:Vosk STT Processing\n<i>On-device, real-time streaming\nno audio leaves the device</i>;
+
+:Clean Transcription\n<i>Remove greetings, normalise to lowercase</i>;
+
+:Check cancellation pattern\n<i>Regex match on transcript</i>;
+
+if (Cancel match?) then (Yes)
+  :Extract request ID;
+  :Voice confirmation via TTS;
+  :Cancel via HTTP POST to server;
+  stop
+else (No)
+endif
+
+:Tier 1: Keyword Matching\n<i>Pre-compiled regex patterns\n17 intent dictionaries</i>;
+
+if (Keyword match?) then (Yes)
+  :Intent classified\n<i>High confidence</i>;
+else (No)
+  :Tier 2: MobileBERT TFLite\n<i>Neural intent classification\n18 intent classes</i>;
+  if (Confidence above threshold?) then (No)
+    :TTS: "Sorry, could not understand";
+    stop
+  else (Yes)
+  endif
+endif
+
+:Confirmation Step\n<i>TTS reads back recognised request</i>;
+
+if (Guest confirms?) then (No)
+  :TTS: "Request cancelled";
+  stop
+else (Yes)
+  :HTTP POST to server\n<i>room number, transcription, intent</i>;
+  :Server maps intent to department\nStores in SQLite\nBroadcasts WebSocket event;
+  :Request appears on staff dashboard;
+  stop
+endif
+
+@enduml
+```
 
 ```
 Guest presses

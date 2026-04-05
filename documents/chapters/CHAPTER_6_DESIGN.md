@@ -87,6 +87,108 @@ The voice processing pipeline covers the full guest interaction — from the mom
 
 *(See attached sequence diagram — Figure 6.2)*
 
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 6.2: Voice Request Pipeline Sequence*
+
+```plantuml
+@startuml
+skinparam sequenceArrowThickness 1.5
+skinparam backgroundColor #FFFFFF
+skinparam participantBackgroundColor #F8F9FA
+skinparam participantBorderColor #AAAAAA
+skinparam sequenceLifeLineBorderColor #AAAAAA
+skinparam noteBorderColor #DDDDDD
+skinparam noteBackgroundColor #FFFDE7
+
+title Figure 6.2: Voice Request Pipeline Sequence
+
+actor Guest
+participant "AudioRecorder" as AR
+participant "VoskService" as VS
+participant "NLUService\n(Hybrid)" as NLU
+participant "TextToSpeech\nService" as TTS
+participant "ApiService\n(HTTP)" as API
+participant "FastAPI\nServer" as SRV
+participant "Staff\nDashboard" as DASH
+
+== Phase 1: Audio Capture and Transcription ==
+
+Guest -> AR : Presses microphone button
+activate AR
+AR -> AR : Capture 16kHz PCM audio\n(4,096-byte chunks)
+AR -> AR : VAD: monitor RMS energy\n(threshold = 0.02)
+AR -> VS : Stream audio chunks
+activate VS
+note right of AR : Recording stops after\n1,500ms silence or 10s max
+VS -> VS : On-device STT\n(vosk-model-small-en-in-0.4)
+VS -> VS : Clean transcript\n(remove fillers, lowercase)
+VS --> AR : Return cleaned transcript
+deactivate VS
+deactivate AR
+
+== Phase 2: Intent Classification ==
+
+AR -> NLU : Pass cleaned transcript
+activate NLU
+
+NLU -> NLU : Cancel pattern check\n(regex: "cancel order \\d+")
+
+alt Cancel detected
+    NLU -> TTS : "Cancelling request [ID]"
+    TTS -> Guest : Voice confirmation
+    NLU -> API : Cancel request (HTTP)
+else No cancel match
+    NLU -> NLU : Tier 1: Keyword matching\n(pre-compiled regex, 17 intents)
+    alt Keyword match found
+        NLU -> NLU : confidence = 0.99
+    else No keyword match
+        NLU -> NLU : Tier 2: MobileBERT TFLite\n(hotel_mobilebert_v2.tflite)\nSoftmax over 18 classes
+        alt confidence < 0.60
+            NLU -> TTS : "Sorry, could not\nunderstand your request"
+            TTS -> Guest : Voice feedback
+        end
+    end
+end
+deactivate NLU
+
+== Phase 3: Confirmation and Submission ==
+
+NLU -> TTS : "You'd like [description].\nShall I submit this?"
+activate TTS
+TTS -> Guest : Voice confirmation prompt
+deactivate TTS
+
+Guest -> AR : Speaks "Yes" or "No"
+AR -> NLU : Capture yes/no response
+
+alt Guest says "No"
+    NLU -> TTS : "Request cancelled"
+    TTS -> Guest : Voice feedback
+else Guest says "Yes"
+    NLU -> API : HTTP POST /api/submit-request\n(intent, request_text, room_number)
+    activate API
+    API -> SRV : Submit request
+    activate SRV
+    SRV -> SRV : Store in SQLite\n(requests table)
+    SRV -> SRV : Route to department\n(intent_dept_mapping lookup)
+    SRV -> DASH : Broadcast new_request\n(WebSocket event)
+    SRV --> API : HTTP 200 OK
+    deactivate SRV
+    API --> NLU : Success response
+    deactivate API
+    NLU -> TTS : "Your request has\nbeen submitted"
+    TTS -> Guest : Voice confirmation
+    DASH -> DASH : Display new request card\nin department queue
+end
+
+@enduml
+```
+
 The pipeline has three major phases:
 
 **Phase 1 — Audio Capture and Transcription**
@@ -106,6 +208,71 @@ Once an intent is classified above the confidence threshold (0.60 for the neural
 A key design feature for ensuring NLU reliability under real pipeline conditions is the two-stage hybrid NLU pipeline. It was not planned from the start — it came out of a practical problem noticed during development: purely neural classification was giving unexpectedly low confidence on simple, clear requests. For example, "I need towels" was being classified as `pillow_request` with only 0.72 confidence after small Vosk transcription variations.
 
 **Figure 6.3: Hybrid NLU Pipeline Flow**
+
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 6.3: Hybrid NLU Pipeline Flow*
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam activityBackgroundColor #F8F9FA
+skinparam activityBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam diamondBackgroundColor #FFF9E6
+skinparam diamondBorderColor #AAAAAA
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #DDDDDD
+
+title Figure 6.3: Hybrid NLU Pipeline Flow
+
+start
+
+:Cleaned Transcription;
+
+:Cancel Pattern Check\n<i>Regex: "cancel order \\d+"</i>;
+
+if (Cancel match?) then (Yes)
+  :Extract request ID;
+  :TTS: "Cancelling request [ID]";
+  :Cancel via HTTP POST;
+  stop
+else (No)
+endif
+
+:Tier 1: Keyword Matching\n<i>Pre-compiled regex, 17 intent dictionaries\nMulti-word contextual phrases</i>;
+
+if (Keyword match found?) then (Yes)
+  :Intent + confidence = 0.99;
+  note right
+    Skips neural model entirely
+  end note
+else (No)
+  :Tier 2: MobileBERT TFLite\n<i>hotel_mobilebert_v2.tflite\nTokenise (max 32 tokens)\nSoftmax over 18 classes</i>;
+  if (confidence >= 0.60?) then (No)
+    :TTS: "Sorry, could not\nunderstand your request";
+    stop
+  else (Yes)
+  endif
+endif
+
+:Confirmation Step\nTTS: "You'd like [description].\nShall I submit this?";
+
+if (Guest confirms?) then (No)
+  :TTS: "Request cancelled";
+  stop
+else (Yes)
+  :HTTP POST /api/submit-request\n<i>intent, request_text, room_number</i>;
+  :Server: Store in SQLite\nRoute to department\nBroadcast WebSocket event;
+  stop
+endif
+
+@enduml
+```
 
 ```
 Cleaned Transcription
@@ -282,6 +449,69 @@ The `initial` event is sent as soon as a dashboard client connects, giving it th
 
 **Figure 6.5: WebSocket Communication Topology**
 
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 6.5: WebSocket Communication Topology*
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam componentBackgroundColor #F8F9FA
+skinparam componentBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam nodeBackgroundColor #EEF4FB
+skinparam nodeBorderColor #AAAAAA
+skinparam packageBackgroundColor #F0F7FF
+skinparam packageBorderColor #6699CC
+
+title Figure 6.5: WebSocket Communication Topology
+
+package "Hotel Local Wi-Fi Network" {
+
+  package "Guest Devices (Android Tablets)" {
+    [Room 101 Device] as R101
+    [Room 102 Device] as R102
+    [Room 103 Device] as R103
+  }
+
+  package "FastAPI Server" {
+    component "WebSocket\nConnection Manager" as WCM
+    component "/ws/guest/101" as WG101
+    component "/ws/guest/102" as WG102
+    component "/ws/guest/103" as WG103
+    component "/ws/dashboard" as WDASH
+  }
+
+  package "Staff Dashboards (Web Browser)" {
+    [Housekeeping Dashboard] as HD
+    [Front Desk Dashboard] as FD
+  }
+
+  R101 <--> WG101 : WebSocket\n(room-specific events only)
+  R102 <--> WG102 : WebSocket\n(room-specific events only)
+  R103 <--> WG103 : WebSocket\n(room-specific events only)
+
+  WG101 --> WCM
+  WG102 --> WCM
+  WG103 --> WCM
+  WDASH --> WCM
+
+  HD <--> WDASH : WebSocket\n(all rooms' events)
+  FD <--> WDASH : WebSocket\n(all rooms' events)
+}
+
+note bottom of WCM
+  Guest channels: room-specific events only
+  Dashboard channel: all events for all rooms
+end note
+
+@enduml
+```
+
 ```
 +================================================================+
 |                   HOTEL LOCAL WI-FI NETWORK                   |
@@ -303,6 +533,61 @@ The `initial` event is sent as soon as a dashboard client connects, giving it th
 A request moves through a defined set of states from submission to completion. Invalid transitions are blocked in the application logic — for example, a `completed` request cannot be moved back to `in_progress`.
 
 **Figure 6.6: Request State Diagram**
+
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 6.6: Request State Diagram*
+
+```plantuml
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam stateBackgroundColor #F8F9FA
+skinparam stateBorderColor #AAAAAA
+skinparam arrowColor #555555
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #DDDDDD
+
+title Figure 6.6: Request State Diagram
+
+[*] --> pending : Guest submits request
+
+pending --> in_progress : Staff marks in progress
+pending --> cancelled : Guest cancels
+
+in_progress --> completed : Staff marks complete
+in_progress --> cancelled : Guest cancels
+
+completed --> completed : Guest rates service\n(1–5 stars, optional)
+
+completed --> [*]
+cancelled --> [*]
+
+note right of pending
+  WebSocket broadcast:
+  new_request event
+  to all dashboards
+end note
+
+note right of in_progress
+  WebSocket broadcast:
+  status_update event
+  to guest device + dashboards
+end note
+
+note right of completed
+  WebSocket broadcast:
+  status_update event
+  to guest device + dashboards
+end note
+
+note "Invalid transitions are blocked.\nA completed request cannot\nreturn to in_progress." as N1
+
+@enduml
+```
 
 ```
                     Guest submits request
@@ -363,6 +648,70 @@ The app is built with Jetpack Compose and Material Design 3. The entire interfac
 **Figure 6.7: Guest Application Interface**
 
 *(See attached annotated screenshot — Figure 6.7)*
+
+> **To generate this diagram for the Word document:**
+> 1. Go to [plantuml.com](https://www.plantuml.com/plantuml/uml/)
+> 2. Paste the code below into the editor
+> 3. Click **Submit** — the diagram renders on the right
+> 4. Right-click the image → **Save image as** → save as PNG
+> 5. In Word, Insert → Pictures → choose the saved PNG
+> 6. Add caption: *Figure 6.7: Guest Application Interface*
+
+```plantuml
+@startsalt
+{+
+  {+
+    <b>Room 101</b>  |  WiFi: Connected  |  Server: 192.168.1.10
+  }
+  ==
+  {+
+    <b>— Section 2: Voice Interaction Area —</b>
+    .
+    {+
+      .
+      {+
+        <b>  ( MIC )  </b>
+      }
+      .
+      [||||||||||||||||||||]
+      <i>  Audio Visualiser (20 bars)  </i>
+      .
+      <i>Tap to speak</i>
+      .
+    }
+    --
+    <b>Last recognised request:</b>
+    <i>"I need towels for my room"</i>
+    Intent: towel_request | Confidence: 0.99
+    Dept: Housekeeping
+    .
+  }
+  ==
+  {+
+    <b>  ← Section 3: Request History (scrollable)  →</b>
+    --
+    {+
+      #101  |  <color:blue>● In Progress</color>  |  2 mins ago
+      "I need extra towels for the bathroom"
+      <color:green>Housekeeping</color>  |  [Cancel]
+    }
+    --
+    {+
+      #100  |  <color:orange>● Pending</color>  |  5 mins ago
+      "Please bring a bottle of water and..."
+      <color:#f59e0b>Room Service</color>  |  [Cancel]
+    }
+    --
+    {+
+      #099  |  <color:grey>● Completed</color>  |  1 hour ago
+      "Room cleaning requested"
+      <color:green>Housekeeping</color>
+      ★ ★ ★ ★ ☆
+    }
+  }
+}
+@endsalt
+```
 
 **Section 1 — Room Information Bar (top)**
 Shows the room number, Wi-Fi connection status, and the configured server network profile. Both guests and maintenance staff can see the key context at a glance without navigating any menus.
