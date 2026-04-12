@@ -14,19 +14,21 @@ There is no hotel client for this project, so the operational requirements had t
 
 **Key findings from the literature:**
 
-1. **Telephone-based service creates bottlenecks.** In most small and mid-sized hotels, all guest requests go through a single telephone line to the front desk. Buhalis and Moldavska (2022) identify this as a core operational problem — during busy periods, calls go unanswered, staff have to juggle multiple requests at once, and response times suffer. Hwang and Erdem (2025) back this up from the staff side, showing that manual request handling is one of the main workload problems frontline hotel staff face.
+1. **Telephone-based service creates bottlenecks.** All guest requests going through a single front desk line means that during busy periods, calls go unanswered, staff juggle multiple requests at once, and response times suffer (Buhalis and Moldavska, 2022). Hwang and Erdem (2025) confirm this from the staff side, showing that manual request handling is one of the main workload problems frontline hotel staff face.
 
 2. **Miscommunication is a real problem, especially with international guests.** When requests are handled verbally over the phone, things get misunderstood — the wrong items get delivered, or the request goes to the wrong department. Buhalis and Moldavska (2021) point to this as one of the main reasons hotels have started looking at voice assistants: a structured, intent-based system removes the guesswork from freeform phone conversations. Yilmaz et al. (2025) also connect these kinds of service errors directly to negative online reviews.
 
 3. **Small hotels have no way to track requests.** Most independent hotels have no system for logging what was requested, when it was fulfilled, or how long it took (Buhalis and Moldavska, 2022). When a guest asks about a pending request, staff have to physically check with colleagues. A simple digital log with real-time status updates would directly fix this.
 
-4. **Subscription costs stop small hotels from adopting commercial solutions.** Buhalis and Moldavska (2022) are clear on why voice assistants have only really taken off in large hotel chains: the cost. Commercial platforms need dedicated hardware per room, ongoing subscription fees, and a reliable internet connection. None of that fits the budget of a small independent hotel. This is especially relevant in Sri Lanka, where the accommodation sector is mostly made up of small, owner-operated properties (SLTDA, 2024).
+4. **Subscription costs stop small hotels from adopting commercial solutions.** Commercial platforms need dedicated hardware per room, ongoing subscription fees, and reliable internet — none of which fits the budget of a small independent hotel (Buhalis and Moldavska, 2022). This is especially relevant in Sri Lanka, where the accommodation sector is mostly small, owner-operated properties (SLTDA, 2024).
 
 5. **Internet connectivity is unreliable outside Colombo.** Wickramasinghe and Ratnayake (2022) document that digital infrastructure quality varies a lot across Sri Lanka, with hotels outside the capital regularly losing connectivity for hours at a time. A system that needs constant internet access is simply not practical for this market. This finding directly drove the offline-first requirement.
 
+To supplement the literature, an informal consultation was conducted with a Head Chef with over 15 years of experience across multiple Sri Lankan hotels. He described the current process: guest requests arrive at the front desk by telephone, the front desk forwards them to the relevant department, and the department manager records them in a physical logbook. Items are only entered into a computer system at final billing. No automated routing or real-time tracking is involved at any stage. This directly confirms Findings 1, 3, and 4 above, and provides local practitioner evidence that the problem this system addresses is real and current.
+
 ### 4.2.2 Guest Survey
 
-A short survey was given to 20 individuals with recent hotel stay experience. Respondents were recruited through convenience sampling — family members, relatives, and colleagues known to the researcher — and all had stayed in at least one hotel within the past 12 months. The sample covered a range of ages: four teenagers (under 20), seven young adults (20–35), five middle-aged adults (36–59), and four older adults (60–70). This spread was intentional, since voice assistant comfort levels tend to vary across age groups. The full survey instrument and a demographic summary are in Appendix C.
+A short survey was given to 20 individuals with recent hotel stay experience, recruited through convenience sampling — family members, relatives, and colleagues known to the researcher. The sample covered a range of ages (under 20 to 60–70), since voice assistant comfort levels tend to vary across age groups. The full survey instrument and demographic summary are in Appendix C.
 
 The survey covered:
 
@@ -101,7 +103,7 @@ The 18 intent categories in FR-03 were defined by looking at room service menus 
 
 ## 4.4 Non-Functional Requirements
 
-The non-functional requirements set out the constraints the system has to work within — things like how fast it needs to be, what hardware it should run on, and what it cannot do with guest data. Most of these followed directly from the findings above. The offline requirement came from the connectivity problems documented for Sri Lanka (Wickramasinghe and Ratnayake, 2022). The hardware cost limit came from the budget reality of small hotels in the Sri Lankan market (SLTDA, 2024; Buhalis and Moldavska, 2022). The privacy requirement was backed by both the literature and the guest survey.
+The non-functional requirements define the constraints the system has to work within. Each one follows directly from the findings in Section 4.2, with sources noted in the table.
 
 **Table 4.2: Non-Functional Requirements**
 
@@ -136,8 +138,8 @@ The "Won't Have" items are deliberate scope decisions, not oversights. Multiling
 
 ## 4.6 Summary
 
-Requirements were gathered from two sources: published academic literature on hospitality operations (Section 4.2.1), and a convenience survey of 20 people with recent hotel stay experience (Section 4.2.2). Using both gave a clearer picture than either source alone would have.
+Requirements were gathered from three sources: published academic literature on hospitality operations, an informal consultation with an experienced Sri Lankan hotel professional, and a convenience survey of 20 people with recent hotel stay experience (Section 4.2). Using all three gave a clearer picture than any single source alone would have.
 
 The picture that emerged is consistent: hotels need something that removes the telephone bottleneck, gives staff a way to track requests, and can be deployed without subscription fees or IT support. Guests want it to be fast, straightforward, and — above everything else — not sending their voice data anywhere outside their room.
 
-All of this fed directly into the design: offline operation, audio processing that stays on the device, cheap Android hardware, and no subscription fees. These are precisely the characteristics that define viability for the target context — a prototype that fails on any one of these would not be a credible alternative to traditional room service communication in a small Sri Lankan hotel. The "Won't Have" items — particularly multilingual support — are picked up again as future work in Chapter 11. The next chapter goes through the technology choices and analysis that turned these requirements into an actual working design.
+These requirements directly shaped the design: offline operation, on-device audio processing, commodity Android hardware, and no subscription fees. A prototype that fails on any one of these would not be a credible alternative to traditional room service communication in a small Sri Lankan hotel. Multilingual support is picked up as future work in Chapter 11. The next chapter covers the technology choices and analysis that turned these requirements into a working design.
