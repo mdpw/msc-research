@@ -13,7 +13,7 @@ import json
 app = FastAPI(title="Hotel Voice Assistant API")
 
 # Serve dashboard UI at /dashboard
-FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).parent.parent
 
 app.add_middleware(
     CORSMiddleware,
@@ -401,7 +401,7 @@ def route_to_department(text: str, intent: str = None) -> str:
 @app.get("/dashboard")
 async def serve_dashboard():
     """Serve the staff dashboard UI"""
-    return FileResponse(FRONTEND_DIR / "index.html")
+    return FileResponse(FRONTEND_DIR / "dashboard.html")
 
 if __name__ == "__main__":
     import uvicorn

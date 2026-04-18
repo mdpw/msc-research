@@ -467,7 +467,7 @@
             <h1 id="dashboardTitle">Department Dashboard</h1>
             <div class="user-info">
                 <span class="badge" id="staffNameDisplay"></span>
-                <button class="btn-logout" style="background:#28a745;margin-right:8px;" onclick="playAlertTone()">🔔 Test Sound</button>
+                <button class="btn-logout" style="background:#28a745;margin-right:8px;display:none;" onclick="playAlertTone()">🔔 Test Sound</button>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -522,27 +522,30 @@
             }
         }
 
-        // Two-tone "ding-dong" alert
+        // Bell ringing sound for 3 seconds
         function playAlertTone() {
             ensureAudioContext();
             if (!audioCtx) return;
 
-            function beep(freq, startTime, duration, volume = 0.35) {
+            function bell(startTime) {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, startTime);
-                gain.gain.setValueAtTime(volume, startTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.frequency.setValueAtTime(987, startTime);
+                gain.gain.setValueAtTime(0.5, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.6);
                 osc.start(startTime);
-                osc.stop(startTime + duration);
+                osc.stop(startTime + 0.6);
             }
 
             const t = audioCtx.currentTime;
-            beep(880, t,        0.25);   // high note
-            beep(660, t + 0.28, 0.35);   // low note
+            const ringInterval = 0.45;
+            const rings = Math.floor(3.0 / ringInterval);
+            for (let i = 0; i < rings; i++) {
+                bell(t + i * ringInterval);
+            }
         }
 
         // Unlock audio on any click (satisfies browser autoplay policy, re-resumes if tab was backgrounded)

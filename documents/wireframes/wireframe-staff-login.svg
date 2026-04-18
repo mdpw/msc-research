@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" font-family="Arial, sans-serif">
+
+  <!-- Title -->
+  <text x="400" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Figure: Staff Dashboard — Login Screen Wireframe</text>
+
+  <!-- Gradient background -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#9b59b6;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="40" width="760" height="462" fill="url(#bgGrad)" rx="6"/>
+
+  <!-- Login card -->
+  <rect x="240" y="120" width="320" height="340" fill="white" stroke="#ddd" stroke-width="1" rx="12"/>
+
+  <!-- Card title -->
+  <text x="400" y="178" text-anchor="middle" font-size="16" font-weight="bold" fill="#222">Hotel Staff Login</text>
+
+  <!-- Department label -->
+  <text x="270" y="222" font-size="12" fill="#555">Department</text>
+
+  <!-- Department dropdown -->
+  <rect x="268" y="232" width="264" height="36" fill="#f2f2f2" stroke="#ccc" stroke-width="1" rx="6"/>
+  <text x="284" y="255" font-size="12" fill="#333">Housekeeping</text>
+  <text x="512" y="255" text-anchor="middle" font-size="12" fill="#666">&#8645;</text>
+
+  <!-- Staff Name label -->
+  <text x="270" y="294" font-size="12" fill="#555">Staff Name</text>
+
+  <!-- Staff Name input -->
+  <rect x="268" y="304" width="264" height="36" fill="white" stroke="#ccc" stroke-width="1" rx="6"/>
+  <text x="284" y="327" font-size="12" fill="#333">Dinesh</text>
+
+  <!-- Login button -->
+  <rect x="268" y="360" width="264" height="42" fill="#667eea" stroke="#5a6fd6" stroke-width="1" rx="6"/>
+  <text x="400" y="386" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Login</text>
+
+  <!-- Panel label -->
+  <text x="400" y="514" text-anchor="middle" font-size="10" fill="#666" font-style="italic">Staff Login Panel</text>
+
+</svg>

@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" font-family="Arial, sans-serif">
+
+  <!-- Background -->
+  <rect width="800" height="520" fill="#f2f2f2" rx="4"/>
+
+  <!-- Title -->
+  <text x="400" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Figure: Guest Android App — Main Screen Wireframe</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LEFT PANEL                                                 -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <rect x="20" y="40" width="340" height="462" fill="white" stroke="#aaa" stroke-width="1.5" rx="6"/>
+
+  <!-- Header -->
+  <rect x="20" y="40" width="340" height="86" fill="#d0d4e8" stroke="#aaa" stroke-width="1.5" rx="6"/>
+  <rect x="20" y="98" width="340" height="28" fill="#d0d4e8"/>
+  <text x="40" y="70"  font-size="18" font-weight="bold" fill="#222">Sera</text>
+  <text x="40" y="87"  font-size="12" fill="#444">Voice Assistant</text>
+  <text x="40" y="103" font-size="12" fill="#444">Room 101</text>
+
+  <!-- Collapse button -->
+  <rect x="298" y="56" width="28" height="28" fill="white" stroke="#888" stroke-width="1.5" rx="4"/>
+  <text x="312" y="75" text-anchor="middle" font-size="13" fill="#555">v</text>
+
+  <!-- Close button -->
+  <rect x="332" y="56" width="28" height="28" fill="white" stroke="#888" stroke-width="1.5" rx="4"/>
+  <text x="346" y="75" text-anchor="middle" font-size="13" fill="#888">x</text>
+
+  <!-- Voice area -->
+  <rect x="20" y="126" width="340" height="376" fill="#e6eee9"/>
+
+  <!-- Mic circle -->
+  <circle cx="190" cy="296" r="62" fill="#c6dce8" stroke="#999" stroke-width="2"/>
+  <rect x="182" y="260" width="16" height="28" fill="#555" rx="8"/>
+  <path d="M174,280 Q174,302 190,302 Q206,302 206,280" fill="none" stroke="#555" stroke-width="2.5"/>
+  <line x1="190" y1="302" x2="190" y2="313" stroke="#555" stroke-width="2.5"/>
+  <line x1="179" y1="313" x2="201" y2="313" stroke="#555" stroke-width="2.5"/>
+  <text x="190" y="376" text-anchor="middle" font-size="13" fill="#555">Tap to speak</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- RIGHT PANEL                                                -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <rect x="375" y="40" width="405" height="462" fill="white" stroke="#aaa" stroke-width="1.5" rx="6"/>
+  <text x="395" y="68" font-size="15" font-weight="bold" fill="#222">Recent Requests</text>
+  <circle cx="754" cy="60" r="13" fill="none" stroke="#888" stroke-width="1.5"/>
+  <path d="M748,56 A8,8 0 1,1 754,68" fill="none" stroke="#888" stroke-width="2"/>
+  <polygon points="744,66 748,56 754,62" fill="#888"/>
+  <line x1="375" y1="78" x2="780" y2="78" stroke="#ddd" stroke-width="1"/>
+
+  <!-- Card 1: IN PROGRESS -->
+  <rect x="388" y="86"  width="374" height="108" fill="#f0f6ff" stroke="#90b8e0" stroke-width="1" rx="6"/>
+  <rect x="388" y="86"  width="5"   height="108" fill="#2196F3" rx="3"/>
+  <text x="403" y="106" font-size="12" font-weight="bold" fill="#222">#24</text>
+  <rect x="672" y="90"  width="80"  height="20"  fill="#bbdefb" stroke="#64b0f0" stroke-width="1" rx="10"/>
+  <text x="712" y="104" text-anchor="middle" font-size="9" font-weight="bold" fill="#1565c0">In Progress</text>
+  <text x="403" y="124" font-size="11" fill="#333">Wake me up at seven thirty</text>
+  <circle cx="405" cy="145" r="5" fill="#9c27b0"/>
+  <text x="415" y="149" font-size="10" fill="#555">Front Desk</text>
+  <text x="672" y="149" font-size="10" fill="#999">2 mins ago</text>
+  <rect x="638" y="158" width="50" height="16" fill="#ffcccc" stroke="#e08080" stroke-width="1" rx="8"/>
+  <text x="663" y="170" text-anchor="middle" font-size="9" fill="#c00">Cancel</text>
+
+  <!-- Card 2: COMPLETED -->
+  <rect x="388" y="204" width="374" height="108" fill="#f5fff5" stroke="#ccc" stroke-width="1" rx="6"/>
+  <rect x="388" y="204" width="5"   height="108" fill="#4CAF50" rx="3"/>
+  <text x="403" y="224" font-size="12" font-weight="bold" fill="#222">#23</text>
+  <rect x="672" y="208" width="80"  height="20"  fill="#b8ddb8" stroke="#88bb88" stroke-width="1" rx="10"/>
+  <text x="712" y="222" text-anchor="middle" font-size="9" font-weight="bold" fill="#2a6a2a">Completed</text>
+  <text x="403" y="242" font-size="11" fill="#333">I need a towel</text>
+  <circle cx="405" cy="263" r="5" fill="#4CAF50"/>
+  <text x="415" y="267" font-size="10" fill="#555">Housekeeping</text>
+  <text x="672" y="267" font-size="10" fill="#999">10 mins ago</text>
+  <text x="403" y="290" font-size="13" fill="#e8a020" textLength="65">&#9733;&#9733;&#9733;&#9733;&#9733;</text>
+  <text x="474" y="290" font-size="10" fill="#aaa">tap to rate</text>
+
+  <!-- Card 3: CANCELLED -->
+  <rect x="388" y="322" width="374" height="108" fill="#fafafa" stroke="#ddd" stroke-width="1" rx="6"/>
+  <rect x="388" y="322" width="5"   height="108" fill="#9E9E9E" rx="3"/>
+  <text x="403" y="342" font-size="12" font-weight="bold" fill="#aaa">#22</text>
+  <rect x="665" y="326" width="80"  height="20"  fill="#eeeeee" stroke="#bbb" stroke-width="1" rx="10"/>
+  <text x="705" y="340" text-anchor="middle" font-size="9" fill="#888">Cancelled</text>
+  <text x="403" y="360" font-size="11" fill="#bbb">The television is not working</text>
+  <circle cx="405" cy="381" r="5" fill="#bbb"/>
+  <text x="415" y="385" font-size="10" fill="#bbb">Maintenance</text>
+  <text x="672" y="385" font-size="10" fill="#ccc">30 mins ago</text>
+
+  <!-- Scroll indicator -->
+  <text x="578" y="450" text-anchor="middle" font-size="9" fill="#bbb" font-style="italic">— scrolls down —</text>
+
+  <!-- Panel labels -->
+  <text x="190" y="516" text-anchor="middle" font-size="10" fill="#666" font-style="italic">Voice Input Panel</text>
+  <text x="578" y="516" text-anchor="middle" font-size="10" fill="#666" font-style="italic">Request History Panel</text>
+
+</svg>
