@@ -19,10 +19,7 @@ Gap recovery: **111.3%** — noise-aware training more than closes the STT-induc
 
 ## System Architecture
 
-```
-<img width="387" height="888" alt="image" src="https://github.com/mdpw/msc-research/blob/main/documents/images/3.4.1.png" />
-
-```
+<img width="387" height="888" alt="image" src="documents/images/3.4.1.png" />
 
 Fully offline — no cloud, no external API calls, all processing on-device or within the local hotel network.
 
