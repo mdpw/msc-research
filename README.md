@@ -20,7 +20,7 @@ Gap recovery: **111.3%** — noise-aware training more than closes the STT-induc
 ## System Architecture
 
 ```
-<img width="387" height="888" alt="image" src="https://github.com/user-attachments/assets/16302d8c-f368-46d6-b853-ddfdff6ffcdd" />
+<img width="387" height="888" alt="image" src="https://github.com/mdpw/msc-research/blob/main/documents/images/3.4.1.png" />
 
 ```
 
