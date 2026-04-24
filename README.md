@@ -20,11 +20,8 @@ Gap recovery: **111.3%** — noise-aware training more than closes the STT-induc
 ## System Architecture
 
 ```
-Guest Room (Android)         Hotel LAN Server              Staff Browser
-─────────────────────        ─────────────────────         ───────────────
-Mic → Vosk STT               FastAPI + SQLite               Dashboard
-    → MobileBERT NLU    →    WebSocket Hub           →      Request queues
-    → TTS response      ←    Department routing      ←      Status updates
+<img width="387" height="888" alt="image" src="https://github.com/user-attachments/assets/16302d8c-f368-46d6-b853-ddfdff6ffcdd" />
+
 ```
 
 Fully offline — no cloud, no external API calls, all processing on-device or within the local hotel network.
