@@ -135,6 +135,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var tts: TextToSpeech
     private lateinit var webSocketService: WebSocketService
     private var ttsReady = false
+    private val pendingTtsQueue = mutableListOf<Pair<String, String>>()
+    private val ttsReadyDeferred = CompletableDeferred<Unit>()
     private val TAG = "MainActivity"
     private val ROOM_NUMBER = "101"
     private val _requestHistory = mutableStateListOf<RequestItem>()
@@ -331,8 +333,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun speakFire(message: String) {
+    private fun flushPendingTtsQueue() {
         if (!ttsReady) return
+        pendingTtsQueue.forEach { (message, utteranceId) ->
+            val params = Bundle().apply {
+                putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceId)
+            }
+            tts.speak(message, TextToSpeech.QUEUE_ADD, params, utteranceId)
+        }
+        pendingTtsQueue.clear()
+    }
+
+    private fun speakFire(message: String) {
+        if (!ttsReady) {
+            pendingTtsQueue.add(message to "fire")
+            return
+        }
         requestAudioFocus()
         val params = Bundle()
         params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "fire")
@@ -340,7 +356,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun speakAndWait(message: String) {
-        if (!ttsReady) return
+        if (!ttsReady) {
+            withTimeoutOrNull(5000L) { ttsReadyDeferred.await() }
+        }
+        if (!ttsReady) {
+            pendingTtsQueue.add(message to "greeting")
+            return
+        }
         requestAudioFocus()
         val deferred = CompletableDeferred<Unit>()
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -992,42 +1014,54 @@ suspend fun processVoiceRequest(
                     var resolved = resolveOrderFromReply(cleanedTranscription, cancellableOrders)
 
                     if (resolved == null) {
-                        // Ask the user to clarify which order
-                        val orderSummary = if (cancellableOrders.size == 1) {
-                            "You have one active request: ${cancellableOrders[0].department}. Should I cancel it?"
-                        } else {
-                            val list = cancellableOrders.mapIndexed { i, o ->
-                                "${ordinalWord(i + 1)}: number ${o.id}, ${o.department}"
-                            }.joinToString("; ")
-                            "You have ${cancellableOrders.size} active requests: $list. Which one should I cancel? Say the number, or say first, second, or last."
-                        }
-                        onSpeakAndWait(orderSummary)
+                        if (cancellableOrders.size == 1) {
+                            val order = cancellableOrders[0]
+                            val orderSummary = "You have one active request: ${order.department}. Should I cancel it?"
+                            onSpeakAndWait(orderSummary)
 
-                        // Listen for the user's choice
-                        onStatusUpdate("Say the order number or describe it...")
-                        onProcessingStop(); onRecordingStart()
-                        val replyAudio = audioRecorder.recordWithVAD(
-                            silenceTimeoutMs = 2000L, maxDurationMs = 6000L,
-                            onAudioLevel = { level -> onAudioLevel(level) }
-                        )
-                        onAudioLevel(0f); onRecordingStop(); onProcessingStart()
-
-                        val replyText = voskService.transcribeAudio(replyAudio).lowercase().trim()
-                        onTranscriptionUpdate(replyText)
-                        resolved = resolveOrderFromReply(replyText, cancellableOrders)
-
-                        // One re-prompt if still unresolved
-                        if (resolved == null && replyText.isNotEmpty()) {
-                            onSpeakAndWait("Sorry, I didn't catch that. Please say the order number, or say first or last.")
+                            onStatusUpdate("Say Yes or No...")
                             onProcessingStop(); onRecordingStart()
-                            val retryAudio = audioRecorder.recordWithVAD(
+                            val confirmAudio = audioRecorder.recordWithVAD(
+                                silenceTimeoutMs = 2000L, maxDurationMs = 5000L,
+                                onAudioLevel = { level -> onAudioLevel(level) }
+                            )
+                            onAudioLevel(0f); onRecordingStop(); onProcessingStart()
+
+                            val confirmText = voskService.transcribeAudio(confirmAudio).lowercase().trim()
+                            onTranscriptionUpdate(confirmText)
+                            if (listOf("yes", "yeah", "yep", "sure", "ok", "okay", "go ahead", "do it", "proceed").any { confirmText.contains(it) }) {
+                                resolved = order
+                            } else {
+                                onSpeakResponse("Okay, I'll keep your request.")
+                                onProcessingStop(); onComplete(); return@launch
+                            }
+                        } else {
+                            onSpeakAndWait("Please tell just the order number to cancel.")
+
+                            onStatusUpdate("Say the order number now...")
+                            onProcessingStop(); onRecordingStart()
+                            val replyAudio = audioRecorder.recordWithVAD(
                                 silenceTimeoutMs = 2000L, maxDurationMs = 6000L,
                                 onAudioLevel = { level -> onAudioLevel(level) }
                             )
                             onAudioLevel(0f); onRecordingStop(); onProcessingStart()
-                            val retryText = voskService.transcribeAudio(retryAudio).lowercase().trim()
-                            onTranscriptionUpdate(retryText)
-                            resolved = resolveOrderFromReply(retryText, cancellableOrders)
+
+                            val replyText = voskService.transcribeAudio(replyAudio).lowercase().trim()
+                            onTranscriptionUpdate(replyText)
+                            resolved = resolveOrderFromReply(replyText, cancellableOrders)
+
+                            if (resolved == null && replyText.isNotEmpty()) {
+                                onSpeakAndWait("Sorry, I didn't catch that. Please say the order number again, for example one zero five.")
+                                onProcessingStop(); onRecordingStart()
+                                val retryAudio = audioRecorder.recordWithVAD(
+                                    silenceTimeoutMs = 2000L, maxDurationMs = 6000L,
+                                    onAudioLevel = { level -> onAudioLevel(level) }
+                                )
+                                onAudioLevel(0f); onRecordingStop(); onProcessingStart()
+                                val retryText = voskService.transcribeAudio(retryAudio).lowercase().trim()
+                                onTranscriptionUpdate(retryText)
+                                resolved = resolveOrderFromReply(retryText, cancellableOrders)
+                            }
                         }
                     }
 
@@ -1378,11 +1412,15 @@ fun resolveOrderFromReply(reply: String, activeOrders: List<RequestItem>): Reque
     val digit = Regex("""\d+""").find(normalized)?.value?.toIntOrNull()
     if (digit != null) return activeOrders.firstOrNull { it.id == digit }
 
-    // 2. Word-to-number after stripping fillers (handles "thirteen", "the order number thirteen")
+    // 2. Spoken digit sequence like "one zero five"
+    val digitSequence = spokenDigitSequenceToNumber(normalized)
+    if (digitSequence != null) return activeOrders.firstOrNull { it.id == digitSequence }
+
+    // 3. Word-to-number after stripping fillers (handles "thirteen", "the order number thirteen")
     val fromWords = wordsToNumber(normalized)
     if (fromWords != null) return activeOrders.firstOrNull { it.id == fromWords }
 
-    // 3. Ordinals — map to position in the active orders list
+    // 4. Ordinals — map to position in the active orders list
     val ordinals = mapOf(
         "first" to 0, "second" to 1, "third" to 2, "fourth" to 3, "fifth" to 4,
         "last" to -1, "latest" to -1, "recent" to -1
@@ -1409,6 +1447,22 @@ private val NUMBER_FILLER_WORDS = setOf(
 )
 
 // Convert spoken number words to integer, e.g. "hundred and forty six" → 146
+fun spokenDigitSequenceToNumber(text: String): Int? {
+    val digitWords = mapOf(
+        "zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4,
+        "five" to 5, "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9
+    )
+    val words = text.lowercase().split(Regex("\\s+"))
+        .filter { it.isNotBlank() }
+
+    if (words.isEmpty()) return null
+    if (words.all { digitWords.containsKey(it) }) {
+        val digits = words.map { digitWords[it].toString() }.joinToString("")
+        return digits.toIntOrNull()
+    }
+    return null
+}
+
 fun wordsToNumber(text: String): Int? {
     val ones = mapOf("zero" to 0, "one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
         "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9, "ten" to 10,
@@ -1432,7 +1486,7 @@ fun wordsToNumber(text: String): Int? {
         when {
             ones.containsKey(word) -> current += ones[word]!!
             tens.containsKey(word) -> current += tens[word]!!
-            word == "hundred" -> current = if (current == 0) 100 else current * 100
+            word == "hundred" || word == "hundrad" || word == "hunderd" -> current = if (current == 0) 100 else current * 100
             word == "thousand" -> { current = if (current == 0) 1000 else current * 1000; result += current; current = 0 }
             else -> return null // unrecognized word
         }
