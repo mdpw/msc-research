@@ -384,18 +384,26 @@ class MainActivity : ComponentActivity() {
                         Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
                     }
                 },
-                onStatusChange = { requestId, status ->
+                onStatusChange = { requestId, status, backendMessage ->
                     runOnUiThread {
                         val index = _requestHistory.indexOfFirst { it.id == requestId }
                         if (index != -1) {
                             _requestHistory[index] = _requestHistory[index].copy(status = status)
-                            val statusMessage = when (status) {
+                        }
+
+                        val statusMessage = if (backendMessage.isNotBlank()) {
+                            backendMessage
+                        } else {
+                            when (status) {
                                 "in_progress" -> "Your request No.$requestId is now being processed."
                                 "completed" -> "Your request No.$requestId is completed. Would you like to rate the service?"
                                 else -> "Your request No.$requestId is now $status."
                             }
-                            speakFire(statusMessage)
-                        } else {
+                        }
+
+                        speakFire(statusMessage)
+
+                        if (index == -1) {
                             refreshRequests()
                         }
                     }

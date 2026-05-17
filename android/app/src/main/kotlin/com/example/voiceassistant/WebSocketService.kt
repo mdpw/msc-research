@@ -12,7 +12,7 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
     private val TAG = "WebSocketService"
     private var webSocket: WebSocket? = null
     private var onMessageReceived: ((String) -> Unit)? = null
-    private var onStatusUpdate: ((Int, String) -> Unit)? = null
+    private var onStatusUpdate: ((Int, String, String) -> Unit)? = null
     private var onStaffMessage: ((Int, String, String) -> Unit)? = null
 
     private var isConnected = false
@@ -26,7 +26,7 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
 
     fun connect(
         onMessage: (String) -> Unit,
-        onStatusChange: ((Int, String) -> Unit)? = null,
+        onStatusChange: ((Int, String, String) -> Unit)? = null,
         onStaffMsg: ((Int, String, String) -> Unit)? = null
     ) {
         onMessageReceived = onMessage
@@ -64,12 +64,8 @@ class WebSocketService(private val roomNumber: String, private val wsUrl: String
 
                             Log.d(TAG, "📨 Status update - ID: $requestId, Status: $status, Message: $message")
 
-                            if (message.isNotEmpty()) {
-                                onMessageReceived?.invoke(message)
-                            }
-
                             if (requestId != -1 && status.isNotEmpty()) {
-                                onStatusUpdate?.invoke(requestId, status)
+                                onStatusUpdate?.invoke(requestId, status, message)
                                 Log.d(TAG, "✅ Status callback invoked for request $requestId")
                             }
                         }
